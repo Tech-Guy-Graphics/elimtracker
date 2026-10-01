@@ -55,8 +55,8 @@
     import {initializeApp} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import {GoogleAuthProvider,getAuth,onAuthStateChanged,signInWithPopup,signOut} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-    const FIREBASE_CONFIG={apiKey:"PASTE_FIREBASE_WEB_API_KEY_HERE",authDomain:"PASTE_FIREBASE_PROJECT_ID_HERE.firebaseapp.com",projectId:"PASTE_FIREBASE_PROJECT_ID_HERE",appId:"PASTE_FIREBASE_APP_ID_HERE"};
-    const CONFIG={spreadsheetId:"1RyvLSpYKl1SJbUa3F4KVJRmcIHBbWVUJqjHTgGbD35s",apiKey:"PASTE_RESTRICTED_PUBLIC_SHEETS_API_KEY_HERE",accessBridgeUrl:"PASTE_APPS_SCRIPT_WEB_APP_URL_HERE",refreshMs:30000};
+    const FIREBASE_CONFIG={apiKey:"AIzaSyCs65B8IwKAqLxbTuDGPjV_-uX9bVUJeTM",authDomain:"kill-tracker-e3083.firebaseapp.com",projectId:"kill-tracker-e3083",appId:"1:888950181547:web:2349883ef1a2d82e0631ee"};
+    const CONFIG={spreadsheetId:"1RyvLSpYKl1SJbUa3F4KVJRmcIHBbWVUJqjHTgGbD35s",apiKey:"AIzaSyAsKgBLt6fo23IX-bqCcewlp1iF-vTt0Cg",accessBridgeUrl:"https://script.google.com/macros/s/AKfycbyhPv5QFXMLLSK1rqUcnuesZXfqEFqiBXfbwYYYbMnnbri3VudY7TECJ0BW3ywX14uh/exec",refreshMs:30000};
     const state={players:[],filter:"all",query:"",loadedAt:null,authorized:false,user:null};
     const list=document.querySelector("#leaderboard"),empty=document.querySelector("#empty"),errorBox=document.querySelector("#error"),refreshButton=document.querySelector("#refresh");
     const accessPanel=document.querySelector("#access-panel"),accessHeading=document.querySelector("#access-heading"),accessMessage=document.querySelector("#access-message"),uidWrap=document.querySelector("#uid-wrap"),uidValue=document.querySelector("#uid-value"),signInButton=document.querySelector("#google-signin"),signOutButton=document.querySelector("#signout"),memberContent=document.querySelector("#member-content"),bridge=document.querySelector("#access-bridge");
