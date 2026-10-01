@@ -37,6 +37,7 @@
         <p class="access-message" id="access-message">Sign in with Google to check whether your account has leaderboard access.</p>
         <div class="access-actions">
           <button class="access-button primary" id="google-signin" type="button"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11a9.4 9.4 0 0 1-4.1 6.2v5.1h6.7c3.9-3.6 6-8.8 6-15Z" fill="#4285f4"/><path d="M24 44c5.5 0 10.1-1.8 13.5-4.8l-6.7-5.1c-1.9 1.3-4.1 2.1-6.8 2.1-5.2 0-9.7-3.5-11.3-8.2H5.8v5.2A20 20 0 0 0 24 44Z" fill="#34a853"/><path d="M12.7 28a12 12 0 0 1 0-7.9v-5.2H5.8a20 20 0 0 0 0 18.3l6.9-5.2Z" fill="#fbbc05"/><path d="M24 11.9c3 0 5.7 1 7.8 3.1l5.8-5.8C34.1 5.9 29.5 4 24 4A20 20 0 0 0 5.8 14.9l6.9 5.2c1.6-4.7 6.1-8.2 11.3-8.2Z" fill="#ea4335"/></svg><span>Continue with Google</span></button>
+          <button class="access-button" id="retry-access" type="button" hidden>Retry check</button>
           <button class="access-button" id="signout" type="button" hidden>Sign out</button>
         </div>
         <div class="uid-wrap" id="uid-wrap" hidden><span class="uid-label">Your Firebase UID</span><code class="uid-value" id="uid-value"></code><button class="access-button" id="copy-uid" type="button">Copy UID</button></div>
@@ -60,14 +61,15 @@
     const CONFIG={spreadsheetId:"1RyvLSpYKl1SJbUa3F4KVJRmcIHBbWVUJqjHTgGbD35s",apiKey:"AIzaSyAsKgBLt6fo23IX-bqCcewlp1iF-vTt0Cg",accessBridgeUrl:"https://script.google.com/macros/s/AKfycbyhPv5QFXMLLSK1rqUcnuesZXfqEFqiBXfbwYYYbMnnbri3VudY7TECJ0BW3ywX14uh/exec",refreshMs:30000};
     const state={players:[],filter:"all",query:"",loadedAt:null,authorized:false,user:null};
     const list=document.querySelector("#leaderboard"),empty=document.querySelector("#empty"),errorBox=document.querySelector("#error"),refreshButton=document.querySelector("#refresh");
-    const accessPanel=document.querySelector("#access-panel"),accessHeading=document.querySelector("#access-heading"),accessMessage=document.querySelector("#access-message"),uidWrap=document.querySelector("#uid-wrap"),uidValue=document.querySelector("#uid-value"),signInButton=document.querySelector("#google-signin"),signOutButton=document.querySelector("#signout"),memberContent=document.querySelector("#member-content"),bridge=document.querySelector("#access-bridge");
+    const accessPanel=document.querySelector("#access-panel"),accessHeading=document.querySelector("#access-heading"),accessMessage=document.querySelector("#access-message"),uidWrap=document.querySelector("#uid-wrap"),uidValue=document.querySelector("#uid-value"),signInButton=document.querySelector("#google-signin"),retryButton=document.querySelector("#retry-access"),signOutButton=document.querySelector("#signout"),memberContent=document.querySelector("#member-content"),bridge=document.querySelector("#access-bridge");
     const firebaseConfigured=Object.values(FIREBASE_CONFIG).every(value=>value&&!value.startsWith("PASTE_"));
     const bridgeConfigured=CONFIG.accessBridgeUrl.startsWith("https://script.google.com/macros/s/")&&CONFIG.accessBridgeUrl.endsWith("/exec");
-    let auth=null,bridgeOrigin="",requestId="";
+    let auth=null,bridgeOrigin="",requestId="",accessTimeout=null;
 
     function showSetupMessage(){accessHeading.textContent="Sign-in setup required";accessMessage.textContent="Add your Firebase web app settings and Apps Script web app URL in index.html, then reload.";signInButton.disabled=true}
     if(!firebaseConfigured){showSetupMessage()}else{auth=getAuth(initializeApp(FIREBASE_CONFIG))}
     if(bridgeConfigured){bridge.src=CONFIG.accessBridgeUrl}else if(firebaseConfigured){accessMessage.textContent="Add the deployed Apps Script web app URL in index.html to enable access checks.";signInButton.disabled=true}
+    function startAccessTimeout(){window.clearTimeout(accessTimeout);accessTimeout=window.setTimeout(()=>{if(!state.user||state.authorized||accessHeading.textContent!=="Checking access")return;accessHeading.textContent="Access check timed out";accessMessage.textContent=bridgeOrigin?"The Apps Script bridge loaded but did not return a result. Check its deployment permissions and Apps Script executions.":"The Apps Script bridge did not connect. Check SITE_ORIGIN and that the web app is deployed for anyone to access.";retryButton.hidden=false;signOutButton.disabled=false},15000)}
 
     function number(value){const parsed=Number.parseInt(String(value??"").replace(/,/g,""),10);return Number.isFinite(parsed)?parsed:0}
     function playerFromRow(row){return{image:String(row[0]??"").trim(),eliminations:number(row[1]),name:String(row[2]??"").trim(),character:String(row[4]??"").trim(),active:row[5]===true||String(row[5]).trim().toLowerCase()==="true",placement:number(row[6])}}
@@ -93,18 +95,20 @@
       finally{refreshButton.disabled=false;refreshButton.classList.remove("loading")}
     }
     function setUser(user){
+      window.clearTimeout(accessTimeout);retryButton.hidden=true;
       state.user=user;state.authorized=false;memberContent.hidden=true;errorBox.style.display="none";
       if(!user){accessHeading.textContent="Sign in to continue";accessMessage.textContent="Sign in with Google to check whether your account has leaderboard access.";uidWrap.hidden=true;signInButton.hidden=false;signOutButton.hidden=true;signInButton.disabled=!firebaseConfigured||!bridgeConfigured;return}
-      uidValue.textContent=user.uid;uidWrap.hidden=false;signInButton.hidden=true;signOutButton.hidden=false;accessHeading.textContent="Checking access";accessMessage.textContent="Verifying your account against the player list…";signOutButton.disabled=true;
+      uidValue.textContent=user.uid;uidWrap.hidden=false;signInButton.hidden=true;signOutButton.hidden=false;accessHeading.textContent="Checking access";accessMessage.textContent="Verifying your account against the player list…";signOutButton.disabled=true;startAccessTimeout();
       if(bridgeOrigin)verifyAccess(user);
     }
     async function verifyAccess(user){
       if(!user||user!==state.user||!bridgeOrigin)return;
-      accessHeading.textContent="Checking access";accessMessage.textContent="Verifying your account against the player list…";signOutButton.disabled=true;
+      accessHeading.textContent="Checking access";accessMessage.textContent="Verifying your account against the player list…";signOutButton.disabled=true;retryButton.hidden=true;startAccessTimeout();
       try{const idToken=await user.getIdToken();requestId=crypto.randomUUID();bridge.contentWindow.postMessage({bridge:"leaderboard-access",type:"verify",requestId,idToken},bridgeOrigin)}
-      catch{accessHeading.textContent="Could not verify access";accessMessage.textContent="Please refresh the page and sign in again.";signOutButton.disabled=false}
+      catch{window.clearTimeout(accessTimeout);accessHeading.textContent="Could not verify access";accessMessage.textContent="Could not create a sign-in verification request. Refresh the page and try again.";retryButton.hidden=false;signOutButton.disabled=false}
     }
     function handleAccessResult(result){
+      window.clearTimeout(accessTimeout);retryButton.hidden=true;
       if(!result||result.uid!==state.user?.uid){accessHeading.textContent="Could not verify access";accessMessage.textContent="The access check returned an unexpected response. Try refreshing the page.";signOutButton.disabled=false;return}
       signOutButton.disabled=false;
       if(result.authorized){state.authorized=true;accessHeading.textContent="Access granted";accessMessage.textContent="Your account is on the player list.";memberContent.hidden=false;load()}
@@ -116,8 +120,9 @@
       bridgeOrigin=event.origin;
       if(event.data.type==="ready"){if(state.user)verifyAccess(state.user);return}
       if(event.data.type==="result"&&event.data.requestId===requestId)handleAccessResult(event.data.result);
-      if(event.data.type==="error"&&event.data.requestId===requestId){accessHeading.textContent="Could not verify access";accessMessage.textContent=event.data.message||"Please try again.";signOutButton.disabled=false}
+      if(event.data.type==="error"&&event.data.requestId===requestId){window.clearTimeout(accessTimeout);accessHeading.textContent="Could not verify access";accessMessage.textContent=event.data.message||"Please try again.";retryButton.hidden=false;signOutButton.disabled=false}
     });
+    retryButton.addEventListener("click",()=>{if(!state.user)return;retryButton.hidden=true;if(bridgeOrigin){verifyAccess(state.user)}else{accessHeading.textContent="Checking access";accessMessage.textContent="Reconnecting to the Apps Script bridge…";bridge.src=`${CONFIG.accessBridgeUrl}?retry=${Date.now()}`;startAccessTimeout()}});
     signInButton.addEventListener("click",async()=>{if(!auth)return;signInButton.disabled=true;accessMessage.textContent="Opening Google sign-in…";try{await signInWithPopup(auth,new GoogleAuthProvider())}catch(error){accessHeading.textContent="Sign-in failed";accessMessage.textContent=error.message}finally{signInButton.disabled=false}});
     signOutButton.addEventListener("click",async()=>{if(auth)await signOut(auth)});
     document.querySelector("#copy-uid").addEventListener("click",async event=>{try{await navigator.clipboard.writeText(uidValue.textContent);event.currentTarget.textContent="Copied";window.setTimeout(()=>event.currentTarget.textContent="Copy UID",1400)}catch{accessMessage.textContent="Copy failed. Select the UID above and copy it manually."}});
