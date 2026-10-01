@@ -64,11 +64,14 @@
     const accessPanel=document.querySelector("#access-panel"),accessHeading=document.querySelector("#access-heading"),accessMessage=document.querySelector("#access-message"),uidWrap=document.querySelector("#uid-wrap"),uidValue=document.querySelector("#uid-value"),signInButton=document.querySelector("#google-signin"),retryButton=document.querySelector("#retry-access"),signOutButton=document.querySelector("#signout"),memberContent=document.querySelector("#member-content"),bridge=document.querySelector("#access-bridge");
     const firebaseConfigured=Object.values(FIREBASE_CONFIG).every(value=>value&&!value.startsWith("PASTE_"));
     const bridgeConfigured=CONFIG.accessBridgeUrl.startsWith("https://script.google.com/macros/s/")&&CONFIG.accessBridgeUrl.endsWith("/exec");
-    let auth=null,bridgeOrigin="",requestId="",accessTimeout=null;
+    let auth=null,bridgeOrigin="",bridgeWindow=null,requestId="",accessTimeout=null;
+    const bridgeChannel=crypto.randomUUID();
+
+    function bridgeUrl(retry=false){const url=new URL(CONFIG.accessBridgeUrl);url.searchParams.set("channel",bridgeChannel);if(retry)url.searchParams.set("retry",String(Date.now()));return url.href}
 
     function showSetupMessage(){accessHeading.textContent="Sign-in setup required";accessMessage.textContent="Add your Firebase web app settings and Apps Script web app URL in index.html, then reload.";signInButton.disabled=true}
     if(!firebaseConfigured){showSetupMessage()}else{auth=getAuth(initializeApp(FIREBASE_CONFIG))}
-    if(bridgeConfigured){bridge.src=CONFIG.accessBridgeUrl}else if(firebaseConfigured){accessMessage.textContent="Add the deployed Apps Script web app URL in index.html to enable access checks.";signInButton.disabled=true}
+    if(bridgeConfigured){bridge.src=bridgeUrl()}else if(firebaseConfigured){accessMessage.textContent="Add the deployed Apps Script web app URL in index.html to enable access checks.";signInButton.disabled=true}
     function startAccessTimeout(){window.clearTimeout(accessTimeout);accessTimeout=window.setTimeout(()=>{if(!state.user||state.authorized||accessHeading.textContent!=="Checking access")return;accessHeading.textContent="Access check timed out";accessMessage.textContent=bridgeOrigin?"The Apps Script bridge loaded but did not return a result. Check its deployment permissions and Apps Script executions.":"The Apps Script bridge did not connect. Check SITE_ORIGIN and that the web app is deployed for anyone to access.";retryButton.hidden=false;signOutButton.disabled=false},15000)}
 
     function number(value){const parsed=Number.parseInt(String(value??"").replace(/,/g,""),10);return Number.isFinite(parsed)?parsed:0}
@@ -102,9 +105,9 @@
       if(bridgeOrigin)verifyAccess(user);
     }
     async function verifyAccess(user){
-      if(!user||user!==state.user||!bridgeOrigin)return;
+      if(!user||user!==state.user||!bridgeOrigin||!bridgeWindow)return;
       accessHeading.textContent="Checking access";accessMessage.textContent="Verifying your account against the player list…";signOutButton.disabled=true;retryButton.hidden=true;startAccessTimeout();
-      try{const idToken=await user.getIdToken();requestId=crypto.randomUUID();bridge.contentWindow.postMessage({bridge:"leaderboard-access",type:"verify",requestId,idToken},bridgeOrigin)}
+      try{const idToken=await user.getIdToken();requestId=crypto.randomUUID();bridgeWindow.postMessage({bridge:"leaderboard-access",channel:bridgeChannel,type:"verify",requestId,idToken},bridgeOrigin)}
       catch{window.clearTimeout(accessTimeout);accessHeading.textContent="Could not verify access";accessMessage.textContent="Could not create a sign-in verification request. Refresh the page and try again.";retryButton.hidden=false;signOutButton.disabled=false}
     }
     function handleAccessResult(result){
@@ -116,13 +119,13 @@
     }
     function isTrustedBridgeOrigin(value){try{const host=new URL(value).hostname;return host==="script.google.com"||host==="script.googleusercontent.com"||/-script\.googleusercontent\.com$/.test(host)}catch{return false}}
     window.addEventListener("message",event=>{
-      if(event.source!==bridge.contentWindow||!isTrustedBridgeOrigin(event.origin)||event.data?.bridge!=="leaderboard-access")return;
-      bridgeOrigin=event.origin;
+      if(!isTrustedBridgeOrigin(event.origin)||event.data?.bridge!=="leaderboard-access"||event.data?.channel!==bridgeChannel)return;
+      bridgeOrigin=event.origin;bridgeWindow=event.source;
       if(event.data.type==="ready"){if(state.user)verifyAccess(state.user);return}
       if(event.data.type==="result"&&event.data.requestId===requestId)handleAccessResult(event.data.result);
       if(event.data.type==="error"&&event.data.requestId===requestId){window.clearTimeout(accessTimeout);accessHeading.textContent="Could not verify access";accessMessage.textContent=event.data.message||"Please try again.";retryButton.hidden=false;signOutButton.disabled=false}
     });
-    retryButton.addEventListener("click",()=>{if(!state.user)return;retryButton.hidden=true;if(bridgeOrigin){verifyAccess(state.user)}else{accessHeading.textContent="Checking access";accessMessage.textContent="Reconnecting to the Apps Script bridge…";bridge.src=`${CONFIG.accessBridgeUrl}?retry=${Date.now()}`;startAccessTimeout()}});
+    retryButton.addEventListener("click",()=>{if(!state.user)return;retryButton.hidden=true;if(bridgeOrigin&&bridgeWindow){verifyAccess(state.user)}else{bridgeOrigin="";bridgeWindow=null;accessHeading.textContent="Checking access";accessMessage.textContent="Reconnecting to the Apps Script bridge…";bridge.src=bridgeUrl(true);startAccessTimeout()}});
     signInButton.addEventListener("click",async()=>{if(!auth)return;signInButton.disabled=true;accessMessage.textContent="Opening Google sign-in…";try{await signInWithPopup(auth,new GoogleAuthProvider())}catch(error){accessHeading.textContent="Sign-in failed";accessMessage.textContent=error.message}finally{signInButton.disabled=false}});
     signOutButton.addEventListener("click",async()=>{if(auth)await signOut(auth)});
     document.querySelector("#copy-uid").addEventListener("click",async event=>{try{await navigator.clipboard.writeText(uidValue.textContent);event.currentTarget.textContent="Copied";window.setTimeout(()=>event.currentTarget.textContent="Copy UID",1400)}catch{accessMessage.textContent="Copy failed. Select the UID above and copy it manually."}});
