@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#161916">
+  <title>Elimination League</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{color-scheme:dark;--ink:#161916;--panel:#202520;--soft:#292f29;--line:#3a4239;--paper:#f2f1e9;--muted:#a3aa9d;--lime:#d4f36a;--green:#9edb80;--display:"Barlow Condensed",Impact,sans-serif;--body:"DM Sans","Segoe UI",sans-serif}
+    *{box-sizing:border-box}body{min-width:320px;margin:0;background-color:var(--ink);background-image:radial-gradient(ellipse at 90% 0%,#d4f36a14,transparent 35%),repeating-linear-gradient(135deg,transparent 0 34px,#ffffff03 34px 35px);color:var(--paper);font:14px var(--body)}
+    button,input{font:inherit}button:focus-visible,input:focus-visible{outline:2px solid var(--lime);outline-offset:3px}.page{width:min(1120px,calc(100% - 40px));margin:auto}
+    .topbar{min-height:62px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);color:var(--muted);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase}.brand,.live-label{display:flex;align-items:center;gap:10px}.brand{color:var(--paper)}.brand-mark{width:10px;height:10px;background:var(--lime);transform:rotate(45deg)}.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 12px #9edb8099}
+    .hero{display:grid;grid-template-columns:1fr auto;align-items:end;gap:24px;padding:58px 0 35px;animation:arrive .4s ease-out both}.eyebrow{margin:0 0 8px;color:var(--lime);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase}h1{margin:0;font:900 clamp(56px,9vw,92px)/.85 var(--display);text-transform:uppercase}.hero-copy{max-width:460px;margin:16px 0 0;color:var(--muted);line-height:1.6}
+    .refresh{display:inline-flex;min-height:42px;align-items:center;gap:9px;padding:0 15px;border:1px solid var(--line);border-radius:3px;background:var(--panel);color:var(--paper);cursor:pointer;font-size:12px;font-weight:700}.refresh:hover{border-color:var(--lime);background:var(--soft)}.refresh:disabled{cursor:wait;opacity:.65}.refresh svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.refresh.loading svg{animation:spin .9s linear infinite}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);margin-bottom:28px;border:1px solid var(--line);background:#202520d1;animation:arrive .5s .06s ease-out both}.stat{min-height:90px;padding:17px 20px}.stat+.stat{border-left:1px solid var(--line)}.stat-label{display:block;margin-bottom:5px;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase}.stat-value{display:block;overflow:hidden;font:800 30px/1 var(--display);text-overflow:ellipsis;text-transform:uppercase;white-space:nowrap}.stat:first-child .stat-value{color:var(--lime)}#leader-name{font-size:25px}
+    .board{border:1px solid var(--line);background:var(--panel);animation:arrive .56s .12s ease-out both}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 16px;border-bottom:1px solid var(--line)}h2{margin:0;font:800 22px var(--display);text-transform:uppercase}.controls{display:flex;align-items:center;gap:10px}.tabs{display:flex;gap:3px;padding:3px;border:1px solid var(--line);border-radius:3px;background:var(--ink)}.tab{min-height:30px;padding:0 10px;border:0;border-radius:2px;background:transparent;color:var(--muted);cursor:pointer;font-size:11px;font-weight:700}.tab[aria-pressed=true]{background:var(--soft);color:var(--lime)}
+    .search-wrap{position:relative}.search-icon{position:absolute;top:50%;left:10px;width:14px;height:14px;transform:translateY(-50%);fill:none;stroke:var(--muted);stroke-width:1.8;pointer-events:none}.search{width:190px;height:38px;padding:0 10px 0 32px;border:1px solid var(--line);border-radius:3px;background:var(--ink);color:var(--paper);font-size:12px}.search::placeholder{color:#858d81}
+    .columns,.entry{display:grid;grid-template-columns:66px minmax(190px,1.6fr) minmax(115px,1fr) 120px;align-items:center;column-gap:12px}.columns{min-height:36px;padding:0 18px;color:var(--muted);font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase}.columns span:last-child{text-align:right}.entry{min-height:76px;padding:9px 18px;border-top:1px solid var(--line);transition:background .13s}.entry:hover{background:var(--soft)}.rank{color:var(--muted);font:800 24px var(--display)}.entry:first-child .rank{color:var(--lime)}.player{display:flex;min-width:0;align-items:center;gap:12px}.avatar{display:grid;width:44px;height:44px;flex:0 0 44px;place-items:center;overflow:hidden;border:1px solid #4b5547;border-radius:3px;background:#343b31;color:var(--lime);font:800 18px var(--display);text-transform:uppercase}.avatar img{width:100%;height:100%;object-fit:cover}.copy{min-width:0}.name{overflow:hidden;font-size:14px;font-weight:700;text-overflow:ellipsis;white-space:nowrap}.status{display:flex;align-items:center;gap:6px;margin-top:5px;color:var(--muted);font-size:10px}.dot{width:6px;height:6px;border-radius:50%;background:#798276}.dot.active{background:var(--green)}.character{overflow:hidden;color:#d7dbd1;font-size:12px;text-overflow:ellipsis;white-space:nowrap}.elims{color:var(--lime);font:800 25px var(--display);text-align:right}.elims small{display:none;color:var(--muted);font:600 10px var(--body)}
+    .empty{display:none;padding:48px 20px;color:var(--muted);text-align:center}.empty strong{display:block;margin-bottom:5px;color:var(--paper);font:800 24px var(--display);text-transform:uppercase}.error{display:none;margin:0 0 18px;padding:12px 14px;border:1px solid #ff795b70;border-radius:3px;background:#ff795b14;color:#ffb09d;line-height:1.5}.footer{display:flex;justify-content:space-between;gap:15px;padding:14px 2px 28px;color:var(--muted);font-size:10px}.footer strong{color:#d7dbd1;font-weight:600}
+    .access-panel{margin-bottom:28px;padding:22px;border:1px solid var(--line);background:var(--panel)}.access-panel h2{margin-bottom:7px}.access-message{margin:0 0 16px;color:var(--muted);line-height:1.55}.access-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px}.access-button{display:inline-flex;min-height:40px;align-items:center;justify-content:center;gap:9px;padding:0 14px;border:1px solid var(--line);border-radius:3px;background:var(--soft);color:var(--paper);cursor:pointer;font-size:12px;font-weight:700}.access-button:hover{border-color:var(--lime)}.access-button.primary{border-color:var(--lime);background:var(--lime);color:var(--ink)}.access-button:disabled{cursor:wait;opacity:.6}.access-button svg{width:16px;height:16px;fill:currentColor}.uid-wrap{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-top:16px}.uid-label{color:var(--muted);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase}.uid-value{max-width:100%;overflow-wrap:anywhere;color:var(--lime);font:600 12px ui-monospace,Consolas,monospace}.member-content[hidden],.uid-wrap[hidden],.access-button[hidden]{display:none}
+    @keyframes spin{to{transform:rotate(360deg)}}@keyframes arrive{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    @media(max-width:700px){.page{width:min(100% - 28px,560px)}.topbar{min-height:54px;font-size:10px}.hero{grid-template-columns:1fr;gap:18px;padding:44px 0 26px}h1{font-size:clamp(58px,16vw,82px)}.hero-copy{max-width:360px;margin-top:12px;font-size:13px}.refresh{justify-self:start}.stats{margin-bottom:20px}.stat{min-height:78px;padding:13px 10px}.stat-label{font-size:8px;letter-spacing:1px}.stat-value{font-size:26px}#leader-name{font-size:20px}.toolbar{flex-wrap:wrap;align-items:flex-start}.controls{width:100%;flex-wrap:wrap}.search-wrap{flex:1;min-width:145px}.search{width:100%}.columns{display:none}.entry{grid-template-columns:38px minmax(0,1fr) 64px;gap:9px;min-height:70px;padding:9px 12px}.rank{font-size:21px}.avatar{width:40px;height:40px;flex-basis:40px}.player{gap:9px}.name{font-size:13px}.character{display:none}.elims{font-size:23px}.elims small{display:block;margin-top:2px}.footer{font-size:9px}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar"><div class="brand"><span class="brand-mark" aria-hidden="true"></span><span>Elimination League</span></div><div class="live-label"><span class="live-dot" aria-hidden="true"></span><span>Leaderboard live</span></div></header>
+    <main>
+      <section class="hero" aria-labelledby="page-title"><div><p class="eyebrow">The competition, updated</p><h1 id="page-title">Elimination<br>Leaderboard</h1><p class="hero-copy">Every elimination counts. See who's leading, who's in the arena, and what they're playing.</p></div><button class="refresh" id="refresh" type="button" title="Refresh leaderboard now"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16.2 8A6.5 6.5 0 0 0 4.7 5.4L3.2 7M3.2 7V3.8M3.2 7h3.2M3.8 12A6.5 6.5 0 0 0 15.3 14.6l1.5-1.6m0 0v3.2m0-3.2h-3.2"/></svg>Refresh</button></section>
+      <section class="access-panel" id="access-panel" aria-labelledby="access-heading">
+        <h2 id="access-heading">Sign in to continue</h2>
+        <p class="access-message" id="access-message">Sign in with Google to check whether your account has leaderboard access.</p>
+        <div class="access-actions">
+          <button class="access-button primary" id="google-signin" type="button"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11a9.4 9.4 0 0 1-4.1 6.2v5.1h6.7c3.9-3.6 6-8.8 6-15Z" fill="#4285f4"/><path d="M24 44c5.5 0 10.1-1.8 13.5-4.8l-6.7-5.1c-1.9 1.3-4.1 2.1-6.8 2.1-5.2 0-9.7-3.5-11.3-8.2H5.8v5.2A20 20 0 0 0 24 44Z" fill="#34a853"/><path d="M12.7 28a12 12 0 0 1 0-7.9v-5.2H5.8a20 20 0 0 0 0 18.3l6.9-5.2Z" fill="#fbbc05"/><path d="M24 11.9c3 0 5.7 1 7.8 3.1l5.8-5.8C34.1 5.9 29.5 4 24 4A20 20 0 0 0 5.8 14.9l6.9 5.2c1.6-4.7 6.1-8.2 11.3-8.2Z" fill="#ea4335"/></svg><span>Continue with Google</span></button>
+          <button class="access-button" id="signout" type="button" hidden>Sign out</button>
+        </div>
+        <div class="uid-wrap" id="uid-wrap" hidden><span class="uid-label">Your Firebase UID</span><code class="uid-value" id="uid-value"></code><button class="access-button" id="copy-uid" type="button">Copy UID</button></div>
+      </section>
+      <div class="member-content" id="member-content" hidden>
+        <section class="stats" aria-label="Leaderboard summary"><div class="stat"><span class="stat-label">Players active</span><span class="stat-value" id="active-count">--</span></div><div class="stat"><span class="stat-label">Total players</span><span class="stat-value" id="total-count">--</span></div><div class="stat"><span class="stat-label">Current leader</span><span class="stat-value" id="leader-name">--</span></div></section>
+        <p class="error" id="error" role="alert"></p>
+        <section class="board" aria-labelledby="board-title"><div class="toolbar"><h2 id="board-title">Standings</h2><div class="controls"><div class="tabs" role="group" aria-label="Filter players"><button class="tab" type="button" data-filter="all" aria-pressed="true">Everyone</button><button class="tab" type="button" data-filter="active" aria-pressed="false">Active</button></div><label class="search-wrap"><svg class="search-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.7" cy="8.7" r="5.7"/><path d="m13 13 4 4"/></svg><input class="search" id="search" type="search" placeholder="Find a player" aria-label="Find a player"></label></div></div>
+          <div class="columns" aria-hidden="true"><span>Place</span><span>Player</span><span>Character</span><span>Eliminations</span></div><div id="leaderboard" aria-live="polite"></div><div class="empty" id="empty"><strong>No players found</strong><span>Try another name or change the filter.</span></div>
+        </section>
+        <footer class="footer"><span id="updated">Waiting for sheet data</span><span>Ranked by sheet placement</span></footer>
+      </div>
+    </main>
+  </div>
+  <iframe id="access-bridge" title="Account access verification" aria-hidden="true" tabindex="-1" style="position:absolute;width:1px;height:1px;border:0;opacity:0;pointer-events:none"></iframe>
+  <script type="module">
+    import {initializeApp} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import {GoogleAuthProvider,getAuth,onAuthStateChanged,signInWithPopup,signOut} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+    const FIREBASE_CONFIG={apiKey:"PASTE_FIREBASE_WEB_API_KEY_HERE",authDomain:"PASTE_FIREBASE_PROJECT_ID_HERE.firebaseapp.com",projectId:"PASTE_FIREBASE_PROJECT_ID_HERE",appId:"PASTE_FIREBASE_APP_ID_HERE"};
+    const CONFIG={spreadsheetId:"1RyvLSpYKl1SJbUa3F4KVJRmcIHBbWVUJqjHTgGbD35s",apiKey:"PASTE_RESTRICTED_PUBLIC_SHEETS_API_KEY_HERE",accessBridgeUrl:"PASTE_APPS_SCRIPT_WEB_APP_URL_HERE",refreshMs:30000};
+    const state={players:[],filter:"all",query:"",loadedAt:null,authorized:false,user:null};
+    const list=document.querySelector("#leaderboard"),empty=document.querySelector("#empty"),errorBox=document.querySelector("#error"),refreshButton=document.querySelector("#refresh");
+    const accessPanel=document.querySelector("#access-panel"),accessHeading=document.querySelector("#access-heading"),accessMessage=document.querySelector("#access-message"),uidWrap=document.querySelector("#uid-wrap"),uidValue=document.querySelector("#uid-value"),signInButton=document.querySelector("#google-signin"),signOutButton=document.querySelector("#signout"),memberContent=document.querySelector("#member-content"),bridge=document.querySelector("#access-bridge");
+    const firebaseConfigured=Object.values(FIREBASE_CONFIG).every(value=>value&&!value.startsWith("PASTE_"));
+    const bridgeConfigured=CONFIG.accessBridgeUrl.startsWith("https://script.google.com/macros/s/")&&CONFIG.accessBridgeUrl.endsWith("/exec");
+    let auth=null,bridgeOrigin="",requestId="";
+
+    function showSetupMessage(){accessHeading.textContent="Sign-in setup required";accessMessage.textContent="Add your Firebase web app settings and Apps Script web app URL in index.html, then reload.";signInButton.disabled=true}
+    if(!firebaseConfigured){showSetupMessage()}else{auth=getAuth(initializeApp(FIREBASE_CONFIG))}
+    if(bridgeConfigured){bridge.src=CONFIG.accessBridgeUrl}else if(firebaseConfigured){accessMessage.textContent="Add the deployed Apps Script web app URL in index.html to enable access checks.";signInButton.disabled=true}
+
+    function number(value){const parsed=Number.parseInt(String(value??"").replace(/,/g,""),10);return Number.isFinite(parsed)?parsed:0}
+    function playerFromRow(row){return{image:String(row[0]??"").trim(),eliminations:number(row[1]),name:String(row[2]??"").trim(),character:String(row[4]??"").trim(),active:row[5]===true||String(row[5]).trim().toLowerCase()==="true",placement:number(row[6])}}
+    function compare(a,b){if(a.placement&&b.placement)return a.placement-b.placement;if(a.placement)return-1;if(b.placement)return 1;return b.eliminations-a.eliminations}
+    function addEntry(player,index){
+      const row=document.createElement("article");row.className="entry";
+      const rank=document.createElement("span");rank.className="rank";rank.textContent=String(player.placement||index+1);
+      const playerBox=document.createElement("div");playerBox.className="player";
+      const avatar=document.createElement("div");avatar.className="avatar";avatar.setAttribute("aria-hidden","true");const initial=document.createElement("span");initial.textContent=player.name.slice(0,1)||"?";avatar.append(initial);
+      try{const url=new URL(player.image);if(url.protocol==="https:"){const image=document.createElement("img");image.src=url.href;image.alt="";image.loading="lazy";image.referrerPolicy="no-referrer";image.addEventListener("load",()=>initial.remove(),{once:true});avatar.append(image)}}catch{}
+      const copy=document.createElement("div");copy.className="copy";const name=document.createElement("div");name.className="name";name.textContent=player.name||"Unnamed player";const status=document.createElement("span");status.className="status";const dot=document.createElement("span");dot.className=`dot${player.active?" active":""}`;dot.setAttribute("aria-hidden","true");status.append(dot,document.createTextNode(player.active?"Participating":"Not participating"));copy.append(name,status);playerBox.append(avatar,copy);
+      const character=document.createElement("span");character.className="character";character.textContent=player.character||"—";character.title=player.character;
+      const elims=document.createElement("div");elims.className="elims";elims.append(document.createTextNode(player.eliminations.toLocaleString()));const label=document.createElement("small");label.textContent="eliminations";elims.append(label);
+      row.append(rank,playerBox,character,elims);return row;
+    }
+    function render(){const query=state.query.toLocaleLowerCase();const visible=state.players.filter(p=>(state.filter==="all"||p.active)&&(!query||`${p.name} ${p.character}`.toLocaleLowerCase().includes(query)));list.replaceChildren(...visible.map(addEntry));empty.style.display=visible.length?"none":"block";document.querySelector("#active-count").textContent=String(state.players.filter(p=>p.active).length);document.querySelector("#total-count").textContent=String(state.players.length);document.querySelector("#leader-name").textContent=state.players[0]?.name||"—"}
+    async function load(){
+      if(!state.authorized)return;
+      if(CONFIG.spreadsheetId.startsWith("PASTE_")||CONFIG.apiKey.startsWith("PASTE_")){errorBox.textContent="Add a restricted read-only Google Sheets API key in the CONFIG section to load leaderboard data.";errorBox.style.display="block";document.querySelector("#updated").textContent="Leaderboard connection not configured";return}
+      refreshButton.disabled=true;refreshButton.classList.add("loading");errorBox.style.display="none";
+      try{const range=encodeURIComponent("A2:G");const url=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(CONFIG.spreadsheetId)}/values/${range}?key=${encodeURIComponent(CONFIG.apiKey)}`;const response=await fetch(url,{cache:"no-store"});if(!response.ok){const details=await response.json().catch(()=>({}));throw new Error(details.error?.message||`Google Sheets returned ${response.status}.`)}const data=await response.json();state.players=(data.values||[]).map(playerFromRow).filter(p=>p.name).sort(compare);state.loadedAt=new Date();render();document.querySelector("#updated").textContent=`Updated ${state.loadedAt.toLocaleTimeString([],{hour:"numeric",minute:"2-digit",second:"2-digit"})}`}
+      catch(err){errorBox.textContent=`Couldn't load the leaderboard. ${err.message} Check that the sheet is shared for viewing and the API key is configured for the Sheets API.`;errorBox.style.display="block"}
+      finally{refreshButton.disabled=false;refreshButton.classList.remove("loading")}
+    }
+    function setUser(user){
+      state.user=user;state.authorized=false;memberContent.hidden=true;errorBox.style.display="none";
+      if(!user){accessHeading.textContent="Sign in to continue";accessMessage.textContent="Sign in with Google to check whether your account has leaderboard access.";uidWrap.hidden=true;signInButton.hidden=false;signOutButton.hidden=true;signInButton.disabled=!firebaseConfigured||!bridgeConfigured;return}
+      uidValue.textContent=user.uid;uidWrap.hidden=false;signInButton.hidden=true;signOutButton.hidden=false;accessHeading.textContent="Checking access";accessMessage.textContent="Verifying your account against the player list…";signOutButton.disabled=true;
+      if(bridgeOrigin)verifyAccess(user);
+    }
+    async function verifyAccess(user){
+      if(!user||user!==state.user||!bridgeOrigin)return;
+      accessHeading.textContent="Checking access";accessMessage.textContent="Verifying your account against the player list…";signOutButton.disabled=true;
+      try{const idToken=await user.getIdToken();requestId=crypto.randomUUID();bridge.contentWindow.postMessage({bridge:"leaderboard-access",type:"verify",requestId,idToken},bridgeOrigin)}
+      catch{accessHeading.textContent="Could not verify access";accessMessage.textContent="Please refresh the page and sign in again.";signOutButton.disabled=false}
+    }
+    function handleAccessResult(result){
+      if(!result||result.uid!==state.user?.uid){accessHeading.textContent="Could not verify access";accessMessage.textContent="The access check returned an unexpected response. Try refreshing the page.";signOutButton.disabled=false;return}
+      signOutButton.disabled=false;
+      if(result.authorized){state.authorized=true;accessHeading.textContent="Access granted";accessMessage.textContent="Your account is on the player list.";memberContent.hidden=false;load()}
+      else{state.authorized=false;accessHeading.textContent="You do not have access";accessMessage.textContent="Share this Firebase UID with an administrator so they can add it to the Users sheet.";memberContent.hidden=true;list.replaceChildren()}
+    }
+    function isTrustedBridgeOrigin(value){try{const host=new URL(value).hostname;return host==="script.google.com"||host==="script.googleusercontent.com"||/-script\.googleusercontent\.com$/.test(host)}catch{return false}}
+    window.addEventListener("message",event=>{
+      if(event.source!==bridge.contentWindow||!isTrustedBridgeOrigin(event.origin)||event.data?.bridge!=="leaderboard-access")return;
+      bridgeOrigin=event.origin;
+      if(event.data.type==="ready"){if(state.user)verifyAccess(state.user);return}
+      if(event.data.type==="result"&&event.data.requestId===requestId)handleAccessResult(event.data.result);
+      if(event.data.type==="error"&&event.data.requestId===requestId){accessHeading.textContent="Could not verify access";accessMessage.textContent=event.data.message||"Please try again.";signOutButton.disabled=false}
+    });
+    signInButton.addEventListener("click",async()=>{if(!auth)return;signInButton.disabled=true;accessMessage.textContent="Opening Google sign-in…";try{await signInWithPopup(auth,new GoogleAuthProvider())}catch(error){accessHeading.textContent="Sign-in failed";accessMessage.textContent=error.message}finally{signInButton.disabled=false}});
+    signOutButton.addEventListener("click",async()=>{if(auth)await signOut(auth)});
+    document.querySelector("#copy-uid").addEventListener("click",async event=>{try{await navigator.clipboard.writeText(uidValue.textContent);event.currentTarget.textContent="Copied";window.setTimeout(()=>event.currentTarget.textContent="Copy UID",1400)}catch{accessMessage.textContent="Copy failed. Select the UID above and copy it manually."}});
+    if(auth)onAuthStateChanged(auth,setUser);
+    document.querySelectorAll(".tab").forEach(button=>button.addEventListener("click",()=>{state.filter=button.dataset.filter;document.querySelectorAll(".tab").forEach(tab=>tab.setAttribute("aria-pressed",String(tab===button)));render()}));
+    document.querySelector("#search").addEventListener("input",event=>{state.query=event.target.value.trim();render()});refreshButton.addEventListener("click",load);window.setInterval(()=>{if(state.authorized)load()},CONFIG.refreshMs);
+  </script>
+</body>
+</html>
