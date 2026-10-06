@@ -42,6 +42,8 @@
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
     .entry[data-place="1"] .rank{color:#e8bb49}.live-dot{box-shadow:0 0 12px #0095ff99}
     .privacy-link{padding:0 2px 24px;color:var(--muted);font-size:11px}.privacy-link a{color:var(--muted);text-underline-offset:3px}.privacy-link a:hover{color:var(--paper)}
+    .session-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:18px;border:1px solid var(--line);background:var(--panel)}.session-stat{min-width:0;padding:14px 18px}.session-stat+.session-stat{border-left:1px solid var(--line)}.session-stat-label{display:block;margin-bottom:5px;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase}.session-stat-value{display:block;color:var(--lime);font:800 28px/1 var(--display);font-variant-numeric:tabular-nums}.session-error{grid-column:1/-1;margin:0;padding:7px 12px;border-top:1px solid var(--line);color:#ffb09d;font-size:11px}.session-error[hidden]{display:none}
+    @media(max-width:700px){.session-stat{padding:12px 10px}.session-stat-label{font-size:8px;letter-spacing:.6px}.session-stat-value{font-size:23px}}
   </style>
 </head>
 <body>
@@ -57,6 +59,7 @@
       </section>
       <div class="member-content" id="member-content" hidden>
         <p class="error" id="error" role="alert"></p>
+        <section class="session-stats" aria-label="Session statistics" aria-live="polite"><div class="session-stat"><span class="session-stat-label">Session Eliminations</span><strong class="session-stat-value" id="session-eliminations">--</strong></div><div class="session-stat"><span class="session-stat-label">Wins</span><strong class="session-stat-value" id="session-wins">--</strong></div><div class="session-stat"><span class="session-stat-label">Losses</span><strong class="session-stat-value" id="session-losses">--</strong></div><p class="session-error" id="session-error" role="status" hidden>Session totals could not be loaded.</p></section>
         <section class="board" aria-label="Leaderboard standings"><div class="toolbar"><div class="controls"><select class="sheet-select" id="sheet-select" aria-label="Choose leaderboard sheet" disabled><option>Loading sheets...</option></select><div class="tabs" role="group" aria-label="Filter players"><button class="tab" type="button" data-filter="all" aria-pressed="true">All Players</button><button class="tab" type="button" data-filter="active" aria-pressed="false">Online Now</button></div><label class="search-wrap"><svg class="search-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.7" cy="8.7" r="5.7"/><path d="m13 13 4 4"/></svg><input class="search" id="search" type="search" placeholder="Find a player" aria-label="Find a player"></label></div></div>
           <div class="columns" aria-hidden="true"><span>Place</span><span>Player</span><span>Character</span><span>Eliminations</span></div><div id="leaderboard" aria-live="polite"></div><div class="empty" id="empty"><strong>No players found</strong><span>Try another name or change the filter.</span></div>
         </section>
@@ -79,6 +82,7 @@
     const bridgeConfigured=CONFIG.accessBridgeUrl.startsWith("https://script.google.com/macros/s/")&&CONFIG.accessBridgeUrl.endsWith("/exec");
     let auth=null,bridgeOrigin="",bridgeWindow=null,requestId="",accessTimeout=null,autoRefreshTimeout=null,nextUpdateAt=0;
     const bridgeChannel=crypto.randomUUID();
+    let sessionStatsRequest=0;
 
     function bridgeUrl(retry=false){const url=new URL(CONFIG.accessBridgeUrl);url.searchParams.set("channel",bridgeChannel);if(retry)url.searchParams.set("retry",String(Date.now()));return url.href}
 
@@ -92,6 +96,7 @@
     window.setInterval(updateCountdown,1000);
 
     function number(value){const parsed=Number.parseInt(String(value??"").replace(/,/g,""),10);return Number.isFinite(parsed)?parsed:0}
+    async function loadSessionStats(){const request=++sessionStatsRequest;const valuesUrl=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(CONFIG.spreadsheetId)}/values/${encodeURIComponent("'Sessions'!B2:D2")}?key=${encodeURIComponent(CONFIG.apiKey)}`;const stats=[document.querySelector("#session-eliminations"),document.querySelector("#session-wins"),document.querySelector("#session-losses")];const status=document.querySelector("#session-error");try{const response=await fetch(valuesUrl,{cache:"no-store"});if(!response.ok)throw new Error(`Google Sheets returned ${response.status}.`);const data=await response.json();if(request!==sessionStatsRequest)return;const row=data.values?.[0]||[];stats.forEach((element,index)=>element.textContent=number(row[index]).toLocaleString());status.hidden=true}catch{if(request!==sessionStatsRequest)return;stats.forEach(element=>element.textContent="--");status.hidden=false}}
     function playerFromRow(row){return{image:String(row[0]??"").trim(),eliminations:number(row[1]),name:String(row[2]??"").trim(),gameUsername:String(row[3]??"").trim(),character:String(row[4]??"").trim(),active:row[5]===true||String(row[5]).trim().toLowerCase()==="true",placement:number(row[6])}}
     function compare(a,b){if(a.placement&&b.placement)return a.placement-b.placement;if(a.placement)return-1;if(b.placement)return 1;return b.eliminations-a.eliminations}
     function addEntry(player,index,previousEliminations){
@@ -117,6 +122,7 @@
     async function load(){
       if(!state.authorized)return;
       if(!state.selectedSheet)return;
+      loadSessionStats();
       if(CONFIG.spreadsheetId.startsWith("PASTE_")||CONFIG.apiKey.startsWith("PASTE_")){errorBox.textContent="Add a restricted read-only Google Sheets API key in the CONFIG section to load leaderboard data.";errorBox.style.display="block";document.querySelector("#updated").textContent="Leaderboard connection not configured";return}
       refreshButton.disabled=true;refreshButton.classList.add("loading");errorBox.style.display="none";
       const selectedSheet=state.selectedSheet;
@@ -127,7 +133,7 @@
     async function loadSheetNames(){
       const sheetSelect=document.querySelector("#sheet-select");
       sheetSelect.disabled=true;errorBox.style.display="none";
-      try{const url=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(CONFIG.spreadsheetId)}?fields=sheets.properties.title&key=${encodeURIComponent(CONFIG.apiKey)}`;const response=await fetch(url,{cache:"no-store"});if(!response.ok){const details=await response.json().catch(()=>({}));throw new Error(details.error?.message||`Google Sheets returned ${response.status}.`)}const data=await response.json();state.sheetNames=(data.sheets||[]).map(sheet=>sheet.properties?.title||"").filter(name=>name&&name.toLocaleLowerCase()!=="users");if(!state.sheetNames.length)throw new Error("No leaderboard sheets were found.");sheetSelect.replaceChildren(...state.sheetNames.map(name=>{const option=document.createElement("option");option.value=name;option.textContent=name;return option}));const requestedGame=new URLSearchParams(window.location.search).get("game");const requestedSheet=state.sheetNames.find(name=>name.toLocaleLowerCase()===requestedGame?.trim().toLocaleLowerCase());state.selectedSheet=requestedSheet||state.sheetNames.find(name=>name.toLocaleLowerCase()==="marvel rivals")||state.sheetNames[0];sheetSelect.value=state.selectedSheet;sheetSelect.disabled=false;await load()}
+      try{const url=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(CONFIG.spreadsheetId)}?fields=sheets.properties.title&key=${encodeURIComponent(CONFIG.apiKey)}`;const response=await fetch(url,{cache:"no-store"});if(!response.ok){const details=await response.json().catch(()=>({}));throw new Error(details.error?.message||`Google Sheets returned ${response.status}.`)}const data=await response.json();state.sheetNames=(data.sheets||[]).map(sheet=>sheet.properties?.title||"").filter(name=>name&&name.toLocaleLowerCase()!=="users"&&name.toLocaleLowerCase()!=="sessions");if(!state.sheetNames.length)throw new Error("No leaderboard sheets were found.");sheetSelect.replaceChildren(...state.sheetNames.map(name=>{const option=document.createElement("option");option.value=name;option.textContent=name;return option}));const requestedGame=new URLSearchParams(window.location.search).get("game");const requestedSheet=state.sheetNames.find(name=>name.toLocaleLowerCase()===requestedGame?.trim().toLocaleLowerCase());state.selectedSheet=requestedSheet||state.sheetNames.find(name=>name.toLocaleLowerCase()==="marvel rivals")||state.sheetNames[0];sheetSelect.value=state.selectedSheet;sheetSelect.disabled=false;await load()}
       catch(err){sheetSelect.disabled=true;errorBox.textContent=`Couldn't load leaderboard sheets. ${err.message}`;errorBox.style.display="block";document.querySelector("#updated").textContent="Could not load leaderboard sheets"}
     }
     function setUser(user){
