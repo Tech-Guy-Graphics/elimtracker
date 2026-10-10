@@ -50,7 +50,7 @@
   <div class="page">
     <header class="topbar"><div class="brand"><img src="icon.png" alt=""></div><div class="account-profile" id="account-profile" hidden><button class="account-trigger" id="account-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="account-menu"><span id="account-greeting"></span><img id="account-photo" alt="" hidden></button><div class="profile-menu" id="account-menu" role="menu" hidden><div class="profile-menu-identity"><img id="menu-photo" alt="" hidden><div><span class="profile-menu-name" id="menu-name"></span><span class="profile-menu-email" id="menu-email"></span></div></div><div class="profile-menu-uid"><span>User ID</span><code id="menu-uid"></code></div><button class="access-button signout-button" type="button" role="menuitem">Sign out</button></div></div></header>
     <main>
-      <section class="hero" aria-labelledby="page-title"><div><h1 id="page-title">Elimination<br>Leaderboard</h1><p class="hero-copy">See where you and your friends are on leaderboard. Every elimination counts!</p></div><button class="refresh" id="refresh" type="button" title="Refresh leaderboard now" hidden><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16.2 8A6.5 6.5 0 0 0 4.7 5.4L3.2 7M3.2 7V3.8M3.2 7h3.2M3.8 12A6.5 6.5 0 0 0 15.3 14.6l1.5-1.6m0 0v3.2m0-3.2h-3.2"/></svg>Refresh</button></section>
+      <section class="hero" aria-labelledby="page-title"><div><h1 id="page-title">Elimination<br>Leaderboard</h1><p class="hero-copy">Earn elims, complete challenges, and get to the top!</p></div><button class="refresh" id="refresh" type="button" title="Refresh leaderboard now" hidden><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16.2 8A6.5 6.5 0 0 0 4.7 5.4L3.2 7M3.2 7V3.8M3.2 7h3.2M3.8 12A6.5 6.5 0 0 0 15.3 14.6l1.5-1.6m0 0v3.2m0-3.2h-3.2"/></svg>Refresh</button></section>
       <section class="access-panel" id="access-panel" aria-labelledby="access-heading">
         <div id="login-state"><h2 id="access-heading">Sign in</h2><p class="access-message" id="access-message" hidden></p><button class="access-button primary" id="google-signin" type="button"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11a9.4 9.4 0 0 1-4.1 6.2v5.1h6.7c3.9-3.6 6-8.8 6-15Z" fill="#4285f4"/><path d="M24 44c5.5 0 10.1-1.8 13.5-4.8l-6.7-5.1c-1.9 1.3-4.1 2.1-6.8 2.1-5.2 0-9.7-3.5-11.3-8.2H5.8v5.2A20 20 0 0 0 24 44Z" fill="#34a853"/><path d="M12.7 28a12 12 0 0 1 0-7.9v-5.2H5.8a20 20 0 0 0 0 18.3l6.9-5.2Z" fill="#fbbc05"/><path d="M24 11.9c3 0 5.7 1 7.8 3.1l5.8-5.8C34.1 5.9 29.5 4 24 4A20 20 0 0 0 5.8 14.9l6.9 5.2c1.6-4.7 6.1-8.2 11.3-8.2Z" fill="#ea4335"/></svg><span>Continue with Google</span></button></div>
         <div class="login-loading" id="loading-state" role="status" hidden><span class="loading-spinner" aria-hidden="true"></span><span>Logging In...</span></div>
@@ -59,7 +59,7 @@
       </section>
       <div class="member-content" id="member-content" hidden>
         <p class="error" id="error" role="alert"></p>
-        <section class="session-stats" aria-label="Session statistics" aria-live="polite"><div class="session-stat"><span class="session-stat-label">Session Eliminations</span><strong class="session-stat-value" id="session-eliminations">--</strong></div><div class="session-stat"><span class="session-stat-label">Wins</span><strong class="session-stat-value" id="session-wins">--</strong></div><div class="session-stat"><span class="session-stat-label">Losses</span><strong class="session-stat-value" id="session-losses">--</strong></div><p class="session-error" id="session-error" role="status" hidden>Session totals could not be loaded.</p></section>
+        <section class="session-stats" aria-label="Session statistics" aria-live="polite"><div class="session-stat"><span class="session-stat-label">Session Eliminations</span><strong class="session-stat-value" id="session-eliminations">--</strong></div><div class="session-stat"><span class="session-stat-label">Session Wins</span><strong class="session-stat-value" id="session-wins">--</strong></div><div class="session-stat"><span class="session-stat-label">Session Losses</span><strong class="session-stat-value" id="session-losses">--</strong></div><p class="session-error" id="session-error" role="status" hidden>Session totals could not be loaded.</p></section>
         <section class="board" aria-label="Leaderboard standings"><div class="toolbar"><div class="controls"><select class="sheet-select" id="sheet-select" aria-label="Choose leaderboard sheet" disabled><option>Loading sheets...</option></select><div class="tabs" role="group" aria-label="Filter players"><button class="tab" type="button" data-filter="all" aria-pressed="true">All Players</button><button class="tab" type="button" data-filter="active" aria-pressed="false">Online Now</button></div><label class="search-wrap"><svg class="search-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.7" cy="8.7" r="5.7"/><path d="m13 13 4 4"/></svg><input class="search" id="search" type="search" placeholder="Find a player" aria-label="Find a player"></label></div></div>
           <div class="columns" aria-hidden="true"><span>Place</span><span>Player</span><span>Character</span><span>Eliminations</span></div><div id="leaderboard" aria-live="polite"></div><div class="empty" id="empty"><strong>No players found</strong><span>Try another name or change the filter.</span></div>
         </section>
@@ -72,31 +72,58 @@
   <script type="module">
     import {initializeApp} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import {GoogleAuthProvider,getAuth,onAuthStateChanged,signInWithPopup,signOut} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import {getDatabase,onValue,ref} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
     const FIREBASE_CONFIG={apiKey:"AIzaSyCs65B8IwKAqLxbTuDGPjV_-uX9bVUJeTM",authDomain:"kill-tracker-e3083.firebaseapp.com",projectId:"kill-tracker-e3083",appId:"1:888950181547:web:2349883ef1a2d82e0631ee"};
-    const CONFIG={spreadsheetId:"1RyvLSpYKl1SJbUa3F4KVJRmcIHBbWVUJqjHTgGbD35s",apiKey:"AIzaSyAsKgBLt6fo23IX-bqCcewlp1iF-vTt0Cg",accessBridgeUrl:"https://script.google.com/macros/s/AKfycbyhPv5QFXMLLSK1rqUcnuesZXfqEFqiBXfbwYYYbMnnbri3VudY7TECJ0BW3ywX14uh/exec",refreshMs:30000};
-    const state={players:[],filter:"all",query:"",loadedAt:null,authorized:false,user:null,gameAccounts:{},sheetNames:[],selectedSheet:""};
+    const CONFIG={spreadsheetId:"1RyvLSpYKl1SJbUa3F4KVJRmcIHBbWVUJqjHTgGbD35s",apiKey:"AIzaSyAsKgBLt6fo23IX-bqCcewlp1iF-vTt0Cg",accessBridgeUrl:"https://script.google.com/macros/s/AKfycbyhPv5QFXMLLSK1rqUcnuesZXfqEFqiBXfbwYYYbMnnbri3VudY7TECJ0BW3ywX14uh/exec",firebaseDatabaseUrl:"https://kill-tracker-e3083-default-rtdb.firebaseio.com/",refreshMs:30000};
+    const state={players:[],filter:"all",query:"",loadedAt:null,authorized:false,user:null,gameAccounts:{},sheetNames:[],sheetIds:{},selectedSheet:""};
     const list=document.querySelector("#leaderboard"),empty=document.querySelector("#empty"),errorBox=document.querySelector("#error"),refreshButton=document.querySelector("#refresh");
     const accessPanel=document.querySelector("#access-panel"),loginState=document.querySelector("#login-state"),accessHeading=document.querySelector("#access-heading"),accessMessage=document.querySelector("#access-message"),loadingState=document.querySelector("#loading-state"),deniedState=document.querySelector("#denied-state"),verificationError=document.querySelector("#verification-error"),verificationErrorTitle=document.querySelector("#verification-error-title"),verificationErrorMessage=document.querySelector("#verification-error-message"),signInButton=document.querySelector("#google-signin"),retryButton=document.querySelector("#retry-access"),memberContent=document.querySelector("#member-content"),bridge=document.querySelector("#access-bridge"),accountProfile=document.querySelector("#account-profile"),accountTrigger=document.querySelector("#account-trigger"),accountMenu=document.querySelector("#account-menu"),accountGreeting=document.querySelector("#account-greeting"),accountPhoto=document.querySelector("#account-photo"),menuPhoto=document.querySelector("#menu-photo"),menuName=document.querySelector("#menu-name"),menuEmail=document.querySelector("#menu-email"),menuUid=document.querySelector("#menu-uid"),nextUpdateLabel=document.querySelector("#next-update");
     const firebaseConfigured=Object.values(FIREBASE_CONFIG).every(value=>value&&!value.startsWith("PASTE_"));
     const bridgeConfigured=CONFIG.accessBridgeUrl.startsWith("https://script.google.com/macros/s/")&&CONFIG.accessBridgeUrl.endsWith("/exec");
-    let auth=null,bridgeOrigin="",bridgeWindow=null,requestId="",accessTimeout=null,autoRefreshTimeout=null,nextUpdateAt=0;
+    const realtimeConfigured=CONFIG.firebaseDatabaseUrl.startsWith("https://")&&!CONFIG.firebaseDatabaseUrl.startsWith("https://PASTE_");
+    let auth=null,database=null,bridgeOrigin="",bridgeWindow=null,requestId="",accessTimeout=null,autoRefreshTimeout=null,nextUpdateAt=0,unsubscribeLeaderboard=null,unsubscribeSession=null;
     const bridgeChannel=crypto.randomUUID();
     let sessionStatsRequest=0;
 
     function bridgeUrl(retry=false){const url=new URL(CONFIG.accessBridgeUrl);url.searchParams.set("channel",bridgeChannel);if(retry)url.searchParams.set("retry",String(Date.now()));return url.href}
 
     function showSetupMessage(){accessHeading.textContent="Sign-in setup required";accessMessage.textContent="Add your Firebase web app settings and Apps Script web app URL in index.html, then reload.";signInButton.disabled=true}
-    if(!firebaseConfigured){showSetupMessage()}else{auth=getAuth(initializeApp(FIREBASE_CONFIG))}
+    if(!firebaseConfigured){showSetupMessage()}else{const app=initializeApp(FIREBASE_CONFIG);auth=getAuth(app);if(realtimeConfigured)database=getDatabase(app,CONFIG.firebaseDatabaseUrl)}
     if(bridgeConfigured){bridge.src=bridgeUrl()}else if(firebaseConfigured){accessMessage.textContent="Add the deployed Apps Script web app URL in index.html to enable access checks.";signInButton.disabled=true}
     function showVerificationError(title,message){loadingState.hidden=true;deniedState.hidden=true;verificationError.hidden=false;verificationErrorTitle.textContent=title;verificationErrorMessage.textContent=message}
     function startAccessTimeout(){window.clearTimeout(accessTimeout);accessTimeout=window.setTimeout(()=>{if(!state.user||state.authorized||loadingState.hidden)return;showVerificationError("Access check timed out",bridgeOrigin?"The Apps Script bridge loaded but did not return a result. Check its deployment permissions and Apps Script executions.":"The Apps Script bridge did not connect. Check SITE_ORIGIN and that the web app is deployed for anyone to access.")},15000)}
     function updateCountdown(){if(!nextUpdateAt){nextUpdateLabel.textContent="";return}const seconds=Math.max(0,Math.ceil((nextUpdateAt-Date.now())/1000));nextUpdateLabel.textContent=`Next update in ${seconds}s`}
-    function scheduleAutoRefresh(){window.clearTimeout(autoRefreshTimeout);if(!state.authorized||!state.selectedSheet)return;nextUpdateAt=Date.now()+CONFIG.refreshMs;updateCountdown();autoRefreshTimeout=window.setTimeout(load,CONFIG.refreshMs)}
+    function scheduleAutoRefresh(){window.clearTimeout(autoRefreshTimeout);if(realtimeConfigured||!state.authorized||!state.selectedSheet){nextUpdateAt=0;updateCountdown();return}nextUpdateAt=Date.now()+CONFIG.refreshMs;updateCountdown();autoRefreshTimeout=window.setTimeout(load,CONFIG.refreshMs)}
     window.setInterval(updateCountdown,1000);
 
     function number(value){const parsed=Number.parseInt(String(value??"").replace(/,/g,""),10);return Number.isFinite(parsed)?parsed:0}
     async function loadSessionStats(){const request=++sessionStatsRequest;const valuesUrl=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(CONFIG.spreadsheetId)}/values/${encodeURIComponent("'Session'!B2:D2")}?key=${encodeURIComponent(CONFIG.apiKey)}`;const stats=[document.querySelector("#session-eliminations"),document.querySelector("#session-wins"),document.querySelector("#session-losses")];const status=document.querySelector("#session-error");try{const response=await fetch(valuesUrl,{cache:"no-store"});if(!response.ok)throw new Error(`Google Sheets returned ${response.status}.`);const data=await response.json();if(request!==sessionStatsRequest)return;const row=data.values?.[0]||[];stats.forEach((element,index)=>element.textContent=number(row[index]).toLocaleString());status.hidden=true}catch{if(request!==sessionStatsRequest)return;stats.forEach(element=>element.textContent="--");status.hidden=false}}
+    function updateSessionStats(data){const stats=[document.querySelector("#session-eliminations"),document.querySelector("#session-wins"),document.querySelector("#session-losses")];const status=document.querySelector("#session-error");if(!data){stats.forEach(element=>element.textContent="--");status.hidden=false;return}stats[0].textContent=number(data.eliminations).toLocaleString();stats[1].textContent=number(data.wins).toLocaleString();stats[2].textContent=number(data.losses).toLocaleString();status.hidden=true}
+    function subscribeToLiveUpdates(){
+      if(!database||!state.authorized)return;
+      if(unsubscribeSession)unsubscribeSession();
+      unsubscribeSession=onValue(ref(database,"session"),snapshot=>updateSessionStats(snapshot.val()),()=>updateSessionStats(null));
+      subscribeToSelectedSheet();
+    }
+    function subscribeToSelectedSheet(){
+      if(!database||!state.authorized||!state.selectedSheet)return;
+      if(unsubscribeLeaderboard)unsubscribeLeaderboard();
+      const selectedSheet=state.selectedSheet;
+      const sheetId=state.sheetIds[selectedSheet];
+      if(!sheetId){errorBox.textContent="Could not find the selected sheet in the live database.";errorBox.style.display="block";return}
+      errorBox.style.display="none";
+      document.querySelector("#updated").textContent="Connecting to live updates…";
+      unsubscribeLeaderboard=onValue(ref(database,`leaderboards/${sheetId}`),snapshot=>{
+        if(state.selectedSheet!==selectedSheet)return;
+        const data=snapshot.val();
+        if(!data){state.players=[];render();document.querySelector("#updated").textContent="Waiting for the first live sheet sync";return}
+        const previousEliminations=new Map(state.players.map(player=>[player.gameUsername.trim().toLocaleLowerCase(),player.eliminations]));
+        state.players=(data.rows||[]).map(playerFromRow).filter(player=>player.name&&player.gameUsername).sort(compare);
+        state.loadedAt=new Date();render(true,previousEliminations);
+        document.querySelector("#updated").textContent=`Live · ${state.loadedAt.toLocaleTimeString([],{hour:"numeric",minute:"2-digit",second:"2-digit"})}`;
+      },error=>{errorBox.textContent=`Couldn't connect to live updates. ${error.message}`;errorBox.style.display="block"});
+    }
     function playerFromRow(row){return{image:String(row[0]??"").trim(),eliminations:number(row[1]),name:String(row[2]??"").trim(),gameUsername:String(row[3]??"").trim(),character:String(row[4]??"").trim(),active:row[5]===true||String(row[5]).trim().toLowerCase()==="true",placement:number(row[6])}}
     function compare(a,b){if(a.placement&&b.placement)return a.placement-b.placement;if(a.placement)return-1;if(b.placement)return 1;return b.eliminations-a.eliminations}
     function addEntry(player,index,previousEliminations){
@@ -122,7 +149,7 @@
     async function load(){
       if(!state.authorized)return;
       if(!state.selectedSheet)return;
-      loadSessionStats();
+      if(!realtimeConfigured)loadSessionStats();
       if(CONFIG.spreadsheetId.startsWith("PASTE_")||CONFIG.apiKey.startsWith("PASTE_")){errorBox.textContent="Add a restricted read-only Google Sheets API key in the CONFIG section to load leaderboard data.";errorBox.style.display="block";document.querySelector("#updated").textContent="Leaderboard connection not configured";return}
       refreshButton.disabled=true;refreshButton.classList.add("loading");errorBox.style.display="none";
       const selectedSheet=state.selectedSheet;
@@ -133,10 +160,12 @@
     async function loadSheetNames(){
       const sheetSelect=document.querySelector("#sheet-select");
       sheetSelect.disabled=true;errorBox.style.display="none";
-      try{const url=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(CONFIG.spreadsheetId)}?fields=sheets.properties.title&key=${encodeURIComponent(CONFIG.apiKey)}`;const response=await fetch(url,{cache:"no-store"});if(!response.ok){const details=await response.json().catch(()=>({}));throw new Error(details.error?.message||`Google Sheets returned ${response.status}.`)}const data=await response.json();state.sheetNames=(data.sheets||[]).map(sheet=>sheet.properties?.title||"").filter(name=>name&&name.toLocaleLowerCase()!=="users"&&name.toLocaleLowerCase()!=="session");if(!state.sheetNames.length)throw new Error("No leaderboard sheets were found.");sheetSelect.replaceChildren(...state.sheetNames.map(name=>{const option=document.createElement("option");option.value=name;option.textContent=name;return option}));const requestedGame=new URLSearchParams(window.location.search).get("game");const requestedSheet=state.sheetNames.find(name=>name.toLocaleLowerCase()===requestedGame?.trim().toLocaleLowerCase());state.selectedSheet=requestedSheet||state.sheetNames.find(name=>name.toLocaleLowerCase()==="marvel rivals")||state.sheetNames[0];sheetSelect.value=state.selectedSheet;sheetSelect.disabled=false;await load()}
+      try{const url=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(CONFIG.spreadsheetId)}?fields=sheets.properties(sheetId,title)&key=${encodeURIComponent(CONFIG.apiKey)}`;const response=await fetch(url,{cache:"no-store"});if(!response.ok){const details=await response.json().catch(()=>({}));throw new Error(details.error?.message||`Google Sheets returned ${response.status}.`)}const data=await response.json();const sheets=(data.sheets||[]).map(sheet=>({id:sheet.properties?.sheetId,name:sheet.properties?.title||""})).filter(sheet=>sheet.id!==undefined&&sheet.name&&sheet.name.toLocaleLowerCase()!=="users"&&sheet.name.toLocaleLowerCase()!=="session");state.sheetNames=sheets.map(sheet=>sheet.name);state.sheetIds=Object.fromEntries(sheets.map(sheet=>[sheet.name,String(sheet.id)]));if(!state.sheetNames.length)throw new Error("No leaderboard sheets were found.");sheetSelect.replaceChildren(...state.sheetNames.map(name=>{const option=document.createElement("option");option.value=name;option.textContent=name;return option}));const requestedGame=new URLSearchParams(window.location.search).get("game");const requestedSheet=state.sheetNames.find(name=>name.toLocaleLowerCase()===requestedGame?.trim().toLocaleLowerCase());state.selectedSheet=requestedSheet||state.sheetNames.find(name=>name.toLocaleLowerCase()==="marvel rivals")||state.sheetNames[0];sheetSelect.value=state.selectedSheet;sheetSelect.disabled=false;if(database)subscribeToLiveUpdates();else await load()}
       catch(err){sheetSelect.disabled=true;errorBox.textContent=`Couldn't load leaderboard sheets. ${err.message}`;errorBox.style.display="block";document.querySelector("#updated").textContent="Could not load leaderboard sheets"}
     }
     function setUser(user){
+      if(unsubscribeLeaderboard){unsubscribeLeaderboard();unsubscribeLeaderboard=null}
+      if(unsubscribeSession){unsubscribeSession();unsubscribeSession=null}
       window.clearTimeout(accessTimeout);retryButton.hidden=true;
       window.clearTimeout(autoRefreshTimeout);nextUpdateAt=0;updateCountdown();state.user=user;state.authorized=false;memberContent.hidden=true;accessPanel.hidden=false;refreshButton.hidden=true;loginState.hidden=Boolean(user);loadingState.hidden=!user;deniedState.hidden=true;verificationError.hidden=true;accountProfile.hidden=true;accountMenu.hidden=true;accountTrigger.setAttribute("aria-expanded","false");accountPhoto.hidden=true;menuPhoto.hidden=true;errorBox.style.display="none";
       if(!user){accessHeading.textContent="Sign in";accessMessage.textContent="";signInButton.disabled=!firebaseConfigured||!bridgeConfigured;playSignInIntro();return}
@@ -164,7 +193,7 @@
       if(event.data.type==="error"&&event.data.requestId===requestId){window.clearTimeout(accessTimeout);showVerificationError("Could not verify access",event.data.message||"Please try again.")}
     });
     retryButton.addEventListener("click",()=>{if(!state.user)return;if(bridgeOrigin&&bridgeWindow){verifyAccess(state.user)}else{bridgeOrigin="";bridgeWindow=null;loginState.hidden=true;loadingState.hidden=false;verificationError.hidden=true;bridge.src=bridgeUrl(true);startAccessTimeout()}});
-    document.querySelector("#sheet-select").addEventListener("change",event=>{state.selectedSheet=event.target.value;const url=new URL(window.location.href);url.searchParams.set("game",state.selectedSheet);history.replaceState(null,"",url);list.replaceChildren();document.querySelector("#updated").textContent=`Loading ${state.selectedSheet}…`;load()});
+    document.querySelector("#sheet-select").addEventListener("change",event=>{state.selectedSheet=event.target.value;const url=new URL(window.location.href);url.searchParams.set("game",state.selectedSheet);history.replaceState(null,"",url);list.replaceChildren();document.querySelector("#updated").textContent=`Loading ${state.selectedSheet}…`;if(database)subscribeToSelectedSheet();else load()});
     signInButton.addEventListener("click",async()=>{if(!auth)return;signInButton.disabled=true;loginState.hidden=true;loadingState.hidden=false;try{await signInWithPopup(auth,new GoogleAuthProvider())}catch(error){loadingState.hidden=true;loginState.hidden=false;accessHeading.textContent="Sign-in failed";accessMessage.textContent=error.message}finally{signInButton.disabled=false}});
     document.querySelectorAll(".signout-button").forEach(button=>button.addEventListener("click",async()=>{if(auth)await signOut(auth)}));
     accountTrigger.addEventListener("click",()=>{const isOpen=accountTrigger.getAttribute("aria-expanded")==="true";accountTrigger.setAttribute("aria-expanded",String(!isOpen));accountMenu.hidden=isOpen});
