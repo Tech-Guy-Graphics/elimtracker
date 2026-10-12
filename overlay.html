@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Leaderboard Overlay</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{color-scheme:dark;--paper:#f3f6fa;--muted:#aab5c4;--line:#ffffff2b;--accent:#79e0ba;--display:"Barlow Condensed",Impact,sans-serif;--body:"DM Sans","Segoe UI",sans-serif}
+    *{box-sizing:border-box}
+    html,body{width:100%;min-width:320px;min-height:100%;margin:0;background:transparent}
+    body{padding:12px;color:var(--paper);font:14px var(--body);-webkit-font-smoothing:antialiased}
+    .overlay{width:min(100%,780px);margin:0 auto;filter:drop-shadow(0 5px 14px #0008)}
+    .heading{display:flex;min-height:62px;align-items:center;justify-content:space-between;gap:20px;padding:10px 16px;border:1px solid var(--line);border-bottom:0;border-radius:3px 3px 0 0;background:#111923e8}
+    .game-title{min-width:0;overflow:hidden;font:800 26px/1 var(--display);text-overflow:ellipsis;text-transform:uppercase;white-space:nowrap}
+    .record{display:flex;flex:0 0 auto;align-items:center;gap:12px}
+    .record-stat{display:flex;align-items:baseline;gap:5px;font:700 19px/1 var(--display);font-variant-numeric:tabular-nums}
+    .record-stat span:first-child{color:var(--muted);font:800 9px/1 var(--body);letter-spacing:1px}
+    .record-stat.wins .counter-counter{color:var(--accent)}
+    .record-stat.losses .counter-counter{color:#ff9a88}
+    .standings{overflow:hidden;border:1px solid var(--line);border-radius:0 0 3px 3px;background:#111923cc}
+    .entry{display:grid;min-height:62px;grid-template-columns:54px minmax(0,1.5fr) minmax(100px,.8fr) 92px;align-items:center;column-gap:12px;padding:7px 16px;border-top:1px solid #ffffff20;transition:background .2s}
+    .entry:first-child{border-top:0}
+    .entry[data-place="1"]{--medal:#f0c85c;--wash:#f0c85c24}
+    .entry[data-place="2"]{--medal:#d4dde8;--wash:#d4dde81a}
+    .entry[data-place="3"]{--medal:#df9b72;--wash:#df9b721c}
+    .entry[data-place]{background:linear-gradient(90deg,var(--wash),transparent 85%);box-shadow:inset 3px 0 var(--medal)}
+    .rank{color:var(--muted);font:800 27px/1 var(--display);font-variant-numeric:tabular-nums}
+    .entry[data-place] .rank,.entry[data-place] .elims{color:var(--medal)}
+    .player{display:flex;min-width:0;align-items:center;gap:10px}
+    .avatar{display:grid;width:38px;height:38px;flex:0 0 38px;place-items:center;overflow:hidden;border:1px solid #ffffff32;border-radius:2px;background:#ffffff12;color:var(--accent);font:800 16px var(--display);text-transform:uppercase}
+    .avatar img{width:100%;height:100%;object-fit:cover}
+    .name{overflow:hidden;font-size:13px;font-weight:800;text-overflow:ellipsis;white-space:nowrap}
+    .you{margin-left:6px;color:var(--accent);font-size:9px;font-weight:800;letter-spacing:.6px;text-transform:uppercase}
+    .character{overflow:hidden;color:#d2dae4;font-size:12px;font-weight:600;text-overflow:ellipsis;white-space:nowrap}
+    .character::before{margin-right:6px;color:var(--muted);content:"SLOT";font-size:8px;font-weight:800;letter-spacing:.8px}
+    .elims{display:flex;align-items:baseline;justify-content:flex-end;gap:5px;color:var(--accent);font:800 23px/1 var(--display);font-variant-numeric:tabular-nums;text-align:right}
+    .elims-label{color:var(--muted);font:700 8px/1 var(--body);letter-spacing:.7px;text-transform:uppercase}
+    .status{margin:0;padding:12px 16px;border:1px solid var(--line);border-radius:3px;background:#111923e8;color:var(--muted);font-size:12px}
+    .status[hidden]{display:none}
+    .counter-counter{display:inline-flex;align-items:center;gap:0;direction:ltr;line-height:1;vertical-align:middle}
+    .counter-digit{position:relative;display:inline-block;width:.55em;height:1em;overflow:hidden;font-variant-numeric:tabular-nums;vertical-align:top}
+    .counter-number{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;width:100%;height:100%;line-height:1;will-change:transform}
+    .counter-separator{display:inline-block;width:.22em;text-align:center;vertical-align:top;line-height:1}
+    .counter-digit[hidden],.counter-separator[hidden]{display:none}
+    @media(max-width:520px){body{padding:7px}.heading{min-height:52px;padding:8px 11px}.game-title{font-size:22px}.record{gap:8px}.record-stat{gap:3px;font-size:17px}.entry{min-height:56px;grid-template-columns:39px minmax(0,1.4fr) minmax(68px,.8fr) 66px;column-gap:7px;padding:6px 10px}.rank{font-size:23px}.avatar{width:32px;height:32px;flex-basis:32px}.player{gap:7px}.name{font-size:11px}.character{font-size:10px}.elims{gap:3px;font-size:20px}.elims-label{font-size:7px}.character::before{margin-right:3px;font-size:7px}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+  </style>
+</head>
+<body>
+  <main class="overlay" aria-label="Live leaderboard overlay" hidden>
+    <header class="heading">
+      <h1 class="game-title" id="game-title">Loading game</h1>
+      <div class="record" aria-label="Session wins and losses">
+        <div class="record-stat wins"><span>W</span><span id="session-wins" aria-label="Session wins">0</span></div>
+        <div class="record-stat losses"><span>L</span><span id="session-losses" aria-label="Session losses">0</span></div>
+      </div>
+    </header>
+    <section class="standings" id="standings" aria-label="Top leaderboard positions"></section>
+  </main>
+  <p class="status" id="status" role="status">Connecting to the live leaderboard…</p>
+  <iframe id="access-bridge" title="Overlay access verification" aria-hidden="true" tabindex="-1" style="position:absolute;width:1px;height:1px;border:0;opacity:0;pointer-events:none"></iframe>
+  <script type="module">
+    import {initializeApp} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import {getDatabase,onValue,ref} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+    const FIREBASE_CONFIG={apiKey:"AIzaSyCs65B8IwKAqLxbTuDGPjV_-uX9bVUJeTM",authDomain:"kill-tracker-e3083.firebaseapp.com",projectId:"kill-tracker-e3083",appId:"1:888950181547:web:2349883ef1a2d82e0631ee"};
+    const CONFIG={accessBridgeUrl:"https://script.google.com/macros/s/AKfycbyhPv5QFXMLLSK1rqUcnuesZXfqEFqiBXfbwYYYbMnnbri3VudY7TECJ0BW3ywX14uh/exec",firebaseDatabaseUrl:"https://kill-tracker-e3083-default-rtdb.firebaseio.com/"};
+    const uid=new URLSearchParams(location.search).get("uid")||"";
+    const root=document.querySelector(".overlay"),status=document.querySelector("#status"),title=document.querySelector("#game-title"),standings=document.querySelector("#standings"),bridge=document.querySelector("#access-bridge");
+    const channel=crypto.randomUUID(),pending=new Map();
+    let bridgeOrigin="",bridgeWindow=null,database=null,gameUsername="",activeGame="",leaderboardId="",unsubscribeSession=null,unsubscribeLeaderboard=null,previousWins=null,previousLosses=null,previousPlaces=new Map(),previousEliminations=new Map();
+
+    function number(value){const parsed=Number.parseInt(String(value??"").replace(/,/g,""),10);return Number.isFinite(parsed)?parsed:0}
+    function numberRow(row){return{image:String(row[0]??"").trim(),eliminations:number(row[1]),name:String(row[2]??"").trim(),gameUsername:String(row[3]??"").trim(),character:String(row[4]??"").trim(),placement:number(row[6])}}
+    function compare(a,b){if(a.placement&&b.placement)return a.placement-b.placement;if(a.placement)return-1;if(b.placement)return 1;return b.eliminations-a.eliminations}
+    function showError(message){status.textContent=message;status.hidden=false;root.hidden=true}
+    function showOverlay(){status.hidden=true;root.hidden=false}
+    function sendAccessRequest(requestId){if(bridgeWindow&&bridgeOrigin)bridgeWindow.postMessage({bridge:"leaderboard-access",channel,type:"overlay",uid,requestId},bridgeOrigin)}
+    function buildCounter(element,from,to){element.className="counter-counter";element.replaceChildren();const maxValue=Math.max(Math.abs(from),Math.abs(to),1),digitCount=Math.floor(Math.log10(maxValue))+1,places=Array.from({length:digitCount},(_,index)=>10**(digitCount-index-1)),formatted=maxValue.toLocaleString("en-US");let digitIndex=0;for(const character of formatted){if(character===","){const separator=document.createElement("span");separator.className="counter-separator";separator.dataset.threshold=String(places[digitIndex]*10);separator.textContent=",";element.append(separator);continue}const place=places[digitIndex++],digit=document.createElement("span");digit.className="counter-digit";digit.dataset.place=String(place);for(let value=0;value<10;value++){const numberElement=document.createElement("span");numberElement.className="counter-number";numberElement.textContent=String(value);digit.append(numberElement)}element.append(digit)}setCounterValue(element,from)}
+    function setCounterValue(element,value){for(const digit of element.querySelectorAll(".counter-digit")){const place=Number(digit.dataset.place);digit.hidden=value<place&&place>1;const placeValue=Math.floor(value/place)%10;digit.querySelectorAll(".counter-number").forEach((numberElement,index)=>{let offset=(10+index-placeValue)%10;if(offset>5)offset-=10;numberElement.style.transform=`translateY(${offset*100}%)`})}for(const separator of element.querySelectorAll(".counter-separator"))separator.hidden=value<Number(separator.dataset.threshold)}
+    function animateCounter(element,from,to){if(matchMedia("(prefers-reduced-motion: reduce)").matches){setCounterValue(element,to);return}const digits=Array.from(element.querySelectorAll(".counter-digit")).map(digit=>{const place=Number(digit.dataset.place);return{digit,place,fromVal:Math.floor(from/place),toVal:Math.floor(to/place),numberElements:Array.from(digit.querySelectorAll(".counter-number"))}}),separators=Array.from(element.querySelectorAll(".counter-separator")).map(separator=>({separator,threshold:Number(separator.dataset.threshold)})),started=performance.now(),duration=1100;function tick(now){const progress=Math.min(1,(now-started)/duration),eased=1-Math.pow(1-progress,3),currentTotal=from+(to-from)*eased;for(const{digit,place,fromVal,toVal,numberElements}of digits){digit.hidden=currentTotal<place&&place>1;const currentVal=fromVal+(toVal-fromVal)*eased,placeValue=currentVal%10;numberElements.forEach((numberElement,index)=>{let offset=(10+index-placeValue)%10;if(offset>5)offset-=10;numberElement.style.transform=`translateY(${offset*100}%)`})}for(const{separator,threshold}of separators)separator.hidden=currentTotal<threshold;if(progress<1)requestAnimationFrame(tick);else setCounterValue(element,to)}requestAnimationFrame(tick)}
+    function updateCounter(element,value,previous){buildCounter(element,previous??0,value);animateCounter(element,previous??0,value)}
+    function makeEntry(player,index,previousValue){const row=document.createElement("article"),place=player.placement||index+1,key=player.gameUsername.trim().toLocaleLowerCase();row.className="entry";row.dataset.place=String(Math.min(place,3));row.dataset.playerKey=key;const rank=document.createElement("span");rank.className="rank";rank.textContent=String(place);const playerBox=document.createElement("div");playerBox.className="player";const avatar=document.createElement("div");avatar.className="avatar";const initial=document.createElement("span");initial.textContent=player.name.slice(0,1)||"?";avatar.append(initial);try{const imageUrl=new URL(player.image);if(imageUrl.protocol==="https:"){const image=document.createElement("img");image.src=imageUrl.href;image.alt="";image.referrerPolicy="no-referrer";image.addEventListener("load",()=>initial.remove(),{once:true});avatar.append(image)}}catch{}const name=document.createElement("span");name.className="name";name.textContent=player.name||"Unnamed player";playerBox.append(avatar,name);if(key===gameUsername.trim().toLocaleLowerCase()){const you=document.createElement("span");you.className="you";you.textContent="You";name.append(you)}const character=document.createElement("span");character.className="character";character.textContent=player.character||"—";character.title=player.character||"Character slot";const elims=document.createElement("div");elims.className="elims";elims.setAttribute("aria-label",`${player.eliminations.toLocaleString()} eliminations`);const count=document.createElement("span");count.setAttribute("aria-hidden","true");buildCounter(count,previousValue??0,player.eliminations);elims.append(count);const label=document.createElement("span");label.className="elims-label";label.textContent="elims";elims.append(label);animateCounter(count,previousValue??0,player.eliminations);row.append(rank,playerBox,character,elims);const old=previousPlaces.get(key);if(old&&old.place!==place&&!matchMedia("(prefers-reduced-motion: reduce)").matches){rank.animate([{transform:"scale(1)"},{transform:"scale(1.2)",offset:.45},{transform:"scale(1)"}],{duration:520,easing:"ease-out"});row.animate([{filter:"brightness(1)"},{filter:"brightness(1.5)",offset:.35},{filter:"brightness(1)"}],{duration:680,easing:"ease-out"})}return row}
+    function render(rows){const players=rows.map(numberRow).filter(player=>player.name&&player.gameUsername).sort(compare),ownIndex=players.findIndex(player=>player.gameUsername.trim().toLocaleLowerCase()===gameUsername.trim().toLocaleLowerCase()),visible=players.slice(0,3);if(ownIndex>2)visible[2]=players[ownIndex];const oldTops=new Map();standings.querySelectorAll(".entry[data-player-key]").forEach(row=>oldTops.set(row.dataset.playerKey,row.getBoundingClientRect().top));standings.replaceChildren(...visible.map((player,index)=>{const key=player.gameUsername.trim().toLocaleLowerCase();return makeEntry(player,index,previousEliminations.get(key))}));if(!matchMedia("(prefers-reduced-motion: reduce)").matches)standings.querySelectorAll(".entry[data-player-key]").forEach(row=>{const oldTop=oldTops.get(row.dataset.playerKey);if(oldTop===undefined)return;const delta=oldTop-row.getBoundingClientRect().top;if(Math.abs(delta)>1)row.animate([{transform:`translateY(${delta}px)`},{transform:"translateY(0)"}],{duration:520,easing:"cubic-bezier(.2,.75,.25,1)"})});previousPlaces=new Map(players.map((player,index)=>[player.gameUsername.trim().toLocaleLowerCase(),{place:player.placement||index+1,top:0}]));standings.querySelectorAll(".entry[data-player-key]").forEach(row=>{const entry=previousPlaces.get(row.dataset.playerKey);if(entry)entry.top=row.getBoundingClientRect().top});previousEliminations=new Map(players.map(player=>[player.gameUsername.trim().toLocaleLowerCase(),player.eliminations]));if(!players.length)showError("No leaderboard players are available for the active game.");else showOverlay()}
+    function updateRecord(element,value,previous,kind){updateCounter(element,value,previous);if(previous!==null&&value>previous&&!matchMedia("(prefers-reduced-motion: reduce)").matches){const stat=element.closest(".record-stat");stat.animate([{transform:"scale(1)",backgroundColor:"transparent"},{transform:"scale(1.12)",backgroundColor:kind==="win"?"#79e0ba35":"#ff9a8835",offset:.35},{transform:"scale(1)",backgroundColor:"transparent"}],{duration:700,easing:"ease-out"})}}
+    function attachLeaderboard(id){if(unsubscribeLeaderboard)unsubscribeLeaderboard();leaderboardId=String(id||"");if(!leaderboardId){showError("The active game leaderboard is not available yet.");return}unsubscribeLeaderboard=onValue(ref(database,`leaderboards/${leaderboardId}`),snapshot=>{const data=snapshot.val();render(data?.rows||[])},error=>showError(`Could not load the leaderboard: ${error.message}`))}
+    function handleSession(session){if(!session){showError("Waiting for the session sheet to sync.");return}updateRecord(document.querySelector("#session-wins"),number(session.wins),previousWins,"win");updateRecord(document.querySelector("#session-losses"),number(session.losses),previousLosses,"loss");previousWins=number(session.wins);previousLosses=number(session.losses);const nextTitle=String(session.gameTitle||"").trim();title.textContent=nextTitle||"No active game";title.title=nextTitle;if(nextTitle!==activeGame){activeGame=nextTitle;gameUsername="";if(!activeGame){showError("No active game is set in Session!E2.");return}showError("Checking overlay access for the active game…");const id=crypto.randomUUID();pending.set(id,{gameTitle:activeGame,gameSheetId:session.gameSheetId});sendAccessRequest(id)}else if(gameUsername&&String(session.gameSheetId||"")!==leaderboardId)attachLeaderboard(session.gameSheetId)}
+    function connect(){const app=initializeApp(FIREBASE_CONFIG);database=getDatabase(app,CONFIG.firebaseDatabaseUrl);unsubscribeSession=onValue(ref(database,"session"),snapshot=>handleSession(snapshot.val()),error=>showError(`Could not load session stats: ${error.message}`))}
+    function trustedOrigin(value){try{const host=new URL(value).hostname;return host==="script.google.com"||host==="script.googleusercontent.com"||/-script\.googleusercontent\.com$/.test(host)}catch{return false}}
+    window.addEventListener("message",event=>{if(!trustedOrigin(event.origin)||event.data?.bridge!=="leaderboard-access"||event.data?.channel!==channel)return;if(event.data.type==="ready"){bridgeOrigin=event.origin;bridgeWindow=event.source;if(!uid){showError("Add your Firebase UID to the overlay URL as ?uid=YOUR_UID.");return}pending.forEach((request,id)=>sendAccessRequest(id));return}if(event.source!==bridgeWindow)return;const request=pending.get(event.data.requestId);if(!request)return;pending.delete(event.data.requestId);if(request.gameTitle!==activeGame)return;if(event.data.type==="overlay-error"){showError(event.data.message||"Overlay access was denied.");return}if(event.data.type!=="overlay-result")return;const result=event.data.result||{};gameUsername=String(result.gameUsername||"");if(!gameUsername||result.gameTitle!==request.gameTitle){showError("Your account is not linked to the active game.");return}attachLeaderboard(request.gameSheetId)})
+    const bridgeUrl=new URL(CONFIG.accessBridgeUrl);bridgeUrl.searchParams.set("channel",channel);bridge.src=bridgeUrl.href;connect();
+  </script>
+</body>
+</html>
