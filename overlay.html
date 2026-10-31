@@ -55,6 +55,8 @@
     .counter-separator{display:inline-block;width:.22em;text-align:center;vertical-align:top;line-height:1}
     .counter-digit[hidden],.counter-separator[hidden]{display:none}
     @media(max-width:520px){body{padding:7px}.heading{min-height:52px;padding:8px 11px}.game-title{font-size:22px}.record{gap:10px}.record-stat{grid-template-columns:12px auto;gap:5px;font-size:24px}.record-stat span:first-child{font-size:9px}.entry{min-height:56px;grid-template-columns:39px minmax(0,1.4fr) minmax(68px,.8fr) 66px;column-gap:7px;padding:6px 10px}.rank{font-size:23px}.avatar{width:32px;height:32px;flex-basis:32px}.player{gap:7px}.name{font-size:11px}.character{font-size:10px}.slot-label,.elims-label{font-size:7px}.elims{font-size:20px}.elimination-bubble{min-height:43px}.elimination-bubble img,.bubble-initial,.bubble-count{width:32px;height:32px;flex-basis:32px}}
+    @media(max-width:520px){body{padding:7px}.heading{min-height:52px;padding:8px 11px}.game-title{font-size:22px}.record{gap:10px}.record-stat{grid-template-columns:12px auto;gap:5px;font-size:24px}.record-stat span:first-child{font-size:9px}.entry{min-height:56px;grid-template-columns:39px minmax(0,1.4fr) minmax(68px,.8fr) 66px;column-gap:7px;padding:6px 10px}.rank{font-size:23px}.avatar{width:32px;height:32px;flex-basis:32px}.player{gap:7px}.name{font-size:11px}.character{font-size:10px}.slot-label,.elims-label{font-size:7px}.elims{font-size:20px}.elimination-bubble{min-height:43px}.elimination-bubble img,.bubble-initial,.bubble-count{width:32px;height:32px;flex-basis:32px}}
+    @media(max-width:520px){.heading{min-height:44px;padding:5px 11px}.record-stat span:first-child{font-size:24px}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
   </style>
 </head>
@@ -72,382 +74,44 @@
   </main>
   <p class="status" id="status" role="status">Connecting to the live leaderboard…</p>
   <iframe id="access-bridge" title="Overlay access verification" aria-hidden="true" tabindex="-1" style="position:absolute;width:1px;height:1px;border:0;opacity:0;pointer-events:none"></iframe>
-
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+    import {initializeApp} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import {getDatabase,onValue,ref} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-    const FIREBASE_CONFIG = {
-      apiKey: "AIzaSyCs65B8IwKAqLxbTuDGPjV_-uX9bVUJeTM",
-      authDomain: "kill-tracker-e3083.firebaseapp.com",
-      projectId: "kill-tracker-e3083",
-      appId: "1:888950181547:web:2349883ef1a2d82e0631ee"
-    };
-    const CONFIG = {
-      accessBridgeUrl: "https://script.google.com/macros/s/AKfycbyhPv5QFXMLLSK1rqUcnuesZXfqEFqiBXfbwYYYbMnnbri3VudY7TECJ0BW3ywX14uh/exec",
-      firebaseDatabaseUrl: "https://kill-tracker-e3083-default-rtdb.firebaseio.com/"
-    };
+    const FIREBASE_CONFIG={apiKey:"AIzaSyCs65B8IwKAqLxbTuDGPjV_-uX9bVUJeTM",authDomain:"kill-tracker-e3083.firebaseapp.com",projectId:"kill-tracker-e3083",appId:"1:888950181547:web:2349883ef1a2d82e0631ee"};
+    const CONFIG={accessBridgeUrl:"https://script.google.com/macros/s/AKfycbyhPv5QFXMLLSK1rqUcnuesZXfqEFqiBXfbwYYYbMnnbri3VudY7TECJ0BW3ywX14uh/exec",firebaseDatabaseUrl:"https://kill-tracker-e3083-default-rtdb.firebaseio.com/"};
+    const uid=new URLSearchParams(location.search).get("uid")||"";
+    const root=document.querySelector(".overlay"),status=document.querySelector("#status"),title=document.querySelector("#game-title"),standings=document.querySelector("#standings"),feed=document.querySelector("#elimination-feed"),bridge=document.querySelector("#access-bridge");
+    const channel=crypto.randomUUID(),pending=new Map();
+    let bridgeOrigin="",bridgeWindow=null,database=null,gameUsername="",activeGame="",leaderboardId="",unsubscribeSession=null,unsubscribeLeaderboard=null,previousWins=null,previousLosses=null,previousPlaces=new Map(),previousEliminations=new Map();
+    const eliminationBubbles=new Map();
+    let hasLeaderboardSnapshot=false;
 
-    // Extract user ID from URL parameters
-    const urlParams = new URLSearchParams(window.location.search);
-    const uid = urlParams.get("uid") || urlParams.get("id") || "";
-
-    const root = document.querySelector(".overlay");
-    const status = document.querySelector("#status");
-    const title = document.querySelector("#game-title");
-    const standings = document.querySelector("#standings");
-    const feed = document.querySelector("#elimination-feed");
-    const bridge = document.querySelector("#access-bridge");
-
-    const channel = crypto.randomUUID();
-    const pending = new Map();
-
-    let bridgeOrigin = "";
-    let bridgeWindow = null;
-    let database = null;
-    let gameUsername = "";
-    let activeGame = "";
-    let leaderboardId = "";
-    let unsubscribeLeaderboard = null;
-    let previousWins = null;
-    let previousLosses = null;
-    let previousPlaces = new Map();
-    let previousEliminations = new Map();
-    const eliminationBubbles = new Map();
-    let hasLeaderboardSnapshot = false;
-
-    function number(value) {
-      const parsed = Number.parseInt(String(value ?? "").replace(/,/g, ""), 10);
-      return Number.isFinite(parsed) ? parsed : 0;
-    }
-
-    function numberRow(row) {
-      return {
-        image: String(row[0] ?? "").trim(),
-        eliminations: number(row[1]),
-        name: String(row[2] ?? "").trim(),
-        gameUsername: String(row[3] ?? "").trim(),
-        character: String(row[4] ?? "").trim(),
-        placement: number(row[6])
-      };
-    }
-
-    function compare(a, b) {
-      if (a.placement && b.placement) return a.placement - b.placement;
-      if (a.placement) return -1;
-      if (b.placement) return 1;
-      return b.eliminations - a.eliminations;
-    }
-
-    function showError(message) {
-      status.textContent = message;
-      status.hidden = false;
-      root.hidden = true;
-    }
-
-    function showOverlay() {
-      status.hidden = true;
-      root.hidden = false;
-    }
-
-    function sendAccessRequest(requestId) {
-      if (bridgeWindow && bridgeOrigin) {
-        bridgeWindow.postMessage({ bridge: "leaderboard-access", channel, type: "overlay", uid, requestId }, bridgeOrigin);
-      }
-    }
-
-    function buildCounter(element, from, to) {
-      element.className = "counter-counter";
-      element.replaceChildren();
-      const maxValue = Math.max(Math.abs(from), Math.abs(to), 1);
-      const digitCount = Math.floor(Math.log10(maxValue)) + 1;
-      const places = Array.from({ length: digitCount }, (_, index) => 10 ** (digitCount - index - 1));
-      const formatted = maxValue.toLocaleString("en-US");
-      let digitIndex = 0;
-      for (const character of formatted) {
-        if (character === ",") {
-          const separator = document.createElement("span");
-          separator.className = "counter-separator";
-          separator.dataset.threshold = String(places[digitIndex] * 10);
-          separator.textContent = ",";
-          element.append(separator);
-          continue;
-        }
-        const place = places[digitIndex++];
-        const digit = document.createElement("span");
-        digit.className = "counter-digit";
-        digit.dataset.place = String(place);
-        for (let value = 0; value < 10; value++) {
-          const numberElement = document.createElement("span");
-          numberElement.className = "counter-number";
-          numberElement.textContent = String(value);
-          digit.append(numberElement);
-        }
-        element.append(digit);
-      }
-      setCounterValue(element, from);
-    }
-
-    function setCounterValue(element, value) {
-      for (const digit of element.querySelectorAll(".counter-digit")) {
-        const place = Number(digit.dataset.place);
-        digit.hidden = value < place && place > 1;
-        const placeValue = Math.floor(value / place) % 10;
-        digit.querySelectorAll(".counter-number").forEach((numberElement, index) => {
-          let offset = (10 + index - placeValue) % 10;
-          if (offset > 5) offset -= 10;
-          numberElement.style.transform = `translateY(${offset * 100}%)`;
-        });
-      }
-      for (const separator of element.querySelectorAll(".counter-separator")) {
-        separator.hidden = value < Number(separator.dataset.threshold);
-      }
-    }
-
-    function animateCounter(element, from, to) {
-      if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        setCounterValue(element, to);
-        return;
-      }
-      const digits = Array.from(element.querySelectorAll(".counter-digit")).map(digit => {
-        const place = Number(digit.dataset.place);
-        return {
-          digit,
-          place,
-          fromVal: Math.floor(from / place),
-          toVal: Math.floor(to / place),
-          numberElements: Array.from(digit.querySelectorAll(".counter-number"))
-        };
-      });
-      const separators = Array.from(element.querySelectorAll(".counter-separator")).map(separator => ({
-        separator,
-        threshold: Number(separator.dataset.threshold)
-      }));
-      const started = performance.now();
-      const duration = 1100;
-
-      function tick(now) {
-        const progress = Math.min(1, (now - started) / duration);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        const currentTotal = from + (to - from) * eased;
-        for (const { digit, place, fromVal, toVal, numberElements } of digits) {
-          digit.hidden = currentTotal < place && place > 1;
-          const currentVal = fromVal + (toVal - fromVal) * eased;
-          const placeValue = currentVal % 10;
-          numberElements.forEach((numberElement, index) => {
-            let offset = (10 + index - placeValue) % 10;
-            if (offset > 5) offset -= 10;
-            numberElement.style.transform = `translateY(${offset * 100}%)`;
-          });
-        }
-        for (const { separator, threshold } of separators) separator.hidden = currentTotal < threshold;
-        if (progress < 1) requestAnimationFrame(tick);
-        else setCounterValue(element, to);
-      }
-      requestAnimationFrame(tick);
-    }
-
-    function updateCounter(element, value, previous) {
-      buildCounter(element, previous ?? 0, value);
-      animateCounter(element, previous ?? 0, value);
-    }
-
-    function updateRecord(element, value, previous, kind) {
-      updateCounter(element, value, previous);
-      if (previous !== null && value > previous && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        const stat = element.closest(".record-stat");
-        stat.animate([
-          { transform: "scale(1)", backgroundColor: "transparent" },
-          { transform: "scale(1.12)", backgroundColor: kind === "win" ? "#79e0ba35" : "#ff9a8835", offset: 0.35 },
-          { transform: "scale(1)", backgroundColor: "transparent" }
-        ], { duration: 700, easing: "ease-out" });
-      }
-    }
-
-    function attachLeaderboard(id) {
-      if (unsubscribeLeaderboard) unsubscribeLeaderboard();
-      leaderboardId = String(id || "");
-      if (!leaderboardId) {
-        showError("The active game leaderboard is not available yet.");
-        return;
-      }
-      unsubscribeLeaderboard = onValue(ref(database, `leaderboards/${leaderboardId}`), snapshot => {
-        const data = snapshot.val();
-        renderOverlay(data?.rows || []);
-      }, error => showError(`Could not load the leaderboard: ${error.message}`));
-    }
-
-    function makeOverlayEntry(player, index, previousValue) {
-      const row = document.createElement("article");
-      const place = player.placement || index + 1;
-      const key = player.gameUsername.trim().toLocaleLowerCase();
-      row.className = "entry";
-      row.dataset.place = String(Math.min(place, 3));
-      row.dataset.playerKey = key;
-
-      const rank = document.createElement("span");
-      rank.className = "rank";
-      rank.textContent = String(place);
-
-      const playerBox = document.createElement("div");
-      playerBox.className = "player";
-
-      const avatar = document.createElement("div");
-      avatar.className = "avatar";
-      const initial = document.createElement("span");
-      initial.textContent = player.name.slice(0, 1) || "?";
-      avatar.append(initial);
-
-      try {
-        const imageUrl = new URL(player.image);
-        if (imageUrl.protocol === "https:") {
-          const image = document.createElement("img");
-          image.src = imageUrl.href;
-          image.alt = "";
-          image.referrerPolicy = "no-referrer";
-          image.addEventListener("load", () => initial.remove(), { once: true });
-          avatar.append(image);
-        }
-      } catch {}
-
-      const name = document.createElement("span");
-      name.className = "name";
-      name.textContent = player.name || "Unnamed player";
-      playerBox.append(avatar, name);
-
-      if (key === gameUsername.trim().toLocaleLowerCase()) {
-        const you = document.createElement("span");
-        you.className = "you";
-        you.textContent = "You";
-        name.append(you);
-      }
-
-      const characterColumn = document.createElement("div");
-      characterColumn.className = "slot-column";
-      const character = document.createElement("span");
-      character.className = "character";
-      character.textContent = player.character || "—";
-      character.title = player.character || "Character";
-      const characterLabel = document.createElement("span");
-      characterLabel.className = "slot-label";
-      characterLabel.textContent = "Character";
-      characterColumn.append(character, characterLabel);
-
-      const elims = document.createElement("div");
-      elims.className = "elims";
-      elims.setAttribute("aria-label", `${player.eliminations.toLocaleString()} eliminations`);
-      const count = document.createElement("span");
-      count.setAttribute("aria-hidden", "true");
-      buildCounter(count, previousValue ?? 0, player.eliminations);
-      const label = document.createElement("span");
-      label.className = "elims-label";
-      label.textContent = "Elims";
-      elims.append(count, label);
-      animateCounter(count, previousValue ?? 0, player.eliminations);
-
-      row.append(rank, playerBox, characterColumn, elims);
-      return row;
-    }
-
-    function renderOverlay(rows) {
-      const players = rows.map(numberRow).filter(player => player.name && player.gameUsername).sort(compare);
-      const ownIndex = players.findIndex(player => player.gameUsername.trim().toLocaleLowerCase() === gameUsername.trim().toLocaleLowerCase());
-      const visible = players.slice(0, 3);
-      if (ownIndex > 2) visible[2] = players[ownIndex];
-
-      standings.replaceChildren(...visible.map((player, index) => makeOverlayEntry(player, index, previousEliminations.get(player.gameUsername.trim().toLocaleLowerCase()))));
-      previousEliminations = new Map(players.map(player => [player.gameUsername.trim().toLocaleLowerCase(), player.eliminations]));
-      hasLeaderboardSnapshot = true;
-
-      if (!players.length) showError("No leaderboard players are available for the active game.");
-      else showOverlay();
-    }
-
-    function handleOverlaySession(session) {
-      if (!session) {
-        showError("Waiting for the session sheet to sync.");
-        return;
-      }
-      updateRecord(document.querySelector("#session-wins"), number(session.wins), previousWins, "win");
-      updateRecord(document.querySelector("#session-losses"), number(session.losses), previousLosses, "loss");
-      previousWins = number(session.wins);
-      previousLosses = number(session.losses);
-
-      const nextTitle = String(session.gameTitle || "").trim();
-      title.textContent = nextTitle || "No active game";
-      title.title = nextTitle;
-
-      if (nextTitle !== activeGame) {
-        activeGame = nextTitle;
-        gameUsername = "";
-        hasLeaderboardSnapshot = false;
-        previousEliminations.clear();
-        previousPlaces.clear();
-        if (!activeGame) {
-          showError("No active game set in Session!");
-          return;
-        }
-
-        if (!uid) {
-          // If no UID present, bypass access verification and attach directly
-          attachLeaderboard(session.gameSheetId);
-        } else {
-          showError("Checking overlay access for the active game…");
-          const id = crypto.randomUUID();
-          pending.set(id, { gameTitle: activeGame, gameSheetId: session.gameSheetId });
-          sendAccessRequest(id);
-        }
-      } else if ((gameUsername || !uid) && String(session.gameSheetId || "") !== leaderboardId) {
-        attachLeaderboard(session.gameSheetId);
-      }
-    }
-
-    function connect() {
-      if (!uid) {
-        console.warn("No UID supplied in URL parameters. Falling back to public view.");
-      }
-      const app = initializeApp(FIREBASE_CONFIG);
-      database = getDatabase(app, CONFIG.firebaseDatabaseUrl);
-      onValue(ref(database, "session"), snapshot => handleOverlaySession(snapshot.val()), error => showError(`Could not load session stats: ${error.message}`));
-    }
-
-    function trustedOrigin(value) {
-      try {
-        const host = new URL(value).hostname;
-        return host === "script.google.com" || host === "script.googleusercontent.com" || /-script\.googleusercontent\.com$/.test(host);
-      } catch {
-        return false;
-      }
-    }
-
-    window.addEventListener("message", event => {
-      if (!trustedOrigin(event.origin) || event.data?.bridge !== "leaderboard-access" || event.data?.channel !== channel) return;
-      if (event.data.type === "ready") {
-        bridgeOrigin = event.origin;
-        bridgeWindow = event.source;
-        pending.forEach((request, id) => sendAccessRequest(id));
-        return;
-      }
-      if (event.source !== bridgeWindow) return;
-      const request = pending.get(event.data.requestId);
-      if (!request) return;
-      pending.delete(event.data.requestId);
-      if (request.gameTitle !== activeGame) return;
-      if (event.data.type === "overlay-error") {
-        showError(event.data.message || "Overlay access was denied.");
-        return;
-      }
-      if (event.data.type !== "overlay-result") return;
-      const result = event.data.result || {};
-      gameUsername = String(result.gameUsername || "");
-      attachLeaderboard(request.gameSheetId);
-    });
-
-    // Initialize connection and setup access bridge
-    const bridgeUrl = new URL(CONFIG.accessBridgeUrl);
-    bridgeUrl.searchParams.set("channel", channel);
-    bridge.src = bridgeUrl.href;
-    connect();
+    function number(value){const parsed=Number.parseInt(String(value??"").replace(/,/g,""),10);return Number.isFinite(parsed)?parsed:0}
+    function numberRow(row){return{image:String(row[0]??"").trim(),eliminations:number(row[1]),name:String(row[2]??"").trim(),gameUsername:String(row[3]??"").trim(),character:String(row[4]??"").trim(),placement:number(row[6])}}
+    function compare(a,b){if(a.placement&&b.placement)return a.placement-b.placement;if(a.placement)return-1;if(b.placement)return 1;return b.eliminations-a.eliminations}
+    function showError(message){status.textContent=message;status.hidden=false;root.hidden=true}
+    function showOverlay(){status.hidden=true;root.hidden=false}
+    function sendAccessRequest(requestId){if(bridgeWindow&&bridgeOrigin)bridgeWindow.postMessage({bridge:"leaderboard-access",channel,type:"overlay",uid,requestId},bridgeOrigin)}
+    function buildCounter(element,from,to){element.className="counter-counter";element.replaceChildren();const maxValue=Math.max(Math.abs(from),Math.abs(to),1),digitCount=Math.floor(Math.log10(maxValue))+1,places=Array.from({length:digitCount},(_,index)=>10**(digitCount-index-1)),formatted=maxValue.toLocaleString("en-US");let digitIndex=0;for(const character of formatted){if(character===","){const separator=document.createElement("span");separator.className="counter-separator";separator.dataset.threshold=String(places[digitIndex]*10);separator.textContent=",";element.append(separator);continue}const place=places[digitIndex++],digit=document.createElement("span");digit.className="counter-digit";digit.dataset.place=String(place);for(let value=0;value<10;value++){const numberElement=document.createElement("span");numberElement.className="counter-number";numberElement.textContent=String(value);digit.append(numberElement)}element.append(digit)}setCounterValue(element,from)}
+    function setCounterValue(element,value){for(const digit of element.querySelectorAll(".counter-digit")){const place=Number(digit.dataset.place);digit.hidden=value<place&&place>1;const placeValue=Math.floor(value/place)%10;digit.querySelectorAll(".counter-number").forEach((numberElement,index)=>{let offset=(10+index-placeValue)%10;if(offset>5)offset-=10;numberElement.style.transform=`translateY(${offset*100}%)`})}for(const separator of element.querySelectorAll(".counter-separator"))separator.hidden=value<Number(separator.dataset.threshold)}
+    function animateCounter(element,from,to){if(matchMedia("(prefers-reduced-motion: reduce)").matches){setCounterValue(element,to);return}const digits=Array.from(element.querySelectorAll(".counter-digit")).map(digit=>{const place=Number(digit.dataset.place);return{digit,place,fromVal:Math.floor(from/place),toVal:Math.floor(to/place),numberElements:Array.from(digit.querySelectorAll(".counter-number"))}}),separators=Array.from(element.querySelectorAll(".counter-separator")).map(separator=>({separator,threshold:Number(separator.dataset.threshold)})),started=performance.now(),duration=1100;function tick(now){const progress=Math.min(1,(now-started)/duration),eased=1-Math.pow(1-progress,3),currentTotal=from+(to-from)*eased;for(const{digit,place,fromVal,toVal,numberElements}of digits){digit.hidden=currentTotal<place&&place>1;const currentVal=fromVal+(toVal-fromVal)*eased,placeValue=currentVal%10;numberElements.forEach((numberElement,index)=>{let offset=(10+index-placeValue)%10;if(offset>5)offset-=10;numberElement.style.transform=`translateY(${offset*100}%)`})}for(const{separator,threshold}of separators)separator.hidden=currentTotal<threshold;if(progress<1)requestAnimationFrame(tick);else setCounterValue(element,to)}requestAnimationFrame(tick)}
+    function updateCounter(element,value,previous){buildCounter(element,previous??0,value);animateCounter(element,previous??0,value)}
+    function makeEntry(player,index,previousValue){const row=document.createElement("article"),place=player.placement||index+1,key=player.gameUsername.trim().toLocaleLowerCase();row.className="entry";row.dataset.place=String(Math.min(place,3));row.dataset.playerKey=key;const rank=document.createElement("span");rank.className="rank";rank.textContent=String(place);const playerBox=document.createElement("div");playerBox.className="player";const avatar=document.createElement("div");avatar.className="avatar";const initial=document.createElement("span");initial.textContent=player.name.slice(0,1)||"?";avatar.append(initial);try{const imageUrl=new URL(player.image);if(imageUrl.protocol==="https:"){const image=document.createElement("img");image.src=imageUrl.href;image.alt="";image.referrerPolicy="no-referrer";image.addEventListener("load",()=>initial.remove(),{once:true});avatar.append(image)}}catch{}const name=document.createElement("span");name.className="name";name.textContent=player.name||"Unnamed player";playerBox.append(avatar,name);if(key===gameUsername.trim().toLocaleLowerCase()){const you=document.createElement("span");you.className="you";you.textContent="You";name.append(you)}const character=document.createElement("span");character.className="character";character.textContent=player.character||"—";character.title=player.character||"Character slot";const elims=document.createElement("div");elims.className="elims";elims.setAttribute("aria-label",`${player.eliminations.toLocaleString()} eliminations`);const count=document.createElement("span");count.setAttribute("aria-hidden","true");buildCounter(count,previousValue??0,player.eliminations);elims.append(count);const label=document.createElement("span");label.className="elims-label";label.textContent="elims";elims.append(label);animateCounter(count,previousValue??0,player.eliminations);row.append(rank,playerBox,character,elims);const old=previousPlaces.get(key);if(old&&old.place!==place&&!matchMedia("(prefers-reduced-motion: reduce)").matches){rank.animate([{transform:"scale(1)"},{transform:"scale(1.2)",offset:.45},{transform:"scale(1)"}],{duration:520,easing:"ease-out"});row.animate([{filter:"brightness(1)"},{filter:"brightness(1.5)",offset:.35},{filter:"brightness(1)"}],{duration:680,easing:"ease-out"})}return row}
+    function render(rows){const players=rows.map(numberRow).filter(player=>player.name&&player.gameUsername).sort(compare),ownIndex=players.findIndex(player=>player.gameUsername.trim().toLocaleLowerCase()===gameUsername.trim().toLocaleLowerCase()),visible=players.slice(0,3);if(ownIndex>2)visible[2]=players[ownIndex];const oldTops=new Map();standings.querySelectorAll(".entry[data-player-key]").forEach(row=>oldTops.set(row.dataset.playerKey,row.getBoundingClientRect().top));standings.replaceChildren(...visible.map((player,index)=>{const key=player.gameUsername.trim().toLocaleLowerCase();return makeEntry(player,index,previousEliminations.get(key))}));if(!matchMedia("(prefers-reduced-motion: reduce)").matches)standings.querySelectorAll(".entry[data-player-key]").forEach(row=>{const oldTop=oldTops.get(row.dataset.playerKey);if(oldTop===undefined)return;const delta=oldTop-row.getBoundingClientRect().top;if(Math.abs(delta)>1)row.animate([{transform:`translateY(${delta}px)`},{transform:"translateY(0)"}],{duration:520,easing:"cubic-bezier(.2,.75,.25,1)"})});previousPlaces=new Map(players.map((player,index)=>[player.gameUsername.trim().toLocaleLowerCase(),{place:player.placement||index+1,top:0}]));standings.querySelectorAll(".entry[data-player-key]").forEach(row=>{const entry=previousPlaces.get(row.dataset.playerKey);if(entry)entry.top=row.getBoundingClientRect().top});previousEliminations=new Map(players.map(player=>[player.gameUsername.trim().toLocaleLowerCase(),player.eliminations]));if(!players.length)showError("No leaderboard players are available for the active game.");else showOverlay()}
+    function updateRecord(element,value,previous,kind){updateCounter(element,value,previous);if(previous!==null&&value>previous&&!matchMedia("(prefers-reduced-motion: reduce)").matches){const stat=element.closest(".record-stat");stat.animate([{transform:"scale(1)",backgroundColor:"transparent"},{transform:"scale(1.12)",backgroundColor:kind==="win"?"#79e0ba35":"#ff9a8835",offset:.35},{transform:"scale(1)",backgroundColor:"transparent"}],{duration:700,easing:"ease-out"})}}
+    function attachLeaderboard(id){if(unsubscribeLeaderboard)unsubscribeLeaderboard();leaderboardId=String(id||"");if(!leaderboardId){showError("The active game leaderboard is not available yet.");return}unsubscribeLeaderboard=onValue(ref(database,`leaderboards/${leaderboardId}`),snapshot=>{const data=snapshot.val();render(data?.rows||[])},error=>showError(`Could not load the leaderboard: ${error.message}`))}
+    function handleSession(session){if(!session){showError("Waiting for the session sheet to sync.");return}updateRecord(document.querySelector("#session-wins"),number(session.wins),previousWins,"win");updateRecord(document.querySelector("#session-losses"),number(session.losses),previousLosses,"loss");previousWins=number(session.wins);previousLosses=number(session.losses);const nextTitle=String(session.gameTitle||"").trim();title.textContent=nextTitle||"No active game";title.title=nextTitle;if(nextTitle!==activeGame){activeGame=nextTitle;gameUsername="";if(!activeGame){showError("No active game is set in Session!E2.");return}showError("Checking overlay access for the active game…");const id=crypto.randomUUID();pending.set(id,{gameTitle:activeGame,gameSheetId:session.gameSheetId});sendAccessRequest(id)}else if(gameUsername&&String(session.gameSheetId||"")!==leaderboardId)attachLeaderboard(session.gameSheetId)}
+    function connect(){const app=initializeApp(FIREBASE_CONFIG);database=getDatabase(app,CONFIG.firebaseDatabaseUrl);unsubscribeSession=onValue(ref(database,"session"),snapshot=>handleSession(snapshot.val()),error=>showError(`Could not load session stats: ${error.message}`))}
+    function trustedOrigin(value){try{const host=new URL(value).hostname;return host==="script.google.com"||host==="script.googleusercontent.com"||/-script\.googleusercontent\.com$/.test(host)}catch{return false}}
+    window.addEventListener("message",event=>{if(!trustedOrigin(event.origin)||event.data?.bridge!=="leaderboard-access"||event.data?.channel!==channel)return;if(event.data.type==="ready"){bridgeOrigin=event.origin;bridgeWindow=event.source;if(!uid){showError("Add your Firebase UID to the overlay URL as ?uid=YOUR_UID.");return}pending.forEach((request,id)=>sendAccessRequest(id));return}if(event.source!==bridgeWindow)return;const request=pending.get(event.data.requestId);if(!request)return;pending.delete(event.data.requestId);if(request.gameTitle!==activeGame)return;if(event.data.type==="overlay-error"){showError(event.data.message||"Overlay access was denied.");return}if(event.data.type!=="overlay-result")return;const result=event.data.result||{};gameUsername=String(result.gameUsername||"");if(!gameUsername||result.gameTitle!==request.gameTitle){showError("Your account is not linked to the active game.");return}attachLeaderboard(request.gameSheetId)})
+    function clearEliminationBubbles(){eliminationBubbles.forEach(bubble=>window.clearTimeout(bubble.timer));eliminationBubbles.clear();feed.replaceChildren();feed.hidden=true}
+    function showEliminationBubble(player,delta){const key=player.gameUsername.trim().toLocaleLowerCase();let bubble=eliminationBubbles.get(key);if(!bubble){const element=document.createElement("div");element.className="elimination-bubble";element.setAttribute("role","status");const initial=document.createElement("span");initial.className="bubble-initial";initial.textContent=player.name.slice(0,1)||"?";element.append(initial);try{const imageUrl=new URL(player.image);if(imageUrl.protocol==="https:"){const image=document.createElement("img");image.src=imageUrl.href;image.alt="";image.referrerPolicy="no-referrer";image.addEventListener("load",()=>initial.remove(),{once:true});element.replaceChild(image,initial)}}catch{}const name=document.createElement("span");name.className="bubble-name";name.textContent=player.name||"Unnamed player";const count=document.createElement("span");count.className="bubble-count";element.append(name,count);bubble={element,count,total:0,timer:0};eliminationBubbles.set(key,bubble);feed.append(element);feed.hidden=false}else{bubble.element.querySelector(".bubble-name").textContent=player.name||"Unnamed player"}bubble.total+=delta;bubble.count.textContent=`+${bubble.total}`;if(!matchMedia("(prefers-reduced-motion: reduce)").matches){bubble.element.animate([{transform:"scale(1)"},{transform:"scale(1.04)",offset:.45},{transform:"scale(1)"}],{duration:320,easing:"ease-out"})}window.clearTimeout(bubble.timer);bubble.timer=window.setTimeout(()=>{if(eliminationBubbles.get(key)!==bubble)return;bubble.element.animate([{opacity:1,transform:"translateY(0)"},{opacity:0,transform:"translateY(5px)"}],{duration:180,easing:"ease-in"}).onfinish=()=>{if(eliminationBubbles.get(key)!==bubble)return;bubble.element.remove();eliminationBubbles.delete(key);feed.hidden=eliminationBubbles.size===0}},5000)}
+    function makeOverlayEntry(player,index,previousValue){const row=document.createElement("article"),place=player.placement||index+1,key=player.gameUsername.trim().toLocaleLowerCase();row.className="entry";row.dataset.place=String(Math.min(place,3));row.dataset.playerKey=key;const rank=document.createElement("span");rank.className="rank";rank.textContent=String(place);const playerBox=document.createElement("div");playerBox.className="player";const avatar=document.createElement("div");avatar.className="avatar";const initial=document.createElement("span");initial.textContent=player.name.slice(0,1)||"?";avatar.append(initial);try{const imageUrl=new URL(player.image);if(imageUrl.protocol==="https:"){const image=document.createElement("img");image.src=imageUrl.href;image.alt="";image.referrerPolicy="no-referrer";image.addEventListener("load",()=>initial.remove(),{once:true});avatar.append(image)}}catch{}const name=document.createElement("span");name.className="name";name.textContent=player.name||"Unnamed player";playerBox.append(avatar,name);if(key===gameUsername.trim().toLocaleLowerCase()){const you=document.createElement("span");you.className="you";you.textContent="You";name.append(you)}const characterColumn=document.createElement("div");characterColumn.className="slot-column";const character=document.createElement("span");character.className="character";character.textContent=player.character||"—";character.title=player.character||"Character";const characterLabel=document.createElement("span");characterLabel.className="slot-label";characterLabel.textContent="Character";characterColumn.append(character,characterLabel);const elims=document.createElement("div");elims.className="elims";elims.setAttribute("aria-label",`${player.eliminations.toLocaleString()} eliminations`);const count=document.createElement("span");count.setAttribute("aria-hidden","true");buildCounter(count,previousValue??0,player.eliminations);const label=document.createElement("span");label.className="elims-label";label.textContent="Elims";elims.append(count,label);animateCounter(count,previousValue??0,player.eliminations);row.append(rank,playerBox,characterColumn,elims);const old=previousPlaces.get(key);if(old&&old.place!==place&&!matchMedia("(prefers-reduced-motion: reduce)").matches){rank.animate([{transform:"scale(1)"},{transform:"scale(1.2)",offset:.45},{transform:"scale(1)"}],{duration:520,easing:"ease-out"});row.animate([{filter:"brightness(1)"},{filter:"brightness(1.5)",offset:.35},{filter:"brightness(1)"}],{duration:680,easing:"ease-out"})}return row}
+    function renderOverlay(rows){const players=rows.map(numberRow).filter(player=>player.name&&player.gameUsername).sort(compare),ownIndex=players.findIndex(player=>player.gameUsername.trim().toLocaleLowerCase()===gameUsername.trim().toLocaleLowerCase()),visible=players.slice(0,3);if(ownIndex>2)visible[2]=players[ownIndex];const visibleKeys=new Set(visible.map(player=>player.gameUsername.trim().toLocaleLowerCase()));if(hasLeaderboardSnapshot)players.forEach(player=>{const key=player.gameUsername.trim().toLocaleLowerCase(),oldValue=previousEliminations.get(key);if(!visibleKeys.has(key)&&oldValue!==undefined&&player.eliminations>oldValue)showEliminationBubble(player,player.eliminations-oldValue)});const oldTops=new Map();standings.querySelectorAll(".entry[data-player-key]").forEach(row=>oldTops.set(row.dataset.playerKey,row.getBoundingClientRect().top));standings.replaceChildren(...visible.map((player,index)=>makeOverlayEntry(player,index,previousEliminations.get(player.gameUsername.trim().toLocaleLowerCase()))));if(!matchMedia("(prefers-reduced-motion: reduce)").matches)standings.querySelectorAll(".entry[data-player-key]").forEach(row=>{const oldTop=oldTops.get(row.dataset.playerKey);if(oldTop===undefined)return;const delta=oldTop-row.getBoundingClientRect().top;if(Math.abs(delta)>1)row.animate([{transform:`translateY(${delta}px)`},{transform:"translateY(0)"}],{duration:520,easing:"cubic-bezier(.2,.75,.25,1)"})});previousPlaces=new Map(players.map((player,index)=>[player.gameUsername.trim().toLocaleLowerCase(),{place:player.placement||index+1,top:0}]));standings.querySelectorAll(".entry[data-player-key]").forEach(row=>{const entry=previousPlaces.get(row.dataset.playerKey);if(entry)entry.top=row.getBoundingClientRect().top});previousEliminations=new Map(players.map(player=>[player.gameUsername.trim().toLocaleLowerCase(),player.eliminations]));hasLeaderboardSnapshot=true;if(!players.length)showError("No leaderboard players are available for the active game.");else showOverlay()}
+    function handleOverlaySession(session){if(!session){showError("Waiting for the session sheet to sync.");return}updateRecord(document.querySelector("#session-wins"),number(session.wins),previousWins,"win");updateRecord(document.querySelector("#session-losses"),number(session.losses),previousLosses,"loss");previousWins=number(session.wins);previousLosses=number(session.losses);const nextTitle=String(session.gameTitle||"").trim();title.textContent=nextTitle||"No active game";title.title=nextTitle;if(nextTitle!==activeGame){activeGame=nextTitle;gameUsername="";hasLeaderboardSnapshot=false;previousEliminations.clear();previousPlaces.clear();clearEliminationBubbles();if(!activeGame){showError("No active game is set in Session!E2.");return}showError("Checking overlay access for the active game…");const id=crypto.randomUUID();pending.set(id,{gameTitle:activeGame,gameSheetId:session.gameSheetId});sendAccessRequest(id)}else if(gameUsername&&String(session.gameSheetId||"")!==leaderboardId)attachLeaderboard(session.gameSheetId)}
+    makeEntry=makeOverlayEntry;render=renderOverlay;handleSession=handleOverlaySession;
+    const bridgeUrl=new URL(CONFIG.accessBridgeUrl);bridgeUrl.searchParams.set("channel",channel);bridge.src=bridgeUrl.href;connect();
   </script>
 </body>
 </html>
