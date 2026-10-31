@@ -13,15 +13,21 @@
     html,body{width:100%;min-width:320px;min-height:100%;margin:0;background:transparent}
     body{padding:12px;color:var(--paper);font:14px var(--body);-webkit-font-smoothing:antialiased}
     .overlay{width:min(100%,780px);margin:0 auto;filter:drop-shadow(0 5px 14px #0008);display:flex;flex-direction:column;gap:12px}
-    .heading{display:flex;min-height:48px;align-items:center;justify-content:space-between;gap:20px;padding:8px 16px;border:1px solid var(--line);border-radius:6px;background:#111923e8}
-    .game-title{min-width:0;margin:0;overflow:hidden;font:800 26px/1 var(--display);text-overflow:ellipsis;text-transform:uppercase;white-space:nowrap}
-    .record{display:flex;flex:0 0 auto;align-items:center;gap:16px}
-    .record-stat{display:grid;grid-template-columns:16px auto;align-items:center;gap:8px;font:800 30px/1 var(--display);font-variant-numeric:tabular-nums}
+    .heading{display:flex;min-height:56px;align-items:center;justify-content:space-between;gap:20px;padding:8px 18px;border:1px solid var(--line);border-radius:6px;background:#111923e8;position:relative;overflow:hidden;transition:background-color .3s ease}
+    .heading.flash-win{background:#114e32e8;border-color:#64e69b}
+    .heading.flash-loss{background:#5a1f22e8;border-color:#ff766e}
+    .game-title{min-width:0;margin:0;overflow:hidden;font:800 28px/1 var(--display);text-overflow:ellipsis;text-transform:uppercase;white-space:nowrap;transition:opacity .2s ease}
+    .heading.flash-win .game-title,.heading.flash-loss .game-title{opacity:0}
+    .header-banner{position:absolute;inset:0;display:grid;place-items:center;font:900 32px/1 var(--display);letter-spacing:2px;text-transform:uppercase;opacity:0;pointer-events:none;transition:opacity .2s ease}
+    .heading.flash-win .header-banner{color:#64e69b;opacity:1}
+    .heading.flash-loss .header-banner{color:#ff766e;opacity:1}
+    .record{display:flex;flex:0 0 auto;align-items:center;gap:20px}
+    .record-stat{display:flex;align-items:center;gap:10px;font:800 36px/1 var(--display);font-variant-numeric:tabular-nums}
     .record-stat span:first-child{color:var(--muted);font:inherit;letter-spacing:1px}
     .record-stat.wins span:first-child,.record-stat.wins .counter-counter{color:#64e69b}
     .record-stat.losses span:first-child,.record-stat.losses .counter-counter{color:#ff766e}
     .standings{overflow:hidden;border:1px solid var(--line);border-radius:6px;background:#111923e8}
-    .entry{display:grid;min-height:62px;grid-template-columns:54px minmax(0,1fr) 92px;align-items:center;column-gap:12px;padding:7px 16px;border-top:1px solid #ffffff20;transition:background .2s}
+    .entry{display:grid;min-height:62px;grid-template-columns:54px minmax(0,1fr) 92px;align-items:center;column-gap:12px;padding:7px 16px;border-top:1px solid #ffffff20;transition:background .2s;position:relative}
     .entry:first-child{border-top:0}
     .entry[data-place="1"]{--medal:#f0c85c;--wash:#f0c85c24}
     .entry[data-place="2"]{--medal:#d4dde8;--wash:#d4dde81a}
@@ -37,8 +43,10 @@
     .name{overflow:hidden;font-size:13px;font-weight:800;text-overflow:ellipsis;text-shadow:0 1px 3px #000,0 0 7px #000b;white-space:nowrap}
     .you{color:var(--accent);font-size:9px;font-weight:800;letter-spacing:.6px;text-shadow:0 1px 3px #000,0 0 7px #000b;text-transform:uppercase}
     .character{overflow:hidden;color:#d2dae4;font-size:12px;font-weight:600;text-overflow:ellipsis;text-shadow:0 1px 3px #000,0 0 7px #000b;white-space:nowrap}
-    .elims{display:flex;min-width:0;flex-direction:column;align-items:flex-end;justify-content:center;color:var(--accent);font:800 23px/1 var(--display);font-variant-numeric:tabular-nums;text-align:right;text-shadow:0 1px 3px #000,0 0 7px #000b}
+    .elims{display:flex;min-width:0;flex-direction:column;align-items:flex-end;justify-content:center;color:var(--accent);font:800 23px/1 var(--display);font-variant-numeric:tabular-nums;text-align:right;text-shadow:0 1px 3px #000,0 0 7px #000b;position:relative}
     .elims-label{color:var(--muted);font:700 8px/1 var(--body);letter-spacing:.8px;text-shadow:0 1px 3px #000,0 0 7px #000b;text-transform:uppercase}
+    .elim-popup{position:absolute;right:0;top:-22px;color:#64e69b;font:900 18px/1 var(--display);text-shadow:0 1px 3px #000,0 0 6px #000;pointer-events:none;animation:popup-float 1.2s cubic-bezier(0.2,0.8,0.2,1) forwards}
+    @keyframes popup-float{0%{opacity:0;transform:translateY(8px) scale(0.8)}20%{opacity:1;transform:translateY(0) scale(1.1)}80%{opacity:1;transform:translateY(-10px) scale(1)}100%{opacity:0;transform:translateY(-18px) scale(1)}}
     .elimination-feed{display:flex;flex-direction:column;align-items:flex-start;gap:7px;padding-top:4px}
     .elimination-bubble{display:flex;min-height:48px;max-width:min(100%,420px);align-items:center;gap:10px;padding:5px 7px 5px 6px;border:1px solid #ffffff38;border-radius:4px;background:#111923e8;box-shadow:0 4px 14px #0006;animation:bubble-in .24s cubic-bezier(.2,.75,.25,1) both}
     .elimination-bubble img,.bubble-initial{width:36px;height:36px;flex:0 0 36px;border:1px solid #ffffff32;border-radius:2px;object-fit:cover}
@@ -54,14 +62,15 @@
     .counter-number{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;width:100%;height:100%;line-height:1;will-change:transform}
     .counter-separator{display:inline-block;width:.22em;text-align:center;vertical-align:top;line-height:1}
     .counter-digit[hidden],.counter-separator[hidden]{display:none}
-    @media(max-width:520px){body{padding:7px}.heading{min-height:52px;padding:8px 11px}.game-title{font-size:22px}.record{gap:10px}.record-stat{grid-template-columns:12px auto;gap:5px;font-size:24px}.record-stat span:first-child{font-size:9px}.entry{min-height:56px;grid-template-columns:39px minmax(0,1fr) 66px;column-gap:7px;padding:6px 10px}.rank{font-size:23px}.avatar{width:32px;height:32px;flex-basis:32px}.name{font-size:11px}.character{font-size:10px}.elims-label{font-size:7px}.elims{font-size:20px}.elimination-bubble{min-height:43px}.elimination-bubble img,.bubble-initial,.bubble-count{width:32px;height:32px;flex-basis:32px}}
+    @media(max-width:520px){body{padding:7px}.heading{min-height:52px;padding:8px 11px}.game-title{font-size:22px}.record{gap:10px}.record-stat{font-size:28px}.entry{min-height:56px;grid-template-columns:39px minmax(0,1fr) 66px;column-gap:7px;padding:6px 10px}.rank{font-size:23px}.avatar{width:32px;height:32px;flex-basis:32px}.name{font-size:11px}.character{font-size:10px}.elims-label{font-size:7px}.elims{font-size:20px}.elimination-bubble{min-height:43px}.elimination-bubble img,.bubble-initial,.bubble-count{width:32px;height:32px;flex-basis:32px}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
   </style>
 </head>
 <body>
   <main class="overlay" aria-label="Live leaderboard overlay" hidden>
-    <header class="heading">
+    <header class="heading" id="header-box">
       <h1 class="game-title" id="game-title">Loading game</h1>
+      <div class="header-banner" id="header-banner"></div>
       <div class="record" aria-label="Session wins and losses">
         <div class="record-stat wins"><span>W</span><span id="session-wins" aria-label="Session wins">0</span></div>
         <div class="record-stat losses"><span>L</span><span id="session-losses" aria-label="Session losses">0</span></div>
@@ -94,6 +103,8 @@
     const root = document.querySelector(".overlay");
     const status = document.querySelector("#status");
     const title = document.querySelector("#game-title");
+    const headerBox = document.querySelector("#header-box");
+    const headerBanner = document.querySelector("#header-banner");
     const standings = document.querySelector("#standings");
     const feed = document.querySelector("#elimination-feed");
     const bridge = document.querySelector("#access-bridge");
@@ -235,7 +246,7 @@
           const placeValue = currentVal % 10;
           numberElements.forEach((numberElement, index) => {
             let offset = (10 + index - placeValue) % 10;
-            if (offset > 5) offset -= 10;
+            if (offset > 5) offset-= 10;
             numberElement.style.transform = `translateY(${offset * 100}%)`;
           });
         }
@@ -252,14 +263,28 @@
     }
 
     function updateRecord(element, value, previous, kind) {
-      updateCounter(element, value, previous);
-      if (previous !== null && value > previous && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        const stat = element.closest(".record-stat");
-        stat.animate([
-          { transform: "scale(1)", backgroundColor: "transparent" },
-          { transform: "scale(1.12)", backgroundColor: kind === "win" ? "#79e0ba35" : "#ff9a8835", offset: 0.35 },
-          { transform: "scale(1)", backgroundColor: "transparent" }
-        ], { duration: 700, easing: "ease-out" });
+      if (previous !== null && value !== previous) {
+        const isWin = kind === "win";
+        const bannerText = isWin ? "VICTORY" : "DEFEAT";
+        const flashClass = isWin ? "flash-win" : "flash-loss";
+
+        headerBanner.textContent = bannerText;
+        headerBox.classList.add(flashClass);
+
+        window.setTimeout(() => {
+          headerBox.classList.remove(flashClass);
+          updateCounter(element, value, previous);
+          if (value > previous && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            const stat = element.closest(".record-stat");
+            stat.animate([
+              { transform: "scale(1)" },
+              { transform: "scale(1.12)", offset: 0.35 },
+              { transform: "scale(1)" }
+            ], { duration: 700, easing: "ease-out" });
+          }
+        }, 1200);
+      } else {
+        updateCounter(element, value, previous ?? 0);
       }
     }
 
@@ -350,7 +375,7 @@
       }, 5000);
     }
 
-    function makeOverlayEntry(player, index, previousValue) {
+    function makeOverlayEntry(player, index, previousValue, deltaVal) {
       const row = document.createElement("article");
       const place = player.placement || index + 1;
       const key = player.gameUsername.trim().toLocaleLowerCase();
@@ -422,6 +447,14 @@
       label.textContent = "Elims";
       
       elims.append(count, label);
+
+      if (deltaVal && deltaVal > 0 && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        const popup = document.createElement("span");
+        popup.className = "elim-popup";
+        popup.textContent = `+${deltaVal}`;
+        elims.append(popup);
+      }
+
       animateCounter(count, previousValue ?? 0, player.eliminations);
 
       row.append(rank, playerInfo, elims);
@@ -435,17 +468,26 @@
       if (ownIndex > 2) visible[2] = players[ownIndex];
 
       const visibleKeys = new Set(visible.map(player => player.gameUsername.trim().toLocaleLowerCase()));
+      const deltas = new Map();
+
       if (hasLeaderboardSnapshot) {
         players.forEach(player => {
           const key = player.gameUsername.trim().toLocaleLowerCase();
-          const oldValue = previousEliminations.get(key);
-          if (!visibleKeys.has(key) && oldValue !== undefined && player.eliminations > oldValue) {
-            showEliminationBubble(player, player.eliminations - oldValue);
+          const oldValue = previousEliminations.get(key) ?? player.eliminations;
+          const diff = player.eliminations - oldValue;
+          if (diff > 0) {
+            deltas.set(key, diff);
+            if (!visibleKeys.has(key)) {
+              showEliminationBubble(player, diff);
+            }
           }
         });
       }
 
-      standings.replaceChildren(...visible.map((player, index) => makeOverlayEntry(player, index, previousEliminations.get(player.gameUsername.trim().toLocaleLowerCase()))));
+      standings.replaceChildren(...visible.map((player, index) => {
+        const key = player.gameUsername.trim().toLocaleLowerCase();
+        return makeOverlayEntry(player, index, previousEliminations.get(key), deltas.get(key));
+      }));
       
       previousEliminations = new Map(players.map(player => [player.gameUsername.trim().toLocaleLowerCase(), player.eliminations]));
       hasLeaderboardSnapshot = true;
