@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101624">
+  <title>Firebase Admin Control Panel</title>
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{color-scheme:dark;--ink:#101624;--panel:#182239;--soft:#22304b;--line:#394865;--paper:#eef4ff;--muted:#a6b4cb;--lime:#0095ff;--green:#5bf28c;--danger:#ff795b;--display:"Barlow Condensed",Impact,sans-serif;--body:"DM Sans","Segoe UI",sans-serif}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--ink);background-image:radial-gradient(ellipse at 90% 0%,#0e2fcb44,transparent 40%);color:var(--paper);font:14px var(--body)}
+    button,input,select{font:inherit}
+    .page{width:min(1260px,calc(100% - 32px));margin:auto;padding-bottom:48px}
+    .topbar{min-height:64px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);gap:12px}
+    .brand{display:flex;align-items:center;gap:12px;font:800 22px var(--display);letter-spacing:1px;text-transform:uppercase}
+    .brand img{width:34px;height:34px}
+    .nav-links{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:36px;padding:0 14px;border:1px solid var(--line);border-radius:3px;background:var(--soft);color:var(--paper);cursor:pointer;font-size:12px;font-weight:700;text-decoration:none}
+    .btn:hover{border-color:var(--lime)}
+    .btn.primary{background:var(--lime);border-color:var(--lime);color:var(--ink)}
+    .btn.danger{border-color:#ff795b80;background:#ff795b20;color:#ff9c87}
+    .btn.success{border-color:#5bf28c80;background:#5bf28c20;color:#84f7ab}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .gate{margin:40px auto;max-width:480px;padding:26px;border:1px solid var(--line);background:var(--panel);border-radius:4px}
+    .gate h1{margin:0 0 8px;font:900 36px/1 var(--display);text-transform:uppercase}
+    .gate p{color:var(--muted);line-height:1.5;margin:0 0 18px}
+    .tabs{display:flex;gap:6px;margin:22px 0 16px;border-bottom:1px solid var(--line);padding-bottom:10px;flex-wrap:wrap}
+    .tab-btn{padding:8px 16px;border:1px solid var(--line);border-radius:3px;background:var(--panel);color:var(--muted);cursor:pointer;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.7px}
+    .tab-btn[aria-selected="true"]{background:var(--lime);border-color:var(--lime);color:var(--ink)}
+    .card{border:1px solid var(--line);background:var(--panel);border-radius:4px;padding:18px;margin-bottom:20px}
+    .card-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+    .card-header h2{margin:0;font:800 24px/1 var(--display);text-transform:uppercase}
+    .grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+    .field{display:grid;gap:5px}
+    .field label{color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px}
+    .field input,.field select{height:38px;padding:0 10px;border:1px solid var(--line);border-radius:3px;background:var(--ink);color:var(--paper)}
+    .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:3px;background:var(--ink)}
+    table{width:100%;border-collapse:collapse;min-width:860px}
+    th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:12px;vertical-align:middle}
+    th{background:var(--soft);color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;white-space:nowrap}
+    td input[type="text"],td input[type="number"],td input[type="url"]{width:100%;min-width:90px;height:32px;padding:0 8px;border:1px solid transparent;border-radius:2px;background:#ffffff08;color:var(--paper)}
+    td input:focus{border-color:var(--lime);background:var(--panel);outline:none}
+    td input[type="checkbox"]{width:18px;height:18px;accent-color:var(--lime);cursor:pointer}
+    .avatar-preview{width:30px;height:30px;border-radius:3px;object-fit:cover;border:1px solid var(--line);background:var(--panel);vertical-align:middle}
+    .badge-admin{display:inline-block;padding:2px 7px;border-radius:2px;background:#0095ff25;border:1px solid var(--lime);color:#72c5ff;font-size:10px;font-weight:800;text-transform:uppercase}
+    .toast{position:fixed;right:20px;bottom:20px;z-index:99;padding:12px 16px;border:1px solid var(--line);border-left:3px solid var(--lime);background:var(--panel);box-shadow:0 12px 32px #000a;font-size:13px;font-weight:600}
+    [hidden]{display:none!important}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <div class="brand"><img src="icon.png" alt=""><span>Firebase Data & Admin Control</span></div>
+      <div class="nav-links" id="nav-links" hidden>
+        <a class="btn" href="index.html">Leaderboard</a>
+        <a class="btn" href="fortnitehunt.html">Pirate Hunt</a>
+        <span id="admin-email" style="color:var(--muted);font-size:12px"></span>
+        <button class="btn" id="signout-btn" type="button">Sign out</button>
+      </div>
+    </header>
+
+    <section class="gate" id="auth-gate">
+      <h1 id="gate-title">Admin Sign In</h1>
+      <p id="gate-desc">Sign in with an approved admin Google account to manage leaderboards, session stats, and user permissions directly in Firebase.</p>
+      <button class="btn primary" id="signin-btn" type="button">Continue with Google</button>
+      <div id="gate-actions" style="margin-top:12px" hidden>
+        <code id="gate-uid" style="display:block;margin-bottom:10px;padding:8px;background:var(--ink);border:1px solid var(--line);font-size:11px"></code>
+        <button class="btn" id="gate-signout" type="button">Sign out</button>
+      </div>
+    </section>
+
+    <main id="admin-app" hidden>
+      <div class="tabs" role="tablist">
+        <button class="tab-btn" role="tab" aria-selected="true" data-tab="leaderboards">Leaderboards (Sheet Grid)</button>
+        <button class="tab-btn" role="tab" aria-selected="false" data-tab="session">Session & Hunt Controls</button>
+        <button class="tab-btn" role="tab" aria-selected="false" data-tab="users">Users & Admin Roles</button>
+      </div>
+
+      <!-- TAB 1: LEADERBOARDS -->
+      <section id="panel-leaderboards" class="card">
+        <div class="card-header">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <h2>Game Sheet</h2>
+            <select id="game-select" style="height:36px;padding:0 12px;border:1px solid var(--line);border-radius:3px;background:var(--ink);color:var(--paper);font-weight:700"></select>
+            <button class="btn" id="new-game-btn" type="button">+ New Game Tab</button>
+            <button class="btn danger" id="delete-game-btn" type="button">Delete Tab</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <button class="btn" id="recalc-ranks-btn" type="button">Auto-Rank by Elims</button>
+            <button class="btn" id="add-player-btn" type="button">+ Add Player Row</button>
+            <button class="btn primary" id="save-board-btn" type="button">Save Sheet Changes</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:44px">Avatar</th>
+                <th>Profile Image URL (Col A)</th>
+                <th style="width:95px">Elims (Col B)</th>
+                <th>Display Name (Col C)</th>
+                <th>Game Username (Col D)</th>
+                <th>Character (Col E)</th>
+                <th style="width:70px">Online (F)</th>
+                <th style="width:75px">Place (G)</th>
+                <th class="fn-col" hidden>Treasure Icon (Col I)</th>
+                <th class="fn-col" style="width:80px" hidden>Qty (Col J)</th>
+                <th style="width:65px">Row</th>
+              </tr>
+            </thead>
+            <tbody id="board-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB 2: SESSION & HUNT CONTROLS -->
+      <section id="panel-session" class="card" hidden>
+        <div class="card-header">
+          <h2>Live Session & Pirate Hunt Controls</h2>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn danger" id="reset-session-btn" type="button">Reset Main Session & Uncheck All Online</button>
+            <button class="btn primary" id="save-session-btn" type="button">Save Session Settings</button>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card" style="margin:0;background:var(--ink)">
+            <h3 style="margin:0 0 12px;font:800 18px var(--display);text-transform:uppercase;color:var(--lime)">Main Overlay & Session (Row 2)</h3>
+            <div style="display:grid;gap:12px">
+              <div class="field"><label>Active Overlay Game (Session!E2)</label><select id="sess-game"></select></div>
+              <div class="field"><label>Session Eliminations (Session!B2)</label><input id="sess-elims" type="number" min="0"></div>
+              <div class="field"><label>Session Wins (Session!C2)</label><input id="sess-wins" type="number" min="0"></div>
+              <div class="field"><label>Session Losses (Session!D2)</label><input id="sess-losses" type="number" min="0"></div>
+            </div>
+          </div>
+          <div class="card" style="margin:0;background:var(--ink)">
+            <h3 style="margin:0 0 12px;font:800 18px var(--display);text-transform:uppercase;color:#f3c75e">Pirate Token Hunt (Session!B5:E5)</h3>
+            <div style="display:grid;gap:12px">
+              <div class="field"><label>Hunt Eliminations (B5)</label><input id="fn-elims" type="number" min="0"></div>
+              <div class="field"><label>Hunt Wins (C5)</label><input id="fn-wins" type="number" min="0"></div>
+              <div class="field"><label>Hunt Losses (D5)</label><input id="fn-losses" type="number" min="0"></div>
+              <div class="field">
+                <label>Hunt Start Time ET (HH:mm:ss dd/MM/yy)</label>
+                <div style="display:flex;gap:6px">
+                  <input id="fn-start" type="text" placeholder="18:30:00 12/11/26" style="flex:1">
+                  <button class="btn" id="fn-now-btn" type="button">Set Now</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: USERS & ADMIN PERMISSIONS -->
+      <section id="panel-users" class="card" hidden>
+        <div class="card-header">
+          <h2>Approved Users & Admin Permissions</h2>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn" id="add-user-btn" type="button">+ Add Approved User UID</button>
+            <button class="btn primary" id="save-users-btn" type="button">Save Users & Admin Roles</button>
+          </div>
+        </div>
+        <p style="color:var(--muted);margin:0 0 14px;font-size:12px">Toggle <strong>Admin</strong> to grant or revoke access to this control panel. Game accounts map directly to each game tab's Column D username.</p>
+        <div class="table-wrap">
+          <table>
+            <thead id="users-thead"></thead>
+            <tbody id="users-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <script type="module">
+    import { auth, db, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, ref, get, set, update, remove, onValue, normalizeRowsFromBoard } from "./firebase-bridge.js";
+
+    let currentUser = null;
+    let boardsCache = {};
+    let sessionCache = {};
+    let usersCache = {};
+    let selectedBoardId = "";
+
+    const toastEl = document.querySelector("#toast");
+    function showToast(msg) {
+      toastEl.textContent = msg;
+      toastEl.hidden = false;
+      clearTimeout(toastEl._t);
+      toastEl._t = setTimeout(() => toastEl.hidden = true, 4000);
+    }
+
+    // Tabs
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab-btn").forEach(b => b.setAttribute("aria-selected", String(b === btn)));
+        const target = btn.dataset.tab;
+        document.querySelector("#panel-leaderboards").hidden = target !== "leaderboards";
+        document.querySelector("#panel-session").hidden = target !== "session";
+        document.querySelector("#panel-users").hidden = target !== "users";
+      });
+    });
+
+    document.querySelector("#signin-btn").addEventListener("click", () => signInWithPopup(auth, new GoogleAuthProvider()));
+    document.querySelector("#signout-btn").addEventListener("click", () => signOut(auth));
+    document.querySelector("#gate-signout").addEventListener("click", () => signOut(auth));
+
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user;
+      const gate = document.querySelector("#auth-gate");
+      const app = document.querySelector("#admin-app");
+      const nav = document.querySelector("#nav-links");
+
+      if (!user) {
+        gate.hidden = false;
+        app.hidden = true;
+        nav.hidden = true;
+        document.querySelector("#gate-title").textContent = "Admin Sign In";
+        document.querySelector("#gate-desc").textContent = "Sign in with an approved admin Google account to manage Firebase data.";
+        document.querySelector("#signin-btn").hidden = false;
+        document.querySelector("#gate-actions").hidden = true;
+        return;
+      }
+
+      const snap = await get(ref(db, `users/${user.uid}`));
+      const record = snap.exists() ? snap.val() : null;
+
+      if (!record || record.isAdmin !== true) {
+        gate.hidden = false;
+        app.hidden = true;
+        nav.hidden = true;
+        document.querySelector("#gate-title").textContent = "Admin Access Denied";
+        document.querySelector("#gate-desc").textContent = "Your account does not have isAdmin enabled in Firebase. Ask an existing admin to enable your UID.";
+        document.querySelector("#signin-btn").hidden = true;
+        document.querySelector("#gate-actions").hidden = false;
+        document.querySelector("#gate-uid").textContent = `UID: ${user.uid}`;
+        return;
+      }
+
+      gate.hidden = true;
+      app.hidden = false;
+      nav.hidden = false;
+      document.querySelector("#admin-email").textContent = user.email || user.uid;
+      bindRealtimeAdminData();
+    });
+
+    function bindRealtimeAdminData() {
+      onValue(ref(db, "leaderboards"), (snap) => {
+        boardsCache = snap.exists() ? snap.val() : {};
+        renderGameSelectors();
+        renderBoardTable();
+        renderUsersTable();
+      });
+      onValue(ref(db, "session"), (snap) => {
+        sessionCache = snap.exists() ? snap.val() : {};
+        populateSessionForm();
+      });
+      onValue(ref(db, "users"), (snap) => {
+        usersCache = snap.exists() ? snap.val() : {};
+        renderUsersTable();
+      });
+    }
+
+    function renderGameSelectors() {
+      const entries = Object.entries(boardsCache);
+      const gameSelect = document.querySelector("#game-select");
+      const sessGame = document.querySelector("#sess-game");
+
+      if (!selectedBoardId || !boardsCache[selectedBoardId]) {
+        selectedBoardId = entries[0]?.[0] || "";
+      }
+
+      gameSelect.replaceChildren(...entries.map(([id, b]) => {
+        const opt = document.createElement("option");
+        opt.value = id;
+        opt.textContent = b.name || id;
+        return opt;
+      }));
+      gameSelect.value = selectedBoardId;
+
+      sessGame.replaceChildren(...entries.map(([id, b]) => {
+        const opt = document.createElement("option");
+        opt.value = b.name || id;
+        opt.textContent = b.name || id;
+        return opt;
+      }));
+      if (sessionCache.gameTitle) sessGame.value = sessionCache.gameTitle;
+    }
+
+    document.querySelector("#game-select").addEventListener("change", (e) => {
+      selectedBoardId = e.target.value;
+      renderBoardTable();
+    });
+
+    function renderBoardTable() {
+      const tbody = document.querySelector("#board-tbody");
+      const board = boardsCache[selectedBoardId];
+      if (!board) {
+        tbody.replaceChildren();
+        return;
+      }
+      const isFortnite = String(board.name || "").trim().toLowerCase() === "fortnite";
+      document.querySelectorAll(".fn-col").forEach(el => el.hidden = !isFortnite);
+
+      const rows = normalizeRowsFromBoard(board);
+      tbody.replaceChildren(...rows.map((r, idx) => createBoardRowTr(r, isFortnite)));
+    }
+
+    function createBoardRowTr(r = ["", 0, "", "", "", false, 0, "", "", 0], isFortnite = false) {
+      const tr = document.createElement("tr");
+      const imgUrl = String(r[0] || "");
+      tr.innerHTML = `
+        <td><img class="avatar-preview" src="${imgUrl}" onerror="this.style.opacity='0.2'" alt=""></td>
+        <td><input type="url" data-col="0" value="${imgUrl.replace(/"/g, "&quot;")}" placeholder="https://..."></td>
+        <td><input type="number" data-col="1" value="${Number(r[1]) || 0}"></td>
+        <td><input type="text" data-col="2" value="${String(r[2] || "").replace(/"/g, "&quot;")}" placeholder="Display Name"></td>
+        <td><input type="text" data-col="3" value="${String(r[3] || "").replace(/"/g, "&quot;")}" placeholder="In-Game Username"></td>
+        <td><input type="text" data-col="4" value="${String(r[4] || "").replace(/"/g, "&quot;")}" placeholder="Character/Hero"></td>
+        <td style="text-align:center"><input type="checkbox" data-col="5" ${r[5] === true || String(r[5]).toLowerCase() === "true" ? "checked" : ""}></td>
+        <td><input type="number" data-col="6" value="${Number(r[6]) || 0}"></td>
+        <td class="fn-col" ${isFortnite ? "" : "hidden"}><input type="url" data-col="8" value="${String(r[8] || "").replace(/"/g, "&quot;")}" placeholder="Treasure URL"></td>
+        <td class="fn-col" ${isFortnite ? "" : "hidden"}><input type="number" data-col="9" value="${Number(r[9]) || 0}"></td>
+        <td><button class="btn danger" type="button" style="min-height:28px;padding:0 8px">×</button></td>
+      `;
+      tr.querySelector('input[data-col="0"]').addEventListener("input", (e) => {
+        const img = tr.querySelector(".avatar-preview");
+        img.src = e.target.value;
+        img.style.opacity = "1";
+      });
+      tr.querySelector("button").addEventListener("click", () => tr.remove());
+      return tr;
+    }
+
+    document.querySelector("#add-player-btn").addEventListener("click", () => {
+      const board = boardsCache[selectedBoardId];
+      if (!board) return;
+      const isFortnite = String(board.name || "").trim().toLowerCase() === "fortnite";
+      document.querySelector("#board-tbody").append(createBoardRowTr(["", 0, "", "", "", false, 0, "", "", 0], isFortnite));
+    });
+
+    document.querySelector("#recalc-ranks-btn").addEventListener("click", () => {
+      const trs = [...document.querySelectorAll("#board-tbody tr")];
+      const parsed = trs.map(tr => ({
+        tr,
+        elims: Number(tr.querySelector('[data-col="1"]').value) || 0
+      }));
+      parsed.sort((a, b) => b.elims - a.elims);
+      const tbody = document.querySelector("#board-tbody");
+      parsed.forEach((item, idx) => {
+        item.tr.querySelector('[data-col="6"]').value = idx + 1;
+        tbody.append(item.tr);
+      });
+      showToast("Sorted and ranked rows by eliminations. Click Save Sheet Changes to publish.");
+    });
+
+    document.querySelector("#save-board-btn").addEventListener("click", async () => {
+      const board = boardsCache[selectedBoardId];
+      if (!board) return;
+      const isFortnite = String(board.name || "").trim().toLowerCase() === "fortnite";
+      const trs = [...document.querySelectorAll("#board-tbody tr")];
+      const rows = [];
+      const players = {};
+
+      trs.forEach((tr, idx) => {
+        const img = tr.querySelector('[data-col="0"]').value.trim();
+        const elims = Number(tr.querySelector('[data-col="1"]').value) || 0;
+        const name = tr.querySelector('[data-col="2"]').value.trim();
+        const gameUsername = tr.querySelector('[data-col="3"]').value.trim();
+        const character = tr.querySelector('[data-col="4"]').value.trim();
+        const active = tr.querySelector('[data-col="5"]').checked;
+        const placement = Number(tr.querySelector('[data-col="6"]').value) || (idx + 1);
+        const tIcon = isFortnite ? tr.querySelector('[data-col="8"]').value.trim() : "";
+        const tQty = isFortnite ? (Number(tr.querySelector('[data-col="9"]').value) || 0) : 0;
+
+        if (!name && !gameUsername) return;
+        const rowArr = isFortnite
+          ? [img, elims, name, gameUsername, character, active, placement, "", tIcon, tQty]
+          : [img, elims, name, gameUsername, character, active, placement];
+        rows.push(rowArr);
+
+        const safeKey = (gameUsername || `player_${idx}`).replace(/[.#$\[\]\/]/g, "_");
+        players[safeKey] = {
+          image: img,
+          eliminations: elims,
+          name,
+          gameUsername,
+          character,
+          active,
+          placement,
+          treasureIcon: tIcon,
+          treasureQuantity: tQty
+        };
+      });
+
+      await set(ref(db, `leaderboards/${selectedBoardId}`), {
+        id: selectedBoardId,
+        name: board.name,
+        rows,
+        players
+      });
+      showToast(`Saved ${board.name} (${rows.length} players) to Firebase!`);
+    });
+
+    document.querySelector("#new-game-btn").addEventListener("click", async () => {
+      const name = prompt("Enter new game tab name (e.g., Valorant, Overwatch 2):");
+      if (!name || !name.trim()) return;
+      const newId = String(Date.now());
+      await set(ref(db, `leaderboards/${newId}`), {
+        id: newId,
+        name: name.trim(),
+        rows: [],
+        players: {}
+      });
+      selectedBoardId = newId;
+      showToast(`Created game tab "${name.trim()}".`);
+    });
+
+    document.querySelector("#delete-game-btn").addEventListener("click", async () => {
+      const board = boardsCache[selectedBoardId];
+      if (!board) return;
+      if (!confirm(`Delete the entire "${board.name}" leaderboard tab?`)) return;
+      await remove(ref(db, `leaderboards/${selectedBoardId}`));
+      selectedBoardId = "";
+      showToast(`Deleted "${board.name}".`);
+    });
+
+    // SESSION TAB
+    function populateSessionForm() {
+      document.querySelector("#sess-elims").value = Number(sessionCache.eliminations) || 0;
+      document.querySelector("#sess-wins").value = Number(sessionCache.wins) || 0;
+      document.querySelector("#sess-losses").value = Number(sessionCache.losses) || 0;
+      if (sessionCache.gameTitle) document.querySelector("#sess-game").value = sessionCache.gameTitle;
+
+      const fn = sessionCache.fortnite || {};
+      document.querySelector("#fn-elims").value = Number(fn.eliminations) || 0;
+      document.querySelector("#fn-wins").value = Number(fn.wins) || 0;
+      document.querySelector("#fn-losses").value = Number(fn.losses) || 0;
+      document.querySelector("#fn-start").value = fn.startTime || "";
+    }
+
+    document.querySelector("#fn-now-btn").addEventListener("click", () => {
+      const now = new Date();
+      const parts = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "America/New_York",
+        hour: "2-digit", minute: "2-digit", second: "2-digit",
+        day: "2-digit", month: "2-digit", year: "2-digit",
+        hour12: false
+      }).formatToParts(now);
+      const getPart = t => parts.find(p => p.type === t)?.value || "00";
+      document.querySelector("#fn-start").value = `${getPart("hour")}:${getPart("minute")}:${getPart("second")} ${getPart("day")}/${getPart("month")}/${getPart("year")}`;
+    });
+
+    document.querySelector("#save-session-btn").addEventListener("click", async () => {
+      const gameTitle = document.querySelector("#sess-game").value;
+      const matched = Object.entries(boardsCache).find(([, b]) => b.name === gameTitle);
+      const payload = {
+        eliminations: Number(document.querySelector("#sess-elims").value) || 0,
+        wins: Number(document.querySelector("#sess-wins").value) || 0,
+        losses: Number(document.querySelector("#sess-losses").value) || 0,
+        gameTitle,
+        gameSheetId: matched ? matched[0] : "",
+        fortnite: {
+          eliminations: Number(document.querySelector("#fn-elims").value) || 0,
+          wins: Number(document.querySelector("#fn-wins").value) || 0,
+          losses: Number(document.querySelector("#fn-losses").value) || 0,
+          startTime: document.querySelector("#fn-start").value.trim()
+        }
+      };
+      await set(ref(db, "session"), payload);
+      showToast("Session & Pirate Hunt settings saved!");
+    });
+
+    document.querySelector("#reset-session-btn").addEventListener("click", async () => {
+      if (!confirm("Reset session eliminations, wins, and losses to 0 and uncheck all online players?")) return;
+      await update(ref(db, "session"), { eliminations: 0, wins: 0, losses: 0 });
+      for (const [id, board] of Object.entries(boardsCache)) {
+        const rows = normalizeRowsFromBoard(board).map(r => {
+          const copy = [...r];
+          copy[5] = false;
+          return copy;
+        });
+        const players = { ...(board.players || {}) };
+        Object.keys(players).forEach(k => { players[k].active = false; });
+        await update(ref(db, `leaderboards/${id}`), { rows, players });
+      }
+      showToast("Session reset and all players marked offline.");
+    });
+
+    // USERS & ADMIN ROLES TAB
+    function renderUsersTable() {
+      const games = Object.values(boardsCache).map(b => b.name).filter(Boolean);
+      const thead = document.querySelector("#users-thead");
+      const tbody = document.querySelector("#users-tbody");
+
+      thead.innerHTML = `<tr>
+        <th>Firebase UID</th>
+        <th>Note / Label</th>
+        <th style="width:110px">Challenge Pts</th>
+        <th style="width:80px">Admin</th>
+        ${games.map(g => `<th>${g} Username</th>`).join("")}
+        <th style="width:65px">Remove</th>
+      </tr>`;
+
+      const userList = Object.values(usersCache);
+      tbody.replaceChildren(...userList.map(u => createUserTr(u, games)));
+    }
+
+    function createUserTr(u = { uid: "", label: "", challengePoints: 0, isAdmin: false, gameAccounts: {} }, games = []) {
+      const tr = document.createElement("tr");
+      const accs = u.gameAccounts || {};
+      tr.innerHTML = `
+        <td><input type="text" data-field="uid" value="${String(u.uid || "").replace(/"/g, "&quot;")}" placeholder="Firebase Auth UID"></td>
+        <td><input type="text" data-field="label" value="${String(u.label || "").replace(/"/g, "&quot;")}" placeholder="Player Note"></td>
+        <td><input type="number" data-field="points" value="${Number(u.challengePoints) || 0}"></td>
+        <td style="text-align:center"><input type="checkbox" data-field="isAdmin" ${u.isAdmin === true ? "checked" : ""}></td>
+        ${games.map(g => `<td><input type="text" data-game="${g.replace(/"/g, "&quot;")}" value="${String(accs[g] || "").replace(/"/g, "&quot;")}" placeholder="${g} ID"></td>`).join("")}
+        <td><button class="btn danger" type="button" style="min-height:28px;padding:0 8px">×</button></td>
+      `;
+      tr.querySelector("button").addEventListener("click", () => tr.remove());
+      return tr;
+    }
+
+    document.querySelector("#add-user-btn").addEventListener("click", () => {
+      const games = Object.values(boardsCache).map(b => b.name).filter(Boolean);
+      document.querySelector("#users-tbody").append(createUserTr({ uid: "", label: "", challengePoints: 0, isAdmin: false, gameAccounts: {} }, games));
+    });
+
+    document.querySelector("#save-users-btn").addEventListener("click", async () => {
+      const trs = [...document.querySelectorAll("#users-tbody tr")];
+      const nextUsers = {};
+      let adminCount = 0;
+
+      trs.forEach(tr => {
+        const uid = tr.querySelector('[data-field="uid"]').value.trim();
+        if (!uid) return;
+        const isAdmin = tr.querySelector('[data-field="isAdmin"]').checked;
+        if (isAdmin) adminCount++;
+        const gameAccounts = {};
+        tr.querySelectorAll("[data-game]").forEach(inp => {
+          const val = inp.value.trim();
+          if (val) gameAccounts[inp.dataset.game] = val;
+        });
+        nextUsers[uid] = {
+          uid,
+          label: tr.querySelector('[data-field="label"]').value.trim(),
+          challengePoints: Math.max(0, Number(tr.querySelector('[data-field="points"]').value) || 0),
+          isAdmin,
+          gameAccounts
+        };
+      });
+
+      if (adminCount === 0) {
+        alert("At least one user must remain an Admin so you do not lock yourself out!");
+        return;
+      }
+
+      await set(ref(db, "users"), nextUsers);
+      showToast(`Saved ${Object.keys(nextUsers).length} users (${adminCount} admin${adminCount === 1 ? "" : "s"})!`);
+    });
+  </script>
+</body>
+</html>
