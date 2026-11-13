@@ -1,4 +1,105 @@
-<script type="module">
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pirate Token Hunt Overlay</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{color-scheme:dark;--paper:#f3f6fa;--muted:#aab5c4;--line:#ffffff2b;--accent:#79e0ba;--display:"Barlow Condensed",Impact,sans-serif;--body:"DM Sans","Segoe UI",sans-serif}
+    *{box-sizing:border-box}
+    html,body{width:100%;min-width:320px;min-height:100%;margin:0;background:transparent}
+    body{padding:12px;color:var(--paper);font:14px var(--body);-webkit-font-smoothing:antialiased}
+    .overlay{width:min(100%,780px);margin:0 auto;filter:drop-shadow(0 5px 14px #0008)}
+    .heading{display:flex;min-height:48px;align-items:center;justify-content:space-between;gap:20px;padding:6px 16px;border:1px solid var(--line);border-bottom:0;border-radius:3px 3px 0 0;background:#111923e8}
+    .game-title{min-width:0;margin:0;overflow:hidden;font:800 26px/1 var(--display);text-overflow:ellipsis;text-transform:uppercase;white-space:nowrap}
+    .record{display:flex;flex:0 0 auto;align-items:center;gap:16px}
+    .record-stat{display:grid;grid-template-columns:16px auto;align-items:center;gap:8px;font:800 30px/1 var(--display);font-variant-numeric:tabular-nums}
+    .record-stat span:first-child{color:var(--muted);font:inherit;letter-spacing:1px}
+    .record-stat.wins span:first-child,.record-stat.wins .counter-counter{color:#64e69b}
+    .record-stat.losses span:first-child,.record-stat.losses .counter-counter{color:#ff766e}
+    .standings{overflow:hidden;border:0;border-radius:0;background:transparent}
+    .entry{display:grid;min-height:62px;grid-template-columns:54px minmax(0,1.5fr) minmax(100px,.8fr) 92px;align-items:center;column-gap:12px;padding:7px 16px;border-top:1px solid #ffffff20;transition:background .2s}
+    .entry{grid-template-columns:54px minmax(0,1fr) 92px;background:#17140fe8}
+    .slot-column{display:none}
+    .entry:first-child{border-top:0}
+    .entry[data-place="1"]{--medal:#f0c85c;--wash:#f0c85c24}
+    .entry[data-place="2"]{--medal:#d4dde8;--wash:#d4dde81a}
+    .entry[data-place="3"]{--medal:#df9b72;--wash:#df9b721c}
+    .entry[data-place]{background:linear-gradient(90deg,var(--wash),#17140fe8 85%);box-shadow:inset 3px 0 var(--medal)}
+    .rank{color:var(--muted);font:800 27px/1 var(--display);font-variant-numeric:tabular-nums;text-shadow:0 1px 3px #000,0 0 7px #000b}
+    .entry[data-place] .rank,.entry[data-place] .elims{color:var(--medal)}
+    .player{display:flex;min-width:0;align-items:center;gap:10px}
+    .avatar{display:grid;width:38px;height:38px;flex:0 0 38px;place-items:center;overflow:hidden;border:1px solid #ffffff32;border-radius:2px;background:#ffffff12;color:var(--accent);font:800 16px var(--display);text-transform:uppercase;filter:drop-shadow(0 1px 3px #000b)}
+    .avatar img{width:100%;height:100%;object-fit:cover}
+    .name{overflow:hidden;font-size:13px;font-weight:800;text-overflow:ellipsis;text-shadow:0 1px 3px #000,0 0 7px #000b;white-space:nowrap}
+    .you{margin-left:6px;color:var(--accent);font-size:9px;font-weight:800;letter-spacing:.6px;text-shadow:0 1px 3px #000,0 0 7px #000b;text-transform:uppercase}
+    .slot-column,.elims{display:flex;min-width:0;flex-direction:column;gap:3px}
+    .entry .slot-column{display:none}
+    .character{overflow:hidden;color:#d2dae4;font-size:12px;font-weight:600;text-overflow:ellipsis;text-shadow:0 1px 3px #000,0 0 7px #000b;white-space:nowrap}
+    .slot-label,.elims-label{color:var(--muted);font:700 8px/1 var(--body);letter-spacing:.8px;text-shadow:0 1px 3px #000,0 0 7px #000b;text-transform:uppercase}
+    .elims{align-items:flex-end;justify-content:center;color:var(--accent);font:800 23px/1 var(--display);font-variant-numeric:tabular-nums;text-align:right;text-shadow:0 1px 3px #000,0 0 7px #000b}
+    .elims-label{font-size:8px}
+    .entry .elims{display:flex;flex-flow:row wrap;align-items:center;justify-content:flex-end;column-gap:5px;row-gap:2px}
+    .entry .elims-label{flex-basis:100%;text-align:right}
+    .counter-delta{display:inline-block;padding:2px 5px;border:1px solid;border-radius:2px;font:700 10px/1 var(--body);white-space:nowrap}
+    .counter-delta.increase{border-color:#39df8c80;background:#39df8c20;color:#72f2ad}
+    .counter-delta.decrease{border-color:#ff795b80;background:#ff795b20;color:#ff9c87}
+    .elimination-feed{display:flex;flex-direction:column;align-items:flex-start;gap:7px;padding-top:9px}
+    .elimination-bubble{display:flex;min-height:48px;max-width:min(100%,420px);align-items:center;gap:10px;padding:5px 7px 5px 6px;border:1px solid #ffffff38;border-radius:4px;background:#111923e8;box-shadow:0 4px 14px #0006;animation:bubble-in .24s cubic-bezier(.2,.75,.25,1) both}
+    .elimination-bubble img,.bubble-initial{width:36px;height:36px;flex:0 0 36px;border:1px solid #ffffff32;border-radius:2px;object-fit:cover}
+    .bubble-initial{display:grid;place-items:center;background:#ffffff12;color:var(--accent);font:800 16px var(--display)}
+    .bubble-name{min-width:0;overflow:hidden;font-size:12px;font-weight:800;text-overflow:ellipsis;white-space:nowrap}
+    .bubble-count{display:grid;width:36px;height:36px;flex:0 0 36px;place-items:center;margin-left:4px;border:1px solid #ffffff44;border-radius:50%;background:#ffffff12;color:#64e69b;font:800 16px/1 var(--display);font-variant-numeric:tabular-nums}
+    .elimination-feed[hidden]{display:none}
+    @keyframes bubble-in{from{opacity:0;transform:translateY(7px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+    .status{margin:0;padding:12px 16px;border:1px solid var(--line);border-radius:3px;background:#111923e8;color:var(--muted);font-size:12px}
+    .status[hidden]{display:none}
+    .counter-counter{display:inline-flex;align-items:center;gap:0;direction:ltr;line-height:1;vertical-align:middle}
+    .counter-digit{position:relative;display:inline-block;width:.55em;height:1em;overflow:hidden;font-variant-numeric:tabular-nums;vertical-align:top}
+    .counter-number{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;width:100%;height:100%;line-height:1;will-change:transform}
+    .counter-separator{display:inline-block;width:.22em;text-align:center;vertical-align:top;line-height:1}
+    .counter-digit[hidden],.counter-separator[hidden]{display:none}
+    :root{--accent:#f0c65b;--line:#f0c65b4a}
+    .heading{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;border-color:#f0c65b55;background:#1a140ceF}
+    .hunt-heading{display:flex;min-width:0;align-items:center;justify-content:space-between;gap:12px}
+    .game-title{color:#f4d57e}
+    .hunt-meta{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:14px;min-height:40px;padding-top:7px;border-top:1px solid #f0c65b40}
+    .hunt-uptime{display:grid;grid-template-columns:auto auto;align-items:baseline;gap:8px;color:#ffe9ad;font:800 21px/1 var(--display);font-variant-numeric:tabular-nums;white-space:nowrap}
+    .hunt-uptime-label{color:var(--muted);font:700 8px/1 var(--body);letter-spacing:.8px;text-transform:uppercase}
+    .hunt-found-message{color:#ffe8a0;font:800 11px/1.2 var(--body);text-transform:uppercase}
+    .hunt-items{display:flex;min-width:0;justify-content:flex-end;gap:8px}
+    .hunt-items-panel{display:grid;min-width:0;gap:4px;justify-items:end}
+    .hunt-items-title{color:var(--muted);font:700 8px/1 var(--body);letter-spacing:.8px;text-transform:uppercase;text-shadow:0 1px 3px #000b}
+    .hunt-item{display:grid;justify-items:center;gap:2px;min-width:34px;color:#fff3ce;font:800 11px/1 var(--display);font-variant-numeric:tabular-nums}
+    .hunt-item img{width:30px;height:30px;object-fit:contain;filter:drop-shadow(0 2px 6px #000b)}
+    .hunt-item.one-piece img{filter:drop-shadow(0 0 7px #fff0a8) drop-shadow(0 0 15px #ffcf38) drop-shadow(0 0 24px #ff9f00);animation:overlay-treasure-glow 1.8s ease-in-out infinite alternate}
+    .hunt-item-count{min-height:1em}
+    .hunt-meta.complete .hunt-uptime{grid-template-columns:1fr;font-size:13px}
+    .hunt-meta.complete .hunt-uptime-label{display:none}
+    @keyframes overlay-treasure-glow{to{transform:scale(1.1);filter:drop-shadow(0 0 12px #fff6cf) drop-shadow(0 0 24px #ffcf38) drop-shadow(0 0 38px #ff9f00)}}
+    @media(max-width:520px){.heading{gap:7px}.hunt-heading{gap:7px}.hunt-meta{grid-template-columns:minmax(0,auto) minmax(0,1fr);gap:8px}.hunt-uptime{grid-template-columns:1fr;gap:3px;font-size:19px}.hunt-found-message{max-width:130px;font-size:9px}.hunt-items{gap:4px}.hunt-item{min-width:29px;font-size:10px}.hunt-item img{width:25px;height:25px}}
+    @media(max-width:520px){.entry{grid-template-columns:39px minmax(0,1fr) 66px;column-gap:7px;padding:6px 10px}.hunt-items-panel{gap:3px}.hunt-items-title{font-size:7px}}
+    @media(max-width:520px){body{padding:7px}.heading{min-height:52px;padding:8px 11px}.game-title{font-size:22px}.record{gap:10px}.record-stat{grid-template-columns:12px auto;gap:5px;font-size:24px}.record-stat span:first-child{font-size:9px}.entry{min-height:56px;grid-template-columns:39px minmax(0,1.4fr) minmax(68px,.8fr) 66px;column-gap:7px;padding:6px 10px}.rank{font-size:23px}.avatar{width:32px;height:32px;flex-basis:32px}.player{gap:7px}.name{font-size:11px}.character{font-size:10px}.slot-label,.elims-label{font-size:7px}.elims{font-size:20px}.elimination-bubble{min-height:43px}.elimination-bubble img,.bubble-initial,.bubble-count{width:32px;height:32px;flex-basis:32px}}
+    @media(max-width:520px){body{padding:7px}.heading{min-height:52px;padding:8px 11px}.game-title{font-size:22px}.record{gap:10px}.record-stat{grid-template-columns:12px auto;gap:5px;font-size:24px}.record-stat span:first-child{font-size:9px}.entry{min-height:56px;grid-template-columns:39px minmax(0,1.4fr) minmax(68px,.8fr) 66px;column-gap:7px;padding:6px 10px}.rank{font-size:23px}.avatar{width:32px;height:32px;flex-basis:32px}.player{gap:7px}.name{font-size:11px}.character{font-size:10px}.slot-label,.elims-label{font-size:7px}.elims{font-size:20px}.elimination-bubble{min-height:43px}.elimination-bubble img,.bubble-initial,.bubble-count{width:32px;height:32px;flex-basis:32px}}
+    @media(max-width:520px){.heading{min-height:44px;padding:5px 11px}.record-stat span:first-child{font-size:24px}}
+    @media(max-width:520px){.entry{grid-template-columns:39px minmax(0,1fr) 66px}.entry .elims{font-size:20px}.counter-delta{padding:2px 3px;font-size:9px}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+  </style>
+</head>
+<body>
+  <main class="overlay" aria-label="Live leaderboard overlay" hidden>
+    <header class="heading">
+      <div class="hunt-heading"><h1 class="game-title" id="game-title">Pirate Token Hunt</h1><div class="record" aria-label="Fortnite session wins and losses"><div class="record-stat wins"><span>W</span><span id="session-wins" aria-label="Session wins">0</span></div><div class="record-stat losses"><span>L</span><span id="session-losses" aria-label="Session losses">0</span></div></div></div>
+      <div class="hunt-meta" id="hunt-meta"><div class="hunt-uptime"><span class="hunt-uptime-label">Uptime</span><span class="hunt-found-message" id="hunt-found-message" hidden>The One Piece has been Found!</span><span id="uptime-timer">--:--:--</span></div><div class="hunt-items-panel"><span class="hunt-items-title">Items Collected</span><div class="hunt-items" id="hunt-items" aria-label="Items collected"></div></div></div>
+    </header>
+    <section class="standings" id="standings" aria-label="Currently online players"></section>
+    <section class="elimination-feed" id="elimination-feed" aria-label="Recent eliminations" aria-live="polite" hidden></section>
+  </main>
+  <p class="status" id="status" role="status">Connecting to the live leaderboard…</p>
+  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getDatabase, onValue, ref, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
@@ -187,3 +288,5 @@
 
     connect();
   </script>
+</body>
+</html>
