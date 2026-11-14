@@ -42,7 +42,7 @@
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
     .entry[data-place="1"] .rank{color:#e8bb49}.live-dot{box-shadow:0 0 12px #0095ff99}
     .privacy-link{padding:0 2px 24px;color:var(--muted);font-size:11px}.privacy-link a{color:var(--muted);text-underline-offset:3px}.privacy-link a:hover{color:var(--paper)}
-    .session-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:18px;border:1px solid var(--line);background:var(--panel)}.session-stat{min-width:0;padding:14px 18px}.session-stat+.session-stat{border-left:1px solid var(--line)}.session-stat-label{display:block;margin-bottom:5px;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase}.session-stat-value{display:block;color:var(--lime);font:800 28px/1 var(--display);font-variant-numeric:tabular-nums}.session-error{grid-column:1/-1;margin:0;padding:7px 12px;border-top:1px solid var(--line);color:#ffb09d;font-size:11px}.session-error[hidden]{display:none}
+    .session-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;margin-bottom:18px;border:1px solid var(--line);background:var(--panel)}.session-stat{min-width:0;padding:14px 18px}.session-stat+.session-stat{border-left:1px solid var(--line)}.session-stat-label{display:block;margin-bottom:5px;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase}.session-stat-value{display:block;color:var(--lime);font:800 28px/1 var(--display);font-variant-numeric:tabular-nums}.session-error{grid-column:1/-1;margin:0;padding:7px 12px;border-top:1px solid var(--line);color:#ffb09d;font-size:11px}.session-error[hidden]{display:none}
     @media(max-width:700px){.session-stat{padding:12px 10px}.session-stat-label{font-size:8px;letter-spacing:.6px}.session-stat-value{font-size:23px}}
     .player-trigger{width:100%;padding:0;border:0;background:transparent;color:inherit;text-align:left;cursor:pointer}.player-trigger:hover .name{text-decoration:underline;text-decoration-color:var(--lime);text-underline-offset:3px}.player-trigger:focus-visible{outline:2px solid var(--lime);outline-offset:3px}
     .hero-actions{display:flex;align-items:center;gap:9px}
@@ -51,11 +51,11 @@
     dialog{width:min(460px,calc(100% - 28px));max-height:min(84vh,700px);overflow:auto;padding:22px;border:1px solid var(--line);border-radius:4px;background:var(--panel);color:var(--paper);box-shadow:0 22px 70px #000b}dialog::backdrop{background:#070b13c9;backdrop-filter:blur(4px)}.dialog-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}.dialog-heading h2{font:800 27px/1 var(--display);text-transform:uppercase}.dialog-close{width:34px;height:34px;flex:0 0 34px;border:1px solid var(--line);border-radius:3px;background:var(--ink);color:var(--paper);cursor:pointer;font-size:18px}.dialog-copy{margin:0 0 16px;color:var(--muted);line-height:1.55}.profile-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin:16px 0;border:1px solid var(--line)}.profile-metric{padding:13px}.profile-metric+ .profile-metric{border-left:1px solid var(--line)}.profile-metric span{display:block;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase}.profile-metric strong{display:block;margin-top:4px;color:var(--lime);font:800 27px/1 var(--display)}.challenge-form{display:grid;gap:13px}.challenge-form label{display:grid;gap:6px;color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.7px;text-transform:uppercase}.challenge-form input{width:100%;height:40px;padding:0 10px;border:1px solid var(--line);border-radius:3px;background:var(--ink);color:var(--paper);font-size:13px;letter-spacing:0;text-transform:none}.challenge-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:4px}.challenge-button{min-height:40px;padding:0 14px;border:1px solid var(--line);border-radius:3px;background:var(--soft);color:var(--paper);cursor:pointer;font-size:12px;font-weight:700}.challenge-button.primary{border-color:var(--lime);background:var(--lime);color:var(--ink)}.challenge-button.danger{border-color:#ff795b80;background:#ff795b20;color:#ff9c87}.challenge-button:disabled{cursor:wait;opacity:.6}.challenge-target{display:block;margin:-7px 0 2px;color:var(--muted);font-size:12px}.challenge-reward{color:#72f2ad;font-size:12px}.challenge-status{padding:12px;border:1px solid var(--line);background:var(--ink);color:var(--muted);line-height:1.55}.challenge-toast{position:fixed;z-index:50;right:20px;bottom:20px;width:min(370px,calc(100vw - 32px));padding:14px 16px;border:1px solid var(--line);border-left:3px solid var(--lime);background:var(--panel);box-shadow:0 12px 35px #0008;color:var(--paper);line-height:1.5}.challenge-toast[hidden]{display:none}.challenge-toast strong{display:block;margin-bottom:3px}
     @media(max-width:700px){.hero-actions{flex-wrap:wrap}}
     @media(max-width:600px){dialog{padding:18px}.challenge-toast{right:16px;bottom:16px}}
-  </style>
+  .board.no-character-column .columns,.board.no-character-column .entry{grid-template-columns:54px minmax(0,1fr) 92px}\n    .profile-menu-identity{background-position:center;background-size:cover;background-repeat:no-repeat;border-radius:4px;padding:12px;background-color:#111923}\n    </style>
 </head>
 <body>
   <div class="page">
-    <header class="topbar"><div class="brand"><img src="icon.png" alt=""></div><div class="account-profile" id="account-profile" hidden><a class="refresh" id="admin-link" href="admin.html" style="min-height:34px;padding:0 11px;font-size:11px;text-decoration:none" hidden>Admin Panel</a><button class="account-trigger" id="account-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="account-menu"><span id="account-greeting"></span><img id="account-photo" alt="" hidden></button><div class="profile-menu" id="account-menu" role="menu" hidden><div class="profile-menu-identity"><img id="menu-photo" alt="" hidden><div><span class="profile-menu-name" id="menu-name"></span><span class="profile-menu-email" id="menu-email"></span></div></div><div class="profile-menu-uid"><span>User ID</span><code id="menu-uid"></code></div><button class="access-button signout-button" type="button" role="menuitem">Sign out</button></div></div></header>
+    <header class="topbar"><div class="brand"><img src="icon.png" alt=""></div><div class="account-profile" id="account-profile" hidden><a class="refresh" id="admin-link" href="admin.html" style="min-height:34px;padding:0 11px;font-size:11px;text-decoration:none" hidden>Admin Panel</a><button class="account-trigger" id="account-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="account-menu"><span id="account-greeting"></span><img id="account-photo" alt="" hidden></button><div class="profile-menu" id="account-menu" role="menu" hidden><div class="profile-menu-identity" id="profile-menu-identity"><img id="menu-photo" alt="" hidden><div><span class="profile-menu-name" id="menu-name"></span><span class="profile-menu-email" id="menu-email"></span></div></div><div class="profile-menu-uid"><span>Firebase ID</span><code id="menu-uid"></code><span>Discord ID</span><code id="menu-discord-id"></code></div><button class="access-button signout-button" type="button" role="menuitem">Sign out</button></div></div></header>
     <main>
       <section class="hero" aria-labelledby="page-title"><div><h1 id="page-title">Elimination<br>Leaderboard</h1><p class="hero-copy">Earn elims, complete challenges, and get to the top!</p></div><div class="hero-actions"><button class="refresh" id="challenge-center" type="button" hidden>Challenges</button><button class="refresh" id="group-challenge" type="button" title="Challenge everyone online" hidden>Group Challenge</button></div></section>
       <section class="access-panel" id="access-panel" aria-labelledby="access-heading">
@@ -66,9 +66,9 @@
       </section>
       <div class="member-content" id="member-content" hidden>
         <p class="error" id="error" role="alert"></p>
-        <section class="session-stats" aria-label="Session statistics" aria-live="polite"><div class="session-stat"><span class="session-stat-label">Session Eliminations</span><strong class="session-stat-value" id="session-eliminations">--</strong></div><div class="session-stat"><span class="session-stat-label">Session Wins</span><strong class="session-stat-value" id="session-wins">--</strong></div><div class="session-stat"><span class="session-stat-label">Session Losses</span><strong class="session-stat-value" id="session-losses">--</strong></div><p class="session-error" id="session-error" role="status" hidden>Session totals could not be loaded.</p></section>
+        <section class="session-stats" aria-label="Session statistics" aria-live="polite"><div class="session-stat"><span class="session-stat-label">Session Eliminations</span><strong class="session-stat-value" id="session-eliminations">--</strong></div><div class="session-stat"><span class="session-stat-label">Session Wins</span><strong class="session-stat-value" id="session-wins">--</strong></div><div class="session-stat"><span class="session-stat-label">Session Losses</span><strong class="session-stat-value" id="session-losses">--</strong></div><button class="refresh" id="quick-reset-session" type="button" hidden style="min-height:34px;margin:8px">Reset Session</button><p class="session-error" id="session-error" role="status" hidden>Session totals could not be loaded.</p></section>
         <section class="board" aria-label="Leaderboard standings"><div class="toolbar"><div class="controls"><select class="sheet-select" id="sheet-select" aria-label="Choose leaderboard sheet" disabled><option>Loading sheets...</option></select><div class="tabs" role="group" aria-label="Filter players"><button class="tab" type="button" data-filter="all" aria-pressed="true">All Players</button><button class="tab" type="button" data-filter="active" aria-pressed="false">Online Now</button></div><label class="search-wrap"><svg class="search-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.7" cy="8.7" r="5.7"/><path d="m13 13 4 4"/></svg><input class="search" id="search" type="search" placeholder="Find a player" aria-label="Find a player"></label></div></div>
-          <div class="columns" aria-hidden="true"><span>Place</span><span>Player</span><span>Character</span><span>Eliminations</span></div><div id="leaderboard" aria-live="polite"></div><div class="empty" id="empty"><strong>No players found</strong><span>Try another name or change the filter.</span></div>
+          <div class="columns" aria-hidden="true"><span>Place</span><span>Player</span><span id="character-heading">Character</span><span>Eliminations</span></div><div id="leaderboard" aria-live="polite"></div><div class="empty" id="empty"><strong>No players found</strong><span>Try another name or change the filter.</span></div>
         </section>
         <footer class="footer"><span class="footer-meta"><span id="updated">Waiting for sheet data</span><span id="next-update"></span></span><span>Powered by Tech Guy Graphics</span></footer>
       </div>
@@ -76,7 +76,7 @@
     <footer class="privacy-link"><a href="privacy.html">Privacy Policy</a></footer>
   </div>
   <dialog id="profile-dialog" aria-labelledby="profile-title"><div class="dialog-heading"><h2 id="profile-title">Player Profile</h2><button class="dialog-close" type="button" data-close-dialog aria-label="Close">×</button></div><div class="profile-identity"><img class="profile-avatar" id="profile-avatar" alt=""><p class="dialog-copy" id="profile-name">Loading profile…</p></div><div class="login-loading profile-loading" id="profile-loading" role="status"><span class="loading-spinner" aria-hidden="true"></span><span>Loading player stats…</span></div><div class="profile-summary" id="profile-summary" hidden><div class="profile-metric"><span>Overall Eliminations</span><strong id="profile-eliminations">--</strong></div><div class="profile-metric"><span>Challenge Points</span><strong id="profile-points">--</strong></div></div><div class="challenge-actions profile-actions" id="profile-actions" hidden><button class="challenge-button primary" id="profile-challenge" type="button">Challenge</button><button class="challenge-button primary" id="profile-1v1" type="button">1v1</button></div><div class="challenge-actions"><button class="challenge-button" type="button" data-close-dialog>Close</button></div></dialog>
-  <dialog id="challenge-dialog" class="challenge-dialog" aria-labelledby="challenge-title"><div class="dialog-heading"><h2 id="challenge-title">Create Challenge</h2><button class="dialog-close" type="button" data-close-dialog aria-label="Close">×</button></div><p class="challenge-target" id="challenge-target"></p><form class="challenge-form" id="challenge-form"><label>Challenge title<input id="challenge-name" name="title" maxlength="60" required placeholder="Most eliminations wins"></label><label>Eliminations to complete<input id="challenge-eliminations" name="eliminations" type="number" min="1" max="1000" step="1" value="10" required></label><label id="time-limit-field">Time limit in minutes<input id="challenge-time" name="timeLimitMinutes" type="number" min="1" max="1440" step="1" value="30" required></label><label class="time-limit-toggle" id="no-time-limit-option" hidden><input id="challenge-no-limit" type="checkbox">No time limit</label><div class="challenge-wager" id="challenge-wager" hidden><span class="challenge-wager-label">Challenge points available</span><span class="challenge-wager-balance" id="challenge-wager-balance"></span><label>Points each player wagers<input id="challenge-wager-points" type="number" min="0" step="1" value="0"></label></div><p class="challenge-reward" id="challenge-reward">Reward: 20 points</p><div class="challenge-actions"><button class="challenge-button primary" type="submit" id="send-challenge">Send Challenge</button><button class="challenge-button" type="button" data-close-dialog>Cancel</button></div></form></dialog>
+  <dialog id="active-game-dialog" class="challenge-dialog"><div class="dialog-heading"><h2>Active Game Changed</h2></div><p class="dialog-copy" id="active-game-copy"></p><div class="challenge-actions"><button class="challenge-button primary" id="switch-active-game" type="button">Switch display</button><button class="challenge-button" id="keep-selected-game" type="button">Keep current game</button></div></dialog><dialog id="challenge-dialog" class="challenge-dialog" aria-labelledby="challenge-title"><div class="dialog-heading"><h2 id="challenge-title">Create Challenge</h2><button class="dialog-close" type="button" data-close-dialog aria-label="Close">×</button></div><p class="challenge-target" id="challenge-target"></p><form class="challenge-form" id="challenge-form"><label>Challenge title<input id="challenge-name" name="title" maxlength="60" required placeholder="Most eliminations wins"></label><label>Eliminations to complete<input id="challenge-eliminations" name="eliminations" type="number" min="1" max="1000" step="1" value="10" required></label><label>Maximum deaths (optional)<input id="challenge-max-deaths" type="number" min="1" max="100" step="1" placeholder="No death limit"></label><label id="challenge-character-field">Required character / hero (optional)<input id="challenge-character" type="text" maxlength="60" placeholder="Enter exact in-game name"><small>Use the full correct name and spelling. Matching is not case-sensitive.</small></label><label id="challenge-mvp-field" hidden>Minimum MVPs (Counter-Strike 2 only)<input id="challenge-min-mvps" type="number" min="1" max="100" step="1" placeholder="No MVP requirement"></label><label class="time-limit-toggle"><input id="challenge-before-match-ends" type="checkbox">Must complete before the match ends</label><label id="time-limit-field">Time limit in minutes<input id="challenge-time" name="timeLimitMinutes" type="number" min="1" max="1440" step="1" value="30" required></label><label class="time-limit-toggle" id="no-time-limit-option" hidden><input id="challenge-no-limit" type="checkbox">No time limit</label><div class="challenge-wager" id="challenge-wager" hidden><span class="challenge-wager-label">Challenge points available</span><span class="challenge-wager-balance" id="challenge-wager-balance"></span><label>Points each player wagers<input id="challenge-wager-points" type="number" min="0" step="1" value="0"></label></div><p class="challenge-reward" id="challenge-reward">Reward: 20 points</p><div class="challenge-actions"><button class="challenge-button primary" type="submit" id="send-challenge">Send Challenge</button><button class="challenge-button" type="button" data-close-dialog>Cancel</button></div></form></dialog>
   <dialog id="incoming-dialog" class="challenge-dialog" aria-labelledby="incoming-title"><div class="dialog-heading"><h2 id="incoming-title">Challenge Received</h2><button class="dialog-close" type="button" data-close-dialog aria-label="Close">×</button></div><p class="dialog-copy" id="incoming-copy"></p><p class="challenge-status" id="incoming-status"></p><div class="participant-progress" id="incoming-participants" aria-live="polite"></div><div class="challenge-actions" id="incoming-actions"><button class="challenge-button primary" id="accept-challenge" type="button">Accept and Start</button><button class="challenge-button danger" id="deny-challenge" type="button">Deny</button></div><button class="challenge-button danger" id="abandon-challenge" type="button" hidden>Abandon Challenge</button></dialog>
   <dialog id="challenge-center-dialog" class="challenge-dialog" aria-labelledby="challenge-center-title"><div class="dialog-heading"><h2 id="challenge-center-title">Challenges</h2><button class="dialog-close" type="button" data-close-dialog aria-label="Close">×</button></div><div class="challenge-center-list" id="challenge-center-list"></div></dialog>
   <dialog id="challenge-stats-dialog" class="challenge-dialog" aria-labelledby="challenge-stats-title"><div class="dialog-heading"><h2 id="challenge-stats-title">Challenge Stats</h2><button class="dialog-close" type="button" data-close-dialog aria-label="Close">×</button></div><p class="dialog-copy" id="challenge-stats-copy"></p><div class="participant-progress" id="challenge-stats-participants" aria-live="polite"></div><form class="spectator-bet" id="spectator-bet" hidden><label>Back a player<select id="challenge-bet-side"></select></label><label>Bet challenge points<input id="challenge-bet-amount" type="number" min="1" step="1" required></label><span class="challenge-wager-balance" id="spectator-bet-balance"></span><button class="challenge-button primary" type="submit">Place bet</button></form></dialog>
@@ -84,7 +84,7 @@
   <script type="module">
     import {
       auth, db, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut,
-      onDisconnect, onValue, ref, set, get,
+      onDisconnect, onValue, ref, set, get, update,
       getUserRecord, getGameCatalog, normalizeRowsFromBoard, runFirebaseChallengeAction
     } from "./firebase-bridge.js";
 
@@ -113,7 +113,35 @@
     function renderTreasure(rows) { const tList = document.querySelector("#treasure-list"); if (!tList) return; const items = (rows || []).map((row, index) => ({ url: String(row[8] ?? "").trim(), quantity: number(row[9]), index })).filter(item => item.quantity > 0 && /^https:\/\//i.test(item.url)); const found = number(rows?.[0]?.[9]) === 1; setHuntFound(found); const tEmpty = document.querySelector("#treasure-empty"); if (tEmpty) tEmpty.hidden = items.length > 0; tList.querySelectorAll(".treasure-item").forEach(item => item.remove()); items.forEach(item => { const entry = document.createElement("div"); entry.className = `treasure-item${found && item.index === 0 ? " one-piece" : ""}`; const image = document.createElement("img"); image.className = "treasure-icon"; image.src = item.url; image.alt = "Treasure found"; image.loading = "lazy"; image.referrerPolicy = "no-referrer"; const quantity = document.createElement("span"); quantity.className = "treasure-quantity"; quantity.textContent = `×${item.quantity.toLocaleString()}`; entry.append(image, quantity); tList.append(entry); }); }
     if (IS_FORTNITE_HUNT) window.setInterval(updateHuntTimer, 1000);
 
+    let lastActiveGameId = "";
+    let activeGameInitialized = false;
     function updateSessionStats(data) {
+      if (!IS_FORTNITE_HUNT && data?.activeGameId) {
+        const activeGame = state.sheetNames.find(name => state.sheetIds[name] === String(data.activeGameId)) ||
+          state.sheetNames.find(name => name.toLowerCase() === String(data.activeGameName || data.gameTitle || "").toLowerCase());
+        const requestedGame = new URLSearchParams(location.search).get("game");
+        const hasExplicitGame = Boolean(requestedGame);
+        if (!activeGameInitialized) {
+          activeGameInitialized = true;
+          if (!hasExplicitGame && activeGame) {
+            state.selectedSheet = activeGame;
+            const select = document.querySelector("#sheet-select");
+            if (select) select.value = activeGame;
+            subscribeToSelectedSheet();
+          } else if (hasExplicitGame && activeGame && activeGame.toLowerCase() !== state.selectedSheet.toLowerCase()) {
+            document.querySelector("#active-game-copy").textContent = `The active game is ${activeGame}. Would you like to switch the leaderboard display?`;
+            document.querySelector("#active-game-dialog").showModal();
+            document.querySelector("#switch-active-game").onclick = () => { state.selectedSheet = activeGame; const u = new URL(location.href); u.searchParams.set("game", activeGame); history.replaceState(null,"",u); document.querySelector("#sheet-select").value=activeGame; subscribeToSelectedSheet(); document.querySelector("#active-game-dialog").close(); };
+            document.querySelector("#keep-selected-game").onclick = () => document.querySelector("#active-game-dialog").close();
+          }
+        } else if (lastActiveGameId && lastActiveGameId !== String(data.activeGameId) && activeGame && activeGame !== state.selectedSheet) {
+          document.querySelector("#active-game-copy").textContent = `The active game changed to ${activeGame}. Switch the leaderboard display?`;
+          document.querySelector("#active-game-dialog").showModal();
+          document.querySelector("#switch-active-game").onclick = () => { state.selectedSheet=activeGame; const u=new URL(location.href); u.searchParams.set("game",activeGame); history.replaceState(null,"",u); document.querySelector("#sheet-select").value=activeGame; subscribeToSelectedSheet(); document.querySelector("#active-game-dialog").close(); };
+          document.querySelector("#keep-selected-game").onclick = () => document.querySelector("#active-game-dialog").close();
+        }
+        lastActiveGameId = String(data.activeGameId);
+      }
       const stats = [document.querySelector("#session-eliminations"), document.querySelector("#session-wins"), document.querySelector("#session-losses")];
       const status = document.querySelector("#session-error");
       if (IS_FORTNITE_HUNT) {
@@ -208,7 +236,7 @@
       document.querySelector("#incoming-copy").textContent = pending ? `${displayChallengeName(challenge.creatorName)} sent you ${challenge.mode === "group" ? "a group challenge" : challenge.mode === "1v1" ? "a 1v1 challenge" : "a challenge"}.` : `${challenge.mode === "1v1" ? "Both players started together." : "Challenge progress"} · ${displayChallengeName(challenge.creatorName)}`;
       const timeLabel = challenge.noTimeLimit ? "No time limit" : `${challenge.timeLimitMinutes} min`;
       const deadline = participant.status === "active" && !challenge.noTimeLimit ? ` · ${formatRemaining(participant.deadline)}` : "";
-      document.querySelector("#incoming-status").textContent = `${challenge.title} · Goal: ${number(challenge.eliminations).toLocaleString()} eliminations · ${timeLabel} · ${number(challenge.rewardPoints).toLocaleString()} base points${challenge.wagerPoints ? ` · ${number(challenge.wagerPoints).toLocaleString()} each wagered` : ""}${challenge.winnerName ? ` · Winner: ${displayChallengeName(challenge.winnerName)}` : deadline}`;
+      document.querySelector("#incoming-status").textContent = `${challenge.title} · Goal: ${number(challenge.eliminations).toLocaleString()} eliminations${challenge.constraints?.maxDeaths ? ` · Before ${challenge.constraints.maxDeaths} deaths` : ""}${challenge.constraints?.requiredCharacter ? ` · As ${challenge.constraints.requiredCharacter}` : ""}${challenge.constraints?.minMVPs ? ` · At least ${challenge.constraints.minMVPs} MVPs` : ""}${challenge.constraints?.beforeMatchEnds ? " · Before match ends" : ""} · ${timeLabel} · ${number(challenge.rewardPoints).toLocaleString()} base points${challenge.wagerPoints ? ` · ${number(challenge.wagerPoints).toLocaleString()} each wagered` : ""}${challenge.winnerName ? ` · Winner: ${displayChallengeName(challenge.winnerName)}` : deadline}`;
       renderParticipantProgress(challenge, document.querySelector("#incoming-participants"));
       actions.hidden = !pending;
       abandon.hidden = participant.status !== "active";
@@ -232,14 +260,15 @@
         identity.append(makeLeaderboardAvatar(participant.image, displayName), Object.assign(document.createElement("span"), { className: "participant-name", textContent: displayName }));
         const status = Object.assign(document.createElement("span"), { className: "participant-status", textContent: participant.status });
         const progress = Math.min(goal, Math.max(0, number(participant.progress)));
-        const count = Object.assign(document.createElement("span"), { className: "participant-count", textContent: `${progress.toLocaleString()} / ${goal.toLocaleString()} eliminations${actorId === state.actorId ? " · You" : ""}` });
+        const count = Object.assign(document.createElement("span"), { className: "participant-count", textContent: `${progress.toLocaleString()} / ${goal.toLocaleString()} eliminations · ${number(participant.deaths)} deaths${participant.currentCharacter ? ` · ${participant.currentCharacter}` : ""}${participant.constraintsSatisfied ? ` · ${Object.entries(participant.constraintsSatisfied).map(([k,v]) => `${k}: ${v ? "✓" : "—"}`).join(" · ")}` : ""}${actorId === state.actorId ? " · You" : ""}` });
         const bar = Object.assign(document.createElement("progress"), { max: goal, value: progress });
         row.append(identity, status, count, bar);
         return row;
       }));
     }
 
-    function refreshOpenChallenge() {
+    async function refreshOpenChallenge() {
+      refreshChallengeTelemetry().catch(error => console.warn("Challenge telemetry refresh failed:", error));
       const dialog = document.querySelector("#incoming-dialog");
       if (dialog.open) {
         const challenge = state.challenges[dialog.dataset.challengeId], participant = challengeParticipant(challenge);
@@ -253,6 +282,64 @@
       if (document.querySelector("#challenge-center-dialog").open) renderChallengeCenter();
     }
 
+
+    let telemetryRefreshBusy = false;
+    async function refreshChallengeTelemetry() {
+      if (telemetryRefreshBusy || !state.actorId) return;
+      telemetryRefreshBusy = true;
+      try {
+        for (const [challengeId, challenge] of Object.entries(state.challenges || {})) {
+          const participant = challenge.participants?.[state.actorId];
+          if (!participant || participant.status !== "active" || !participant.gameUsername) continue;
+          const gameKey = challenge.gameSheetId || state.sheetIds[challenge.gameTitle] || state.sheetIds[state.selectedSheet];
+          if (!gameKey) continue;
+          const safeName = String(participant.gameUsername).trim().toLowerCase().replace(/[.#$\[\]\/]/g, "_");
+          const snap = await get(ref(db, `gameTelemetry/${gameKey}/${safeName}`));
+          if (!snap.exists()) continue;
+          const telemetry = snap.val() || {};
+          const kills = Math.max(0, number(telemetry.eliminations));
+          const deaths = Math.max(0, number(telemetry.deaths));
+          const mvps = Math.max(0, number(telemetry.mvps));
+          const character = String(telemetry.character || "").trim();
+          if (!participant.telemetryInitialized) {
+            participant.telemetryInitialized = true;
+            participant.startingMatchEliminations = kills;
+            participant.lastTelemetryEliminations = kills;
+            participant.progress = 0;
+          } else {
+            const previousTelemetryKills = number(participant.lastTelemetryEliminations);
+            const delta = Math.max(0, kills - previousTelemetryKills);
+            const requiredCharacter = String(challenge.constraints?.requiredCharacter || "").trim();
+            const characterMatches = !requiredCharacter ||
+              character.toLocaleLowerCase() === requiredCharacter.toLocaleLowerCase();
+            if (characterMatches) participant.progress = number(participant.progress) + delta;
+            participant.lastTelemetryEliminations = kills;
+          }
+          participant.deaths = deaths;
+          participant.currentCharacter = character;
+          const constraints = challenge.constraints || {};
+          const deathSatisfied = constraints.maxDeaths == null || deaths < Number(constraints.maxDeaths);
+          const characterSatisfied = !constraints.requiredCharacter || number(participant.progress) > 0;
+          const goalSatisfied = number(participant.progress) >= number(challenge.eliminations);
+          const mvpSatisfied = constraints.minMVPs == null || mvps >= Number(constraints.minMVPs);
+          const matchEndSatisfied = !constraints.beforeMatchEnds || telemetry.matchActive === true;
+          participant.constraintsSatisfied = {
+            eliminations: goalSatisfied,
+            deaths: deathSatisfied,
+            character: characterSatisfied,
+            beforeMatchEnds: matchEndSatisfied,
+            mvps: mvpSatisfied
+          };
+          if (!deathSatisfied) participant.status = "failed";
+          else if (goalSatisfied && deathSatisfied && characterSatisfied && matchEndSatisfied && mvpSatisfied) participant.status = "completed";
+          else if (telemetry.matchActive === false && (constraints.beforeMatchEnds || (constraints.minMVPs != null && !mvpSatisfied))) participant.status = "failed";
+          participant.updatedAt = Date.now();
+          await set(ref(db, `challenges/${challengeId}/participants/${state.actorId}`), participant);
+        }
+      } finally {
+        telemetryRefreshBusy = false;
+      }
+    }
     function announceStartedDuels(previous, challenges) {
       Object.entries(challenges).forEach(([id, challenge]) => {
         const oldChallenge = previous[id];
@@ -269,7 +356,14 @@
       const dialog = document.querySelector("#challenge-stats-dialog"), betForm = document.querySelector("#spectator-bet"), sideSelect = document.querySelector("#challenge-bet-side"), betAmount = document.querySelector("#challenge-bet-amount");
       dialog.dataset.challengeId = challengeId;
       document.querySelector("#challenge-stats-title").textContent = challenge.mode === "1v1" ? (challenge.status === "completed" ? "1v1 Results" : "1v1 In Progress") : "Group Challenge";
-      document.querySelector("#challenge-stats-copy").textContent = `${challenge.title} · ${challenge.winnerName ? `${challenge.winnerName} won` : `First to ${number(challenge.eliminations).toLocaleString()} eliminations`}`;
+      const constraints = challenge.constraints || {};
+       const parameterText = [
+         constraints.maxDeaths ? `before ${constraints.maxDeaths} deaths` : "",
+         constraints.requiredCharacter ? `as ${constraints.requiredCharacter}` : "",
+         constraints.minMVPs ? `at least ${constraints.minMVPs} MVPs` : "",
+         constraints.beforeMatchEnds ? "before the match ends" : ""
+       ].filter(Boolean).join(" · ");
+       document.querySelector("#challenge-stats-copy").textContent = `${challenge.title} · ${challenge.winnerName ? `${challenge.winnerName} won` : `Goal: ${number(challenge.eliminations).toLocaleString()} eliminations`}${parameterText ? ` · ${parameterText}` : ""}`;
       renderParticipantProgress(challenge, document.querySelector("#challenge-stats-participants"));
       const existingBet = challenge.bets?.[state.actorId], isSpectator = challenge.mode === "1v1" && challenge.status === "active" && !challenge.participants?.[state.actorId];
       betForm.hidden = !isSpectator;
@@ -317,6 +411,10 @@
       document.querySelector("#challenge-target").textContent = mode === "group" ? "Sent to approved players currently online." : `Challenge ${displayChallengeName(state.profileTarget?.name)}.`;
       document.querySelector("#challenge-title").textContent = mode === "group" ? "Create Group Challenge" : mode === "1v1" ? "Set Up 1v1" : "Create Challenge";
       document.querySelector("#challenge-name").value = "";
+      document.querySelector("#challenge-max-deaths").value = "";
+      document.querySelector("#challenge-character").value = "";
+      document.querySelector("#challenge-min-mvps").value = "";
+      document.querySelector("#challenge-before-match-ends").checked = false;
       updateChallengeReward();
       document.querySelector("#challenge-dialog").showModal();
     }
@@ -324,6 +422,9 @@
     function updateChallengeReward() {
       const eliminations = Math.max(1, number(document.querySelector("#challenge-eliminations").value));
       const noLimit = document.querySelector("#challenge-no-limit").checked;
+      const selectedGame = String(state.profileTarget?.gameTitle || state.selectedSheet || "").toLowerCase();
+      document.querySelector("#challenge-character-field").hidden = selectedGame === "fortnite" || selectedGame === "counter-strike 2";
+      document.querySelector("#challenge-mvp-field").hidden = selectedGame !== "counter-strike 2";
       const minutes = Math.max(1, number(document.querySelector("#challenge-time").value));
       document.querySelector("#time-limit-field").hidden = noLimit;
       document.querySelector("#challenge-time").disabled = noLimit;
@@ -433,11 +534,24 @@
       }
       elims.append(count, Object.assign(document.createElement("small"), { textContent: "eliminations" }));
       animateCounter(count, previousValue, player.eliminations);
-      row.append(playerBox, Object.assign(document.createElement("span"), { className: "character", textContent: player.character || "—" }), elims);
+      if (String(state.selectedSheet || "").toLowerCase() !== "fortnite") {
+        row.append(playerBox, Object.assign(document.createElement("span"), { className: "character", textContent: player.character || "—" }), elims);
+      } else {
+        row.append(playerBox, elims);
+      }
       return row;
     }
 
     function render(animatePositions = false, previousEliminations = null) {
+      const characterHeading = document.querySelector("#character-heading");
+      if (characterHeading) {
+        document.querySelector(".board")?.classList.toggle("no-character-column", String(state.selectedSheet || "").toLowerCase() === "fortnite");
+        const gameName = String(state.selectedSheet || "").toLowerCase();
+        characterHeading.hidden = gameName === "fortnite";
+        characterHeading.textContent = gameName === "counter-strike 2" ? "MVPs" : "Character";
+      }
+      const huntLink = document.querySelector("#pirate-hunt-link");
+      if (huntLink) huntLink.hidden = state.selectedSheet.toLowerCase() !== "fortnite";
       const previousPositions = new Map(), animateNewEntries = animatePositions && list.childElementCount === 0;
       if (animatePositions && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
         list.querySelectorAll(".entry[data-player-key]").forEach(row => previousPositions.set(row.dataset.playerKey, row.getBoundingClientRect().top));
@@ -468,6 +582,8 @@
       groupChallengeButton.hidden = false;
       document.querySelector("#challenge-center").hidden = false;
       if (adminLink) adminLink.hidden = !state.isAdmin;
+       const quickReset = document.querySelector("#quick-reset-session");
+       if (quickReset) quickReset.hidden = !state.isAdmin;
       animateFadeUp(groupChallengeButton, 0, 550);
       animateFadeUp(document.querySelector("#challenge-center"), 40, 550);
       animateFadeUp(accountProfile, 0, 550);
@@ -532,15 +648,23 @@
             state.gameAccounts = state.userRecord.gameAccounts || {};
             state.challengePoints = number(state.userRecord.challengePoints);
             if (adminLink) adminLink.hidden = !state.isAdmin;
+            const quickReset = document.querySelector("#quick-reset-session");
+            if (quickReset) quickReset.hidden = !state.isAdmin;
           }
         });
 
         accessPanel.hidden = true; memberContent.hidden = false;
-        accountGreeting.textContent = `Hi, ${user.displayName || user.email || "there"}`;
-        menuName.textContent = user.displayName || "Google account";
+        accountGreeting.textContent = `Hi, ${user.displayName || record.leaderboardName || user.email || "there"}`;
+        menuName.textContent = user.displayName || record.leaderboardName || "Google account";
         menuEmail.textContent = user.email || "";
-        menuUid.textContent = user.uid;
-        if (user.photoURL) { accountPhoto.src = user.photoURL; menuPhoto.src = user.photoURL; accountPhoto.hidden = false; menuPhoto.hidden = false; }
+        menuUid.textContent = user.uid || "";
+        const discordIdEl = document.querySelector("#menu-discord-id");
+        if (discordIdEl) discordIdEl.textContent = record.discordId || "";
+        const menuIdentity = document.querySelector("#profile-menu-identity");
+        const bannerUrl = safeLeaderboardImage(record.discordBannerUrl || "");
+        if (menuIdentity) menuIdentity.style.backgroundImage = bannerUrl ? `linear-gradient(#0008,#0008),url("${bannerUrl}")` : "none";
+        const profilePhoto = user.photoURL || record.profileImageUrl || "";
+        if (profilePhoto) { accountPhoto.src = profilePhoto; menuPhoto.src = profilePhoto; accountPhoto.hidden = false; menuPhoto.hidden = false; }
         accountProfile.hidden = false;
         animateMemberEntrance();
         startPresence();
@@ -571,7 +695,13 @@
           eliminations: number(document.querySelector("#challenge-eliminations").value),
           timeLimitMinutes: noTimeLimit ? 0 : number(document.querySelector("#challenge-time").value),
           noTimeLimit, wagerPoints: number(document.querySelector("#challenge-wager-points").value),
-          gameTitle: state.profileTarget?.gameTitle || state.selectedSheet, gameUsername: state.profileTarget?.gameUsername
+           maxDeaths: document.querySelector("#challenge-max-deaths").value,
+           requiredCharacter: document.querySelector("#challenge-character").value.trim(),
+           minMVPs: document.querySelector("#challenge-min-mvps").value,
+           beforeMatchEnds: document.querySelector("#challenge-before-match-ends").checked,
+          gameTitle: state.profileTarget?.gameTitle || state.selectedSheet,
+           gameSheetId: state.sheetIds[state.profileTarget?.gameTitle || state.selectedSheet] || "",
+           gameUsername: state.profileTarget?.gameUsername
         });
         document.querySelector("#challenge-dialog").close();
         toast("Challenge sent", `${result.recipientCount} player(s) · ${result.rewardPoints} base points`);
@@ -630,6 +760,17 @@
     document.querySelectorAll(".signout-button").forEach(button => button.addEventListener("click", async () => await signOut(auth)));
     accountTrigger.addEventListener("click", () => { const isOpen = accountTrigger.getAttribute("aria-expanded") === "true"; accountTrigger.setAttribute("aria-expanded", String(!isOpen)); accountMenu.hidden = isOpen; });
     document.addEventListener("click", event => { if (!accountProfile.contains(event.target)) { accountMenu.hidden = true; accountTrigger.setAttribute("aria-expanded", "false"); } });
+    document.querySelector("#quick-reset-session")?.addEventListener("click", async () => {
+      if (!state.isAdmin || !confirm("Reset session eliminations, wins, and losses to zero? Online player checks will not be changed.")) return;
+      await update(ref(db, "session"), { eliminations: 0, wins: 0, losses: 0 });
+      toast("Session reset", "Session counters were reset. Online status was left unchanged.");
+    });
+    const discordButton = document.querySelector("#discord-signin");
+    if (discordButton) {
+      discordButton.addEventListener("click", () => {
+        toast("Discord sign-in setup required", "Discord-only sign-in needs a deployed Firebase Cloud Function that verifies Discord identity and returns a Firebase custom token.");
+      });
+    }
     onAuthStateChanged(auth, setUser);
     document.querySelectorAll(".tab").forEach(button => button.addEventListener("click", () => { state.filter = button.dataset.filter; document.querySelectorAll(".tab").forEach(tab => tab.setAttribute("aria-pressed", String(tab === button))); render(); }));
     document.querySelector("#search").addEventListener("input", event => { state.query = event.target.value.trim(); render(); });

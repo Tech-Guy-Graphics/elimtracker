@@ -99,16 +99,15 @@
           <table>
             <thead>
               <tr>
-                <th style="width:44px">Avatar</th>
-                <th>Profile Image URL (Col A)</th>
-                <th style="width:95px">Elims (Col B)</th>
-                <th>Display Name (Col C)</th>
-                <th>Game Username (Col D)</th>
-                <th>Character (Col E)</th>
-                <th style="width:70px">Online (F)</th>
-                <th style="width:75px">Place (G)</th>
-                <th class="fn-col" hidden>Treasure Icon (Col I)</th>
-                <th class="fn-col" style="width:80px" hidden>Qty (Col J)</th>
+                <th style="width:64px">Profile Image</th>
+                <th style="width:95px">Eliminations</th>
+                <th>Leaderboard Name</th>
+                <th>Game Username</th>
+                <th id="character-column-heading">Character / MVPs</th>
+                <th style="width:70px">Online</th>
+                <th style="width:75px">Place</th>
+                <th class="fn-col" hidden>Treasure Icon</th>
+                <th class="fn-col" style="width:80px" hidden>Treasure Qty</th>
                 <th style="width:65px">Row</th>
               </tr>
             </thead>
@@ -122,26 +121,26 @@
         <div class="card-header">
           <h2>Live Session & Pirate Hunt Controls</h2>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn danger" id="reset-session-btn" type="button">Reset Main Session & Uncheck All Online</button>
+            <button class="btn danger" id="reset-session-btn" type="button">Reset Main Session</button>
             <button class="btn primary" id="save-session-btn" type="button">Save Session Settings</button>
           </div>
         </div>
         <div class="grid-2">
           <div class="card" style="margin:0;background:var(--ink)">
-            <h3 style="margin:0 0 12px;font:800 18px var(--display);text-transform:uppercase;color:var(--lime)">Main Overlay & Session (Row 2)</h3>
+            <h3 style="margin:0 0 12px;font:800 18px var(--display);text-transform:uppercase;color:var(--lime)">Main Overlay & Session</h3>
             <div style="display:grid;gap:12px">
-              <div class="field"><label>Active Overlay Game (Session!E2)</label><select id="sess-game"></select></div>
-              <div class="field"><label>Session Eliminations (Session!B2)</label><input id="sess-elims" type="number" min="0"></div>
-              <div class="field"><label>Session Wins (Session!C2)</label><input id="sess-wins" type="number" min="0"></div>
-              <div class="field"><label>Session Losses (Session!D2)</label><input id="sess-losses" type="number" min="0"></div>
+              <div class="field"><label>Active Overlay Game</label><select id="sess-game"></select></div>
+              <div class="field"><label>Session Eliminations</label><input id="sess-elims" type="number" min="0"></div>
+              <div class="field"><label>Session Wins</label><input id="sess-wins" type="number" min="0"></div>
+              <div class="field"><label>Session Losses</label><input id="sess-losses" type="number" min="0"></div>
             </div>
           </div>
           <div class="card" style="margin:0;background:var(--ink)">
-            <h3 style="margin:0 0 12px;font:800 18px var(--display);text-transform:uppercase;color:#f3c75e">Pirate Token Hunt (Session!B5:E5)</h3>
+            <h3 style="margin:0 0 12px;font:800 18px var(--display);text-transform:uppercase;color:#f3c75e">Pirate Token Hunt</h3>
             <div style="display:grid;gap:12px">
-              <div class="field"><label>Hunt Eliminations (B5)</label><input id="fn-elims" type="number" min="0"></div>
-              <div class="field"><label>Hunt Wins (C5)</label><input id="fn-wins" type="number" min="0"></div>
-              <div class="field"><label>Hunt Losses (D5)</label><input id="fn-losses" type="number" min="0"></div>
+              <div class="field"><label>Hunt Eliminations</label><input id="fn-elims" type="number" min="0"></div>
+              <div class="field"><label>Hunt Wins</label><input id="fn-wins" type="number" min="0"></div>
+              <div class="field"><label>Hunt Losses</label><input id="fn-losses" type="number" min="0"></div>
               <div class="field">
                 <label>Hunt Start Time ET (HH:mm:ss dd/MM/yy)</label>
                 <div style="display:flex;gap:6px">
@@ -159,11 +158,11 @@
         <div class="card-header">
           <h2>Approved Users & Admin Permissions</h2>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn" id="add-user-btn" type="button">+ Add Approved User UID</button>
+            <button class="btn" id="add-user-btn" type="button">+ Add User</button>
             <button class="btn primary" id="save-users-btn" type="button">Save Users & Admin Roles</button>
           </div>
         </div>
-        <p style="color:var(--muted);margin:0 0 14px;font-size:12px">Toggle <strong>Admin</strong> to grant or revoke access to this control panel. Game accounts map directly to each game tab's Column D username.</p>
+        <p style="color:var(--muted);margin:0 0 14px;font-size:12px">Toggle <strong>Admin</strong> to grant or revoke access to this control panel. Game accounts map directly to each game leaderboard username.</p>
         <div class="table-wrap">
           <table>
             <thead id="users-thead"></thead>
@@ -303,6 +302,9 @@
         return;
       }
       const isFortnite = String(board.name || "").trim().toLowerCase() === "fortnite";
+      const isCS2 = String(board.name || "").trim().toLowerCase() === "counter-strike 2";
+      const characterHeading = document.querySelector("#character-column-heading");
+      if (characterHeading) { characterHeading.hidden = isFortnite; characterHeading.textContent = isCS2 ? "MVPs" : "Character"; }
       document.querySelectorAll(".fn-col").forEach(el => el.hidden = !isFortnite);
 
       const rows = normalizeRowsFromBoard(board);
@@ -313,24 +315,30 @@
       const tr = document.createElement("tr");
       const imgUrl = String(r[0] || "");
       tr.innerHTML = `
-        <td><img class="avatar-preview" src="${imgUrl}" onerror="this.style.opacity='0.2'" alt=""></td>
-        <td><input type="url" data-col="0" value="${imgUrl.replace(/"/g, "&quot;")}" placeholder="https://..."></td>
+        <td><button class="avatar-edit board-avatar-edit" type="button" title="Click to change profile image" style="border:0;background:none;cursor:pointer;padding:0"><img class="avatar-preview" src="${imgUrl}" onerror="this.style.opacity='0.2'" alt=""></button><input type="hidden" data-col="0" value="${imgUrl.replace(/"/g, "&quot;")}"></td>
         <td><input type="number" data-col="1" value="${Number(r[1]) || 0}"></td>
         <td><input type="text" data-col="2" value="${String(r[2] || "").replace(/"/g, "&quot;")}" placeholder="Display Name"></td>
         <td><input type="text" data-col="3" value="${String(r[3] || "").replace(/"/g, "&quot;")}" placeholder="In-Game Username"></td>
-        <td><input type="text" data-col="4" value="${String(r[4] || "").replace(/"/g, "&quot;")}" placeholder="Character/Hero"></td>
+        <td ${isFortnite ? "hidden" : ""}><input type="text" data-col="4" value="${String(r[4] || "").replace(/"/g, "&quot;")}" placeholder="${String(document.querySelector("#character-column-heading")?.textContent || "Character")}"></td>
         <td style="text-align:center"><input type="checkbox" data-col="5" ${r[5] === true || String(r[5]).toLowerCase() === "true" ? "checked" : ""}></td>
         <td><input type="number" data-col="6" value="${Number(r[6]) || 0}"></td>
-        <td class="fn-col" ${isFortnite ? "" : "hidden"}><input type="url" data-col="8" value="${String(r[8] || "").replace(/"/g, "&quot;")}" placeholder="Treasure URL"></td>
+        <td class="fn-col" ${isFortnite ? "" : "hidden"}><div style="display:flex;align-items:center;gap:6px"><img class="avatar-preview treasure-preview" src="${String(r[8] || "").replace(/"/g, "&quot;")}" alt=""><input type="url" data-col="8" value="${String(r[8] || "").replace(/"/g, "&quot;")}" placeholder="Treasure image URL"></div></td>
         <td class="fn-col" ${isFortnite ? "" : "hidden"}><input type="number" data-col="9" value="${Number(r[9]) || 0}"></td>
         <td><button class="btn danger" type="button" style="min-height:28px;padding:0 8px">×</button></td>
       `;
-      tr.querySelector('input[data-col="0"]').addEventListener("input", (e) => {
-        const img = tr.querySelector(".avatar-preview");
-        img.src = e.target.value;
-        img.style.opacity = "1";
+      tr.querySelector('input[data-col="8"]')?.addEventListener("input", e => {
+        const img = tr.querySelector(".treasure-preview"); if (img) img.src = e.target.value;
       });
-      tr.querySelector("button").addEventListener("click", () => tr.remove());
+      tr.querySelector(".board-avatar-edit")?.addEventListener("click", () => {
+        const field = tr.querySelector('input[data-col="0"]');
+        const next = prompt("Enter the profile image URL (leave blank to clear):", field.value);
+        if (next === null) return;
+        field.value = next.trim();
+        const img = tr.querySelector(".avatar-preview");
+        img.src = field.value;
+        img.style.opacity = field.value ? "1" : "0.25";
+      });
+      tr.querySelector("td:last-child button")?.addEventListener("click", () => tr.remove());
       return tr;
     }
 
@@ -365,11 +373,16 @@
       const players = {};
 
       trs.forEach((tr, idx) => {
-        const img = tr.querySelector('[data-col="0"]').value.trim();
+        const enteredImage = tr.querySelector('[data-col="0"]').value.trim();
         const elims = Number(tr.querySelector('[data-col="1"]').value) || 0;
-        const name = tr.querySelector('[data-col="2"]').value.trim();
+        const enteredName = tr.querySelector('[data-col="2"]').value.trim();
         const gameUsername = tr.querySelector('[data-col="3"]').value.trim();
-        const character = tr.querySelector('[data-col="4"]').value.trim();
+        const linkedUser = Object.values(usersCache).find(user =>
+          String(user.gameAccounts?.[board.name] || "").trim().toLowerCase() === gameUsername.toLowerCase()
+        );
+        const img = linkedUser?.profileImageUrl || enteredImage;
+        const name = linkedUser?.leaderboardName || enteredName;
+        const character = isFortnite ? "" : tr.querySelector('[data-col="4"]').value.trim();
         const active = tr.querySelector('[data-col="5"]').checked;
         const placement = Number(tr.querySelector('[data-col="6"]').value) || (idx + 1);
         const tIcon = isFortnite ? tr.querySelector('[data-col="8"]').value.trim() : "";
@@ -453,6 +466,16 @@
       document.querySelector("#fn-start").value = `${getPart("hour")}:${getPart("minute")}:${getPart("second")} ${getPart("day")}/${getPart("month")}/${getPart("year")}`;
     });
 
+    async function clearOtherGameOnlineStatus(activeGameId) {
+      for (const [id, board] of Object.entries(boardsCache)) {
+        if (String(id) === String(activeGameId)) continue;
+        const rows = normalizeRowsFromBoard(board).map(row => { const copy = [...row]; copy[5] = false; return copy; });
+        const players = { ...(board.players || {}) };
+        Object.values(players).forEach(player => { player.active = false; });
+        await update(ref(db, `leaderboards/${id}`), { rows, players });
+      }
+    }
+
     document.querySelector("#save-session-btn").addEventListener("click", async () => {
       const gameTitle = document.querySelector("#sess-game").value;
       const matched = Object.entries(boardsCache).find(([, b]) => b.name === gameTitle);
@@ -462,6 +485,8 @@
         losses: Number(document.querySelector("#sess-losses").value) || 0,
         gameTitle,
         gameSheetId: matched ? matched[0] : "",
+        activeGameId: matched ? matched[0] : "",
+        activeGameName: gameTitle,
         fortnite: {
           eliminations: Number(document.querySelector("#fn-elims").value) || 0,
           wins: Number(document.querySelector("#fn-wins").value) || 0,
@@ -469,24 +494,17 @@
           startTime: document.querySelector("#fn-start").value.trim()
         }
       };
+      if (payload.activeGameId && String(sessionCache.activeGameId || "") !== String(payload.activeGameId)) {
+        await clearOtherGameOnlineStatus(payload.activeGameId);
+      }
       await set(ref(db, "session"), payload);
       showToast("Session & Pirate Hunt settings saved!");
     });
 
     document.querySelector("#reset-session-btn").addEventListener("click", async () => {
-      if (!confirm("Reset session eliminations, wins, and losses to 0 and uncheck all online players?")) return;
+      if (!confirm("Reset session eliminations, wins, and losses to 0? Online status will not be changed.")) return;
       await update(ref(db, "session"), { eliminations: 0, wins: 0, losses: 0 });
-      for (const [id, board] of Object.entries(boardsCache)) {
-        const rows = normalizeRowsFromBoard(board).map(r => {
-          const copy = [...r];
-          copy[5] = false;
-          return copy;
-        });
-        const players = { ...(board.players || {}) };
-        Object.keys(players).forEach(k => { players[k].active = false; });
-        await update(ref(db, `leaderboards/${id}`), { rows, players });
-      }
-      showToast("Session reset and all players marked offline.");
+      showToast("Session counters reset. Online status was left unchanged.");
     });
 
     // USERS & ADMIN ROLES TAB
@@ -496,7 +514,10 @@
       const tbody = document.querySelector("#users-tbody");
 
       thead.innerHTML = `<tr>
-        <th>Firebase UID</th>
+        <th>Firebase UID (optional)</th>
+        <th>Discord User ID (optional)</th>
+        <th>Leaderboard Name</th>
+        <th>Profile Image</th>
         <th>Note / Label</th>
         <th style="width:110px">Challenge Pts</th>
         <th style="width:80px">Admin</th>
@@ -511,15 +532,34 @@
     function createUserTr(u = { uid: "", label: "", challengePoints: 0, isAdmin: false, gameAccounts: {} }, games = []) {
       const tr = document.createElement("tr");
       const accs = u.gameAccounts || {};
+      const inferredRow = Object.entries(accs).map(([gameName, username]) => {
+        const board = Object.values(boardsCache).find(item => String(item.name || "").toLowerCase() === String(gameName).toLowerCase());
+        return normalizeRowsFromBoard(board).find(row => String(row[3] || "").trim().toLowerCase() === String(username || "").trim().toLowerCase());
+      }).find(Boolean);
+      const legacyLabelIsUrl = /^https?:\/\//i.test(String(u.label || "").trim());
+      const leaderboardName = u.leaderboardName || inferredRow?.[2] || "";
+      const profileImageUrl = u.profileImageUrl || (legacyLabelIsUrl ? u.label : inferredRow?.[0]) || "";
+      const noteLabel = legacyLabelIsUrl ? "" : (u.label || "");
       tr.innerHTML = `
         <td><input type="text" data-field="uid" value="${String(u.uid || "").replace(/"/g, "&quot;")}" placeholder="Firebase Auth UID"></td>
-        <td><input type="text" data-field="label" value="${String(u.label || "").replace(/"/g, "&quot;")}" placeholder="Player Note"></td>
+        <td><input type="text" data-field="discordId" value="${String(u.discordId || "").replace(/"/g, "&quot;")}" placeholder="Discord User ID"></td>
+        <td><input type="text" data-field="leaderboardName" value="${String(leaderboardName).replace(/"/g, "&quot;")}" placeholder="Main leaderboard name"></td>
+        <td><button type="button" class="avatar-edit" title="Click to change profile image" style="border:0;background:none;cursor:pointer"><img class="avatar-preview user-avatar" src="${String(profileImageUrl).replace(/"/g, "&quot;")}" alt="Edit profile image"></button><input type="hidden" data-field="profileImageUrl" value="${String(profileImageUrl).replace(/"/g, "&quot;")}"></td>
+        <td><input type="text" data-field="label" value="${String(noteLabel).replace(/"/g, "&quot;")}" placeholder="Note / label"></td>
         <td><input type="number" data-field="points" value="${Number(u.challengePoints) || 0}"></td>
         <td style="text-align:center"><input type="checkbox" data-field="isAdmin" ${u.isAdmin === true ? "checked" : ""}></td>
         ${games.map(g => `<td><input type="text" data-game="${g.replace(/"/g, "&quot;")}" value="${String(accs[g] || "").replace(/"/g, "&quot;")}" placeholder="${g} ID"></td>`).join("")}
         <td><button class="btn danger" type="button" style="min-height:28px;padding:0 8px">×</button></td>
       `;
-      tr.querySelector("button").addEventListener("click", () => tr.remove());
+      tr.querySelector(".avatar-edit")?.addEventListener("click", () => {
+        const field = tr.querySelector('[data-field="profileImageUrl"]');
+        const next = prompt("Enter the profile image URL (leave blank to clear):", field.value);
+        if (next === null) return;
+        field.value = next.trim();
+        const image = tr.querySelector(".user-avatar");
+        image.src = field.value; image.style.opacity = field.value ? "1" : "0.25";
+      });
+      tr.querySelector("td:last-child button")?.addEventListener("click", () => tr.remove());
       return tr;
     }
 
@@ -535,7 +575,9 @@
 
       trs.forEach(tr => {
         const uid = tr.querySelector('[data-field="uid"]').value.trim();
-        if (!uid) return;
+        const discordId = tr.querySelector('[data-field="discordId"]').value.trim();
+        if (!uid && !discordId) return;
+        const recordKey = uid || `discord_${discordId}`;
         const isAdmin = tr.querySelector('[data-field="isAdmin"]').checked;
         if (isAdmin) adminCount++;
         const gameAccounts = {};
@@ -543,8 +585,12 @@
           const val = inp.value.trim();
           if (val) gameAccounts[inp.dataset.game] = val;
         });
-        nextUsers[uid] = {
-          uid,
+        nextUsers[recordKey] = {
+          uid: uid || "",
+          authUid: recordKey,
+          discordId,
+          leaderboardName: tr.querySelector('[data-field="leaderboardName"]').value.trim(),
+          profileImageUrl: tr.querySelector('[data-field="profileImageUrl"]').value.trim(),
           label: tr.querySelector('[data-field="label"]').value.trim(),
           challengePoints: Math.max(0, Number(tr.querySelector('[data-field="points"]').value) || 0),
           isAdmin,
@@ -558,6 +604,31 @@
       }
 
       await set(ref(db, "users"), nextUsers);
+      // Keep public leaderboard display names and profile images synchronized from the central user directory.
+      for (const [boardId, board] of Object.entries(boardsCache)) {
+        const rows = normalizeRowsFromBoard(board).map(row => {
+          const copy = [...row];
+          const linked = Object.values(nextUsers).find(user =>
+            String(user.gameAccounts?.[board.name] || "").trim().toLowerCase() === String(copy[3] || "").trim().toLowerCase()
+          );
+          if (linked) {
+            if (linked.leaderboardName) copy[2] = linked.leaderboardName;
+            if (Object.prototype.hasOwnProperty.call(linked, "profileImageUrl")) copy[0] = linked.profileImageUrl || "";
+          }
+          return copy;
+        });
+        const players = { ...(board.players || {}) };
+        for (const player of Object.values(players)) {
+          const linked = Object.values(nextUsers).find(user =>
+            String(user.gameAccounts?.[board.name] || "").trim().toLowerCase() === String(player.gameUsername || "").trim().toLowerCase()
+          );
+          if (linked) {
+            if (linked.leaderboardName) player.name = linked.leaderboardName;
+            if (Object.prototype.hasOwnProperty.call(linked, "profileImageUrl")) player.image = linked.profileImageUrl || "";
+          }
+        }
+        await update(ref(db, `leaderboards/${boardId}`), { rows, players });
+      }
       showToast(`Saved ${Object.keys(nextUsers).length} users (${adminCount} admin${adminCount === 1 ? "" : "s"})!`);
     });
   </script>

@@ -68,7 +68,7 @@
     .counter-digit[hidden],.counter-separator[hidden]{display:none}
     @media(max-width:520px){body{padding:7px}.heading{min-height:52px;padding:8px 11px}.game-title{font-size:22px}.record{gap:10px}.record-stat{font-size:28px}.entry{min-height:56px;grid-template-columns:39px minmax(0,1fr) 66px;column-gap:7px;padding:6px 10px}.rank{font-size:23px}.avatar{width:32px;height:32px;flex-basis:32px}.name{font-size:11px}.character{font-size:10px}.elims-label{font-size:7px}.elims{font-size:20px}.elimination-bubble{min-height:43px}.elimination-bubble img,.bubble-initial,.bubble-count{width:32px;height:32px;flex-basis:32px}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
-  </style>
+  .overlay.no-character-column .entry{grid-template-columns:54px minmax(0,1fr) 92px}\n    @media(max-width:520px){.overlay.no-character-column .entry{grid-template-columns:39px minmax(0,1fr) 66px}}\n    </style>
 </head>
 <body>
   <main class="overlay" aria-label="Live leaderboard overlay" hidden>
@@ -466,12 +466,16 @@
         nameRow.append(you);
       }
 
-      const character = document.createElement("span");
-      character.className = "character";
-      character.textContent = player.character || "—";
-      character.title = player.character || "Character";
-
-      playerDetails.append(nameRow, character);
+      if (activeGame.toLocaleLowerCase() !== "fortnite") {
+        const character = document.createElement("span");
+        character.className = "character";
+        const isCS2 = activeGame.toLocaleLowerCase() === "counter-strike 2";
+        character.textContent = player.character || "—";
+        character.title = isCS2 ? "MVPs" : "Character";
+        playerDetails.append(nameRow, character);
+      } else {
+        playerDetails.append(nameRow);
+      }
       playerInfo.append(avatar, playerDetails);
 
       const elims = document.createElement("div");
@@ -552,6 +556,7 @@
 
       if (nextTitle !== activeGame) {
         activeGame = nextTitle;
+        document.querySelector(".overlay")?.classList.toggle("no-character-column", activeGame.toLocaleLowerCase() === "fortnite");
         gameUsername = "";
         hasLeaderboardSnapshot = false;
         previousEliminations.clear();

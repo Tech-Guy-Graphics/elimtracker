@@ -96,6 +96,15 @@ export async function resolveLeaderboardIdentity(gameAccounts, preferredGameTitl
   const snap = await get(ref(db, "leaderboards"));
   if (!snap.exists()) return { name: "Player", image: "" };
   const boards = snap.val();
+  const users = await getAllUsers();
+  const linkedRecord = Object.values(users).find(user =>
+    Object.entries(user.gameAccounts || {}).some(([game, username]) =>
+      Object.entries(gameAccounts).some(([mineGame, mineUsername]) =>
+        game.trim().toLowerCase() === mineGame.trim().toLowerCase() &&
+        String(username).trim().toLowerCase() === String(mineUsername).trim().toLowerCase()
+      )
+    )
+  );
   const titles = Object.keys(gameAccounts);
   if (preferredGameTitle && gameAccounts[preferredGameTitle]) {
     titles.splice(titles.indexOf(preferredGameTitle), 1);
@@ -112,12 +121,13 @@ export async function resolveLeaderboardIdentity(gameAccounts, preferredGameTitl
     const match = rows.find(r => String(r[3] || "").trim().toLowerCase() === username);
     if (match) {
       return {
-        name: String(match[2] || "Player").trim(),
-        image: String(match[0] || "").trim()
+        name: String(linkedRecord?.leaderboardName || match[2] || "Player").trim(),
+        image: String(linkedRecord?.profileImageUrl || match[0] || "").trim(),
+        banner: String(linkedRecord?.discordBannerUrl || "")
       };
     }
   }
-  return { name: "Player", image: "" };
+  return { name: linkedRecord?.leaderboardName || "Player", image: linkedRecord?.profileImageUrl || "", banner: linkedRecord?.discordBannerUrl || "" };
 }
 
 // Direct Firebase Challenge Engine (replaces Apps Script bridge)
@@ -139,9 +149,10 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
     const targetIdentity = await resolveLeaderboardIdentity(matchedEntry.gameAccounts, payload.gameTitle);
     const overallEliminations = await computeOverallEliminations(matchedEntry.gameAccounts);
     return {
-      actorId: matchedEntry.uid,
+      actorId: matchedEntry.uid || matchedEntry.authUid,
       name: targetIdentity.name || payload.gameUsername,
       image: targetIdentity.image || "",
+      banner: targetIdentity.banner || "",
       overallEliminations,
       challengePoints: Math.max(0, Number(matchedEntry.challengePoints) || 0),
       currentChallengePoints: Math.max(0, Number(userRecord.challengePoints) || 0),
@@ -154,10 +165,22 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
     const title = String(payload.title || "").trim().slice(0, 60);
     const eliminations = Math.floor(Number(payload.eliminations));
     const noTimeLimit = payload.mode === "1v1" && payload.noTimeLimit === true;
+    const constraints = {
+      maxDeaths: payload.maxDeaths === "" || payload.maxDeaths == null ? null : Math.floor(Number(payload.maxDeaths)),
+      beforeMatchEnds: payload.beforeMatchEnds === true,
+      requiredCharacter: String(payload.requiredCharacter || "").trim().slice(0, 60),
+      minMVPs: payload.minMVPs === "" || payload.minMVPs == null ? null : Math.floor(Number(payload.minMVPs))
+    };
     const timeLimitMinutes = noTimeLimit ? 0 : Math.floor(Number(payload.timeLimitMinutes));
     if (!title) throw new Error("Enter a challenge title.");
     if (!Number.isInteger(eliminations) || eliminations < 1 || eliminations > 1000) {
       throw new Error("Choose between 1 and 1,000 eliminations.");
+    }
+    if (constraints.maxDeaths !== null && (!Number.isInteger(constraints.maxDeaths) || constraints.maxDeaths < 1 || constraints.maxDeaths > 100)) {
+      throw new Error("Choose a death limit from 1 to 100.");
+    }
+    if (constraints.minMVPs !== null && (!Number.isInteger(constraints.minMVPs) || constraints.minMVPs < 1 || constraints.minMVPs > 100)) {
+      throw new Error("Choose a minimum MVP count from 1 to 100.");
     }
     if (!noTimeLimit && (!Number.isInteger(timeLimitMinutes) || timeLimitMinutes < 1 || timeLimitMinutes > 1440)) {
       throw new Error("Choose a time limit from 1 minute to 24 hours.");
@@ -172,11 +195,11 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
     if (isGroup) {
       const presenceSnap = await get(ref(db, "presence"));
       const presence = presenceSnap.exists() ? presenceSnap.val() : {};
-      targets.push({ actorId: uid, name: myIdentity.name, image: myIdentity.image });
+      targets.push({ actorId: uid, name: myIdentity.name, image: myIdentity.image, gameUsername: userRecord.gameAccounts?.[payload.gameTitle] || "" });
       for (const [pUid, pInfo] of Object.entries(presence)) {
         if (pUid !== uid && users[pUid] && pInfo?.online === true && Date.now() - Number(pInfo.lastSeen || 0) < 90000) {
           const iden = await resolveLeaderboardIdentity(users[pUid].gameAccounts, payload.gameTitle);
-          targets.push({ actorId: pUid, name: iden.name, image: iden.image });
+          targets.push({ actorId: pUid, name: iden.name, image: iden.image, gameUsername: users[pUid].gameAccounts?.[payload.gameTitle] || "" });
         }
       }
     } else {
@@ -188,14 +211,14 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
         )
       );
       if (!targetEntry) throw new Error("That player is not linked to an approved account.");
-      if (targetEntry.uid === uid) throw new Error("You cannot challenge yourself.");
+      if ((targetEntry.uid || targetEntry.authUid) === uid) throw new Error("You cannot challenge yourself.");
       const targetIden = await resolveLeaderboardIdentity(targetEntry.gameAccounts, payload.gameTitle);
       if (isDuel) {
         const maxWager = Math.min(Number(userRecord.challengePoints) || 0, Number(targetEntry.challengePoints) || 0);
         if (wagerPoints > maxWager) throw new Error("Wager cannot exceed the lower player's balance.");
-        targets.push({ actorId: uid, name: myIdentity.name, image: myIdentity.image });
+        targets.push({ actorId: uid, name: myIdentity.name, image: myIdentity.image, gameUsername: userRecord.gameAccounts?.[payload.gameTitle] || "" });
       }
-      targets.push({ actorId: targetEntry.uid, name: targetIden.name, image: targetIden.image });
+      targets.push({ actorId: targetEntry.uid || targetEntry.authUid, name: targetIden.name, image: targetIden.image, gameUsername: targetEntry.gameAccounts?.[payload.gameTitle] || payload.gameUsername });
     }
 
     const participants = {};
@@ -204,6 +227,7 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
       participants[t.actorId] = {
         name: t.name,
         image: t.image || "",
+        gameUsername: t.gameUsername || "",
         status: isDuel && t.actorId === uid ? "waiting" : "pending",
         updatedAt: now
       };
@@ -214,6 +238,9 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
     const challenge = {
       title,
       eliminations,
+      constraints,
+      gameTitle: String(payload.gameTitle || ""),
+      gameSheetId: String(payload.gameSheetId || ""),
       timeLimitMinutes,
       rewardPoints,
       mode: isGroup ? "group" : isDuel ? "1v1" : "individual",
@@ -261,6 +288,10 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
           startingEliminations: startElims,
           lastTotal: startElims,
           progress: 0,
+          deaths: 0,
+          currentCharacter: "",
+          startingMatchEliminations: 0,
+          constraintsSatisfied: { eliminations: false, deaths: true, character: !constraints.requiredCharacter, mvps: !constraints.minMVPs },
           deadline: challenge.noTimeLimit ? null : now + challenge.timeLimitMinutes * 60000,
           updatedAt: now
         };
@@ -279,6 +310,10 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
       participant.startingEliminations = startElims;
       participant.lastTotal = startElims;
       participant.progress = 0;
+      participant.deaths = 0;
+      participant.currentCharacter = "";
+      participant.startingMatchEliminations = 0;
+      participant.constraintsSatisfied = { eliminations: false, deaths: true, character: !challenge.constraints?.requiredCharacter, mvps: !challenge.constraints?.minMVPs };
       participant.updatedAt = now;
     }
 
@@ -340,4 +375,16 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
   }
 
   throw new Error("Unknown challenge action.");
+}
+
+export function getDiscordRedirectUri() {
+  return `${window.location.origin}${window.location.pathname}`;
+}
+
+// Discord OAuth must be exchanged for a Firebase custom token by a trusted HTTPS
+// endpoint. A Discord access token cannot safely be used as Firebase authentication.
+export async function signInWithDiscordPopup() {
+  throw new Error(
+    "Discord sign-in requires a Discord OAuth client ID and a deployed Firebase HTTPS/Callable Function that validates the Discord account and returns a Firebase custom token."
+  );
 }
