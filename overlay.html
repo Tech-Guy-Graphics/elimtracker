@@ -90,7 +90,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+    import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
     const FIREBASE_CONFIG = {
       apiKey: "AIzaSyCs65B8IwKAqLxbTuDGPjV_-uX9bVUJeTM",
@@ -104,7 +104,11 @@
     };
 
     const urlParams = new URLSearchParams(window.location.search);
-    const uid = urlParams.get("uid") || urlParams.get("id") || "";
+    const discordParam = (urlParams.get("discordId") || urlParams.get("discord") || "").trim().replace(/^discord_/i, "");
+    const rawIdParam = (urlParams.get("uid") || urlParams.get("id") || "").trim();
+    const isDiscordSnowflake = /^\d{17,20}$/.test(rawIdParam) || /^discord_\d+$/i.test(rawIdParam);
+    const discordId = discordParam || (isDiscordSnowflake ? rawIdParam.replace(/^discord_/i, "") : "");
+    const uid = discordId ? "" : rawIdParam;
 
     const root = document.querySelector(".overlay");
     const status = document.querySelector("#status");
@@ -122,6 +126,7 @@
     let bridgeOrigin = "";
     let bridgeWindow = null;
     let database = null;
+    let usersCache = {};
     let gameUsername = "";
     let activeGame = "";
     let leaderboardId = "";
@@ -165,6 +170,26 @@
     function showOverlay() {
       status.hidden = true;
       root.hidden = false;
+    }
+
+    function resolveUserFromFirebase(users) {
+      const list = Object.values(users || {});
+      if (discordId) {
+        return list.find(u => String(u?.discordId || "").trim() === discordId) || null;
+      }
+      if (uid) {
+        return users[uid] || list.find(u => u?.uid === uid || u?.authUid === uid) || null;
+      }
+      return null;
+    }
+
+    function getGameUsernameForUser(userRec, gameTitle) {
+      if (!userRec || !userRec.gameAccounts) return "";
+      const target = String(gameTitle || "").trim().toLowerCase();
+      const match = Object.entries(userRec.gameAccounts).find(
+        ([g]) => g.trim().toLowerCase() === target
+      );
+      return match ? String(match[1] || "").trim() : "";
     }
 
     function sendAccessRequest(requestId) {
@@ -275,11 +300,9 @@
         const bannerText = isWin ? "VICTORY" : "DEFEAT";
         const flashClass = isWin ? "flash-win" : "flash-loss";
 
-        // Step 1: Fade out header content
         headerContent.classList.add("fade-out");
 
         window.setTimeout(() => {
-          // Step 2: Change background color and show letters fadeInUp
           headerBox.classList.add(flashClass);
           headerBanner.replaceChildren(...bannerText.split("").map(char => {
             const span = document.createElement("span");
@@ -292,7 +315,6 @@
             window.setTimeout(() => span.classList.add("show"), index * 50);
           });
 
-          // Hold for 1.8 seconds, then fadeOutUp by letter and revert background
           window.setTimeout(() => {
             spans.forEach((span, index) => {
               window.setTimeout(() => {
@@ -304,8 +326,6 @@
             window.setTimeout(() => {
               headerBox.classList.remove(flashClass);
               headerBanner.replaceChildren();
-
-              // Step 3: Fade header content back in, then play count animation
               headerContent.classList.remove("fade-out");
               window.setTimeout(() => {
                 updateCounter(element, value, previous);
@@ -355,7 +375,7 @@
         const element = document.createElement("div");
         element.className = "elimination-bubble";
         element.setAttribute("role", "status");
-        
+
         const initial = document.createElement("span");
         initial.className = "bubble-initial";
         initial.textContent = player.name.slice(0, 1) || "?";
@@ -459,7 +479,7 @@
       name.textContent = player.name || "Unnamed player";
       nameRow.append(name);
 
-      if (key === gameUsername.trim().toLocaleLowerCase()) {
+      if (gameUsername && key === gameUsername.trim().toLocaleLowerCase()) {
         const you = document.createElement("span");
         you.className = "you";
         you.textContent = "You";
@@ -481,15 +501,15 @@
       const elims = document.createElement("div");
       elims.className = "elims";
       elims.setAttribute("aria-label", `${player.eliminations.toLocaleString()} eliminations`);
-      
+
       const count = document.createElement("span");
       count.setAttribute("aria-hidden", "true");
       buildCounter(count, previousValue ?? 0, player.eliminations);
-      
+
       const label = document.createElement("span");
       label.className = "elims-label";
       label.textContent = "Elims";
-      
+
       elims.append(count, label);
 
       if (deltaVal && deltaVal > 0 && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -507,7 +527,9 @@
 
     function renderOverlay(rows) {
       const players = rows.map(numberRow).filter(player => player.name && player.gameUsername).sort(compare);
-      const ownIndex = players.findIndex(player => player.gameUsername.trim().toLocaleLowerCase() === gameUsername.trim().toLocaleLowerCase());
+      const ownIndex = gameUsername
+        ? players.findIndex(player => player.gameUsername.trim().toLocaleLowerCase() === gameUsername.trim().toLocaleLowerCase())
+        : -1;
       const visible = players.slice(0, 3);
       if (ownIndex > 2) visible[2] = players[ownIndex];
 
@@ -532,7 +554,7 @@
         const key = player.gameUsername.trim().toLocaleLowerCase();
         return makeOverlayEntry(player, index, previousEliminations.get(key), deltas.get(key));
       }));
-      
+
       previousEliminations = new Map(players.map(player => [player.gameUsername.trim().toLocaleLowerCase(), player.eliminations]));
       hasLeaderboardSnapshot = true;
 
@@ -567,22 +589,46 @@
           return;
         }
 
-        if (!uid) {
+        if (!uid && !discordId) {
           attachLeaderboard(session.gameSheetId);
         } else {
-          showError("Checking overlay access for the active game…");
-          const id = crypto.randomUUID();
-          pending.set(id, { gameTitle: activeGame, gameSheetId: session.gameSheetId });
-          sendAccessRequest(id);
+          // Resolve via Firebase users first (supports both Discord ID and Firebase UID)
+          const fbUser = resolveUserFromFirebase(usersCache);
+          if (fbUser) {
+            gameUsername = getGameUsernameForUser(fbUser, activeGame);
+            attachLeaderboard(session.gameSheetId);
+          } else if (discordId) {
+            showError("Discord ID is not linked to an approved user account.");
+          } else {
+            showError("Checking overlay access for the active game…");
+            const id = crypto.randomUUID();
+            pending.set(id, { gameTitle: activeGame, gameSheetId: session.gameSheetId });
+            sendAccessRequest(id);
+          }
         }
-      } else if ((gameUsername || !uid) && String(session.gameSheetId || "") !== leaderboardId) {
+      } else if ((gameUsername || (!uid && !discordId)) && String(session.gameSheetId || "") !== leaderboardId) {
         attachLeaderboard(session.gameSheetId);
       }
     }
 
-    function connect() {
+    async function connect() {
       const app = initializeApp(FIREBASE_CONFIG);
       database = getDatabase(app, CONFIG.firebaseDatabaseUrl);
+      if (uid || discordId) {
+        const usersSnap = await get(ref(database, "users")).catch(() => null);
+        if (usersSnap && usersSnap.exists()) {
+          usersCache = usersSnap.val() || {};
+        }
+        onValue(ref(database, "users"), snap => {
+          usersCache = snap.exists() ? snap.val() : {};
+          if (activeGame) {
+            const fbUser = resolveUserFromFirebase(usersCache);
+            if (fbUser) {
+              gameUsername = getGameUsernameForUser(fbUser, activeGame);
+            }
+          }
+        });
+      }
       onValue(ref(database, "session"), snapshot => handleOverlaySession(snapshot.val()), error => showError(`Could not load session stats: ${error.message}`));
     }
 
@@ -618,9 +664,11 @@
       attachLeaderboard(request.gameSheetId);
     });
 
-    const bridgeUrl = new URL(CONFIG.accessBridgeUrl);
-    bridgeUrl.searchParams.set("channel", channel);
-    bridge.src = bridgeUrl.href;
+    if (uid) {
+      const bridgeUrl = new URL(CONFIG.accessBridgeUrl);
+      bridgeUrl.searchParams.set("channel", channel);
+      bridge.src = bridgeUrl.href;
+    }
     connect();
   </script>
 </body>

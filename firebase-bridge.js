@@ -43,10 +43,8 @@ export function calculateChallengePoints({ eliminations, timeLimitMinutes, noTim
   const elims = Math.max(1, Math.floor(Number(eliminations) || 1));
   const mins = Math.max(1, Math.floor(Number(timeLimitMinutes) || 30));
 
-  // Base points: timed challenges scale with speed (15 min = 4x elims); untimed = 1x elims
   let base = 0;
   if (requireMatchEnd) {
-    // Must complete before match ends gives a strong bonus, capped below a <=15-minute time limit (which is ~4x elims)
     base = Math.ceil(elims * 2.5);
   } else if (noTimeLimit) {
     base = elims;
@@ -56,7 +54,6 @@ export function calculateChallengePoints({ eliminations, timeLimitMinutes, noTim
 
   let bonusMultiplier = 1.0;
 
-  // Decrease in allowed deaths increases points
   if (maxDeaths !== null && maxDeaths !== undefined && maxDeaths !== "" && Number.isFinite(Number(maxDeaths))) {
     const d = Math.max(0, Math.floor(Number(maxDeaths)));
     if (d === 0) bonusMultiplier += 0.50;
@@ -66,14 +63,12 @@ export function calculateChallengePoints({ eliminations, timeLimitMinutes, noTim
     else bonusMultiplier += 0.05;
   }
 
-  // Required character adds a 25% bonus
   if (String(characterRequirement || "").trim().length > 0) {
     bonusMultiplier += 0.25;
   }
 
   let total = Math.max(1, Math.round(base * bonusMultiplier));
 
-  // Ensure "before match ends" stays slightly lower than an equivalent <=15 min timed challenge when compared at same modifiers
   if (requireMatchEnd) {
     const fifteenMinEquivalent = Math.round(Math.ceil((elims * 60) / 15) * bonusMultiplier);
     if (total >= fifteenMinEquivalent) {
@@ -99,14 +94,20 @@ export async function getAllUsers() {
 
 export async function getUserRecord(uid) {
   if (!uid) return null;
+  const clean = String(uid).trim();
   const users = await getAllUsers();
-  if (users[uid]) return users[uid];
-  return Object.values(users).find(u => u.uid === uid || u.authUid === uid) || null;
+  if (users[clean]) return users[clean];
+  return Object.values(users).find(u =>
+    u.uid === clean ||
+    u.authUid === clean ||
+    String(u.discordId || "").trim() === clean ||
+    `discord_${String(u.discordId || "").trim()}` === clean
+  ) || null;
 }
 
 export async function getUserRecordByDiscordId(discordId) {
   if (!discordId) return null;
-  const cleanId = String(discordId).trim();
+  const cleanId = String(discordId).trim().replace(/^discord_/i, "");
   const users = await getAllUsers();
   return Object.values(users).find(u => String(u.discordId || "").trim() === cleanId) || null;
 }
@@ -149,13 +150,9 @@ export function normalizeRowsFromBoard(board) {
   return [];
 }
 
-export async function computeOverallEliminations(gameAccounts) {
-  if (!gameAccounts || typeof gameAccounts !== "object") return 0;
-  const snap = await get(ref(db, "leaderboards"));
-  if (!snap.exists()) return 0;
-  const boards = snap.val();
+function computeOverallEliminationsFromBoards(gameAccounts, boards) {
+  if (!gameAccounts || typeof gameAccounts !== "object" || !boards) return 0;
   let total = 0;
-
   for (const [gameTitle, username] of Object.entries(gameAccounts)) {
     if (!username) continue;
     const cleanUser = String(username).trim().toLowerCase();
@@ -171,6 +168,13 @@ export async function computeOverallEliminations(gameAccounts) {
     }
   }
   return total;
+}
+
+export async function computeOverallEliminations(gameAccounts) {
+  if (!gameAccounts || typeof gameAccounts !== "object") return 0;
+  const snap = await get(ref(db, "leaderboards"));
+  if (!snap.exists()) return 0;
+  return computeOverallEliminationsFromBoards(gameAccounts, snap.val());
 }
 
 export async function resolveLeaderboardIdentity(gameAccounts, preferredGameTitle = "", fallbackName = "Player", fallbackImage = "") {
@@ -200,6 +204,219 @@ export async function resolveLeaderboardIdentity(gameAccounts, preferredGameTitl
     }
   }
   return { name: fallbackName, image: fallbackImage };
+}
+
+function getTelemetryForUser(userRecord, telemetryByGame, boards) {
+  const accounts = userRecord?.gameAccounts || {};
+  let best = null;
+
+  for (const [gameTitle, rawUsername] of Object.entries(accounts)) {
+    const cleanUser = String(rawUsername || "").trim().toLowerCase();
+    if (!cleanUser) continue;
+
+    const boardEntry = Object.entries(boards || {}).find(
+      ([, b]) => String(b.name || "").trim().toLowerCase() === gameTitle.trim().toLowerCase()
+    );
+    const boardId = boardEntry ? boardEntry[0] : null;
+    const safeKey = cleanUser.replace(/[.#$\[\]\/]/g, "_");
+
+    const gameTelemetry = boardId && telemetryByGame?.[boardId] ? telemetryByGame[boardId] : null;
+    const entry = gameTelemetry?.[safeKey] || Object.values(gameTelemetry || {}).find(
+      t => String(t?.gameUsername || "").trim().toLowerCase() === cleanUser
+    );
+
+    if (entry && (!best || Number(entry.updatedAt || 0) > Number(best.updatedAt || 0))) {
+      best = entry;
+    }
+  }
+  return best;
+}
+
+/**
+ * Evaluates all active/open challenges against current leaderboard eliminations,
+ * Overwolf gameTelemetry (deaths, character, matchActive), and expiration deadlines.
+ * Marks participants & challenges as "completed" or "failed" and awards points.
+ */
+export async function evaluateActiveChallenges() {
+  const [challengesSnap, usersSnap, boardsSnap, telemetrySnap] = await Promise.all([
+    get(ref(db, "challenges")),
+    get(ref(db, "users")),
+    get(ref(db, "leaderboards")),
+    get(ref(db, "gameTelemetry"))
+  ]);
+
+  if (!challengesSnap.exists()) return;
+  const challenges = challengesSnap.val() || {};
+  const users = usersSnap.exists() ? usersSnap.val() : {};
+  const boards = boardsSnap.exists() ? boardsSnap.val() : {};
+  const telemetryByGame = telemetrySnap.exists() ? telemetrySnap.val() : {};
+  const now = Date.now();
+
+  for (const [challengeId, challenge] of Object.entries(challenges)) {
+    if (!challenge || ["completed", "failed", "denied", "abandoned", "expired"].includes(challenge.status)) {
+      continue;
+    }
+
+    const participants = challenge.participants || {};
+    const updates = {};
+    let changed = false;
+
+    // Expire unaccepted open/pending challenges past invitation window
+    const hasAnyActiveOrDone = Object.values(participants).some(p =>
+      ["active", "completed", "failed"].includes(p?.status)
+    );
+    if (!hasAnyActiveOrDone && Number(challenge.invitationExpiresAt) && now > Number(challenge.invitationExpiresAt)) {
+      updates.status = "expired";
+      updates.updatedAt = now;
+      await update(ref(db, `challenges/${challengeId}`), updates);
+      continue;
+    }
+
+    const goalElims = Math.max(1, Number(challenge.eliminations) || 1);
+    const maxDeaths = challenge.maxDeaths !== null && challenge.maxDeaths !== undefined && challenge.maxDeaths !== ""
+      ? Number(challenge.maxDeaths)
+      : null;
+    const reqChar = String(challenge.characterRequirement || "").trim().toLowerCase();
+
+    for (const [pKey, pData] of Object.entries(participants)) {
+      if (!pData || pData.status !== "active") continue;
+
+      const userRec = users[pKey] || Object.values(users).find(
+        u => u && (u.uid === pKey || u.recordKey === pKey || `discord_${u.discordId}` === pKey)
+      );
+      if (!userRec) continue;
+
+      const currentTotalElims = computeOverallEliminationsFromBoards(userRec.gameAccounts, boards);
+      const startElims = Number(pData.startingEliminations ?? currentTotalElims);
+      const progress = Math.max(0, currentTotalElims - startElims);
+
+      const telem = getTelemetryForUser(userRec, telemetryByGame, boards);
+      const acceptedAt = Number(pData.acceptedAt || challenge.startedAt || challenge.createdAt || 0);
+      const telemIsFresh = telem && Number(telem.updatedAt || 0) >= acceptedAt - 2000;
+
+      const currentDeaths = telemIsFresh ? (Number(telem.deaths) || 0) : (Number(pData.deaths) || 0);
+      const startDeaths = Number(pData.startingDeaths ?? (telemIsFresh ? currentDeaths : 0));
+      const deathsSinceStart = Math.max(0, currentDeaths - startDeaths);
+
+      if (pData.startingDeaths === undefined && telemIsFresh) {
+        updates[`participants/${pKey}/startingDeaths`] = startDeaths;
+        changed = true;
+      }
+
+      if (progress !== Number(pData.progress || 0) || currentTotalElims !== Number(pData.lastTotal || 0)) {
+        updates[`participants/${pKey}/progress`] = progress;
+        updates[`participants/${pKey}/lastTotal`] = currentTotalElims;
+        updates[`participants/${pKey}/updatedAt`] = now;
+        changed = true;
+      }
+
+      if (deathsSinceStart !== Number(pData.deaths || 0)) {
+        updates[`participants/${pKey}/deaths`] = deathsSinceStart;
+        updates[`participants/${pKey}/updatedAt`] = now;
+        changed = true;
+      }
+
+      let failedReason = null;
+
+      // 1. Check Character Requirement
+      if (reqChar && telemIsFresh && telem.character) {
+        const playedChar = String(telem.character).trim().toLowerCase();
+        if (playedChar && playedChar !== reqChar) {
+          failedReason = `Played ${telem.character} instead of ${challenge.characterRequirement}`;
+        }
+      }
+
+      // 2. Check Max Deaths
+      if (!failedReason && maxDeaths !== null && Number.isFinite(maxDeaths) && deathsSinceStart > maxDeaths) {
+        failedReason = `Exceeded max deaths (${deathsSinceStart}/${maxDeaths})`;
+      }
+
+      // 3. Check Time Limit Deadline
+      if (!failedReason && Number(pData.deadline) && now > Number(pData.deadline) && progress < goalElims) {
+        failedReason = "Time limit expired";
+      }
+
+      // 4. Check Match End Requirement
+      if (!failedReason && challenge.requireMatchEnd && telem && Number(telem.matchEndedAt || 0) > acceptedAt && telem.matchActive === false && progress < goalElims) {
+        failedReason = "Match ended before reaching goal";
+      }
+
+      if (failedReason) {
+        updates[`participants/${pKey}/status`] = "failed";
+        updates[`participants/${pKey}/failReason`] = failedReason;
+        updates[`participants/${pKey}/updatedAt`] = now;
+        changed = true;
+      } else if (progress >= goalElims) {
+        updates[`participants/${pKey}/status`] = "completed";
+        updates[`participants/${pKey}/completedAt`] = now;
+        updates[`participants/${pKey}/updatedAt`] = now;
+        changed = true;
+
+        // Award points if not yet awarded to this participant
+        if (!pData.pointsAwarded) {
+          updates[`participants/${pKey}/pointsAwarded`] = true;
+          const targetUserKey = userRec.recordKey || pKey;
+          const reward = Number(challenge.rewardPoints) || 0;
+          const wagerBonus = challenge.mode === "1v1" && challenge.wagerEscrowed ? (Number(challenge.wagerPoints) || 0) * 2 : 0;
+          const totalAward = reward + wagerBonus;
+          if (totalAward > 0) {
+            await runTransaction(ref(db, `users/${targetUserKey}/challengePoints`), pts => (Number(pts) || 0) + totalAward);
+          }
+        }
+      }
+    }
+
+    // Re-evaluate overall challenge status
+    const mergedParticipants = { ...participants };
+    for (const [k, v] of Object.entries(updates)) {
+      const m = k.match(/^participants\/([^/]+)\/(.+)$/);
+      if (m) {
+        mergedParticipants[m[1]] = { ...(mergedParticipants[m[1]] || {}), [m[2]]: v };
+      }
+    }
+
+    const pValues = Object.values(mergedParticipants);
+    const anyCompleted = pValues.some(p => p.status === "completed");
+    const anyPendingOrActive = pValues.some(p => ["pending", "active", "waiting"].includes(p.status));
+
+    if (challenge.mode === "1v1" && anyCompleted) {
+      const winnerEntry = Object.entries(mergedParticipants).find(([, p]) => p.status === "completed");
+      updates.status = "completed";
+      updates.winnerId = winnerEntry ? winnerEntry[0] : "";
+      updates.completedAt = now;
+      for (const [otherKey, otherP] of Object.entries(mergedParticipants)) {
+        if (otherP.status === "active") {
+          updates[`participants/${otherKey}/status`] = "failed";
+          updates[`participants/${otherKey}/failReason`] = "Opponent finished first";
+          updates[`participants/${otherKey}/updatedAt`] = now;
+        }
+      }
+      changed = true;
+    } else if (!anyPendingOrActive && pValues.length > 0) {
+      if (anyCompleted) {
+        updates.status = "completed";
+        updates.completedAt = now;
+      } else if (pValues.some(p => p.status === "failed")) {
+        updates.status = "failed";
+        updates.failedAt = now;
+      }
+      changed = true;
+    }
+
+    if (changed) {
+      await update(ref(db, `challenges/${challengeId}`), updates);
+    }
+  }
+}
+
+let challengeTrackerInitialized = false;
+export function startChallengeTracker() {
+  if (challengeTrackerInitialized) return;
+  challengeTrackerInitialized = true;
+
+  onValue(ref(db, "leaderboards"), () => { evaluateActiveChallenges().catch(() => {}); });
+  onValue(ref(db, "gameTelemetry"), () => { evaluateActiveChallenges().catch(() => {}); });
+  window.setInterval(() => { evaluateActiveChallenges().catch(() => {}); }, 10000);
 }
 
 export async function runFirebaseChallengeAction(currentUser, userRecord, action, payload = {}) {
@@ -305,10 +522,19 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
     const participants = {};
     const now = Date.now();
     for (const t of targets) {
+      const isCreatorInGroup = isGroup && t.actorId === actorKey;
+      const startElims = isCreatorInGroup ? await computeOverallEliminations(userRecord.gameAccounts) : 0;
       participants[t.actorId] = {
         name: t.name,
         image: t.image || "",
-        status: isDuel && t.actorId === actorKey ? "waiting" : "pending",
+        status: isCreatorInGroup ? "active" : (isDuel && t.actorId === actorKey ? "waiting" : "pending"),
+        ...(isCreatorInGroup ? {
+          acceptedAt: now,
+          startingEliminations: startElims,
+          lastTotal: startElims,
+          progress: 0,
+          deadline: (noTimeLimit || requireMatchEnd) ? null : now + timeLimitMinutes * 60000
+        } : {}),
         deaths: 0,
         updatedAt: now
       };
@@ -421,7 +647,13 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
         deaths: 0,
         updatedAt: now
       };
-      await update(ref(db, `challenges/${payload.challengeId}/participants/${participantKey}`), participantUpdate);
+      await update(ref(db, `challenges/${payload.challengeId}`), {
+        status: "active",
+        [`participants/${participantKey}`]: {
+          ...participant,
+          ...participantUpdate
+        }
+      });
     }
 
     const updatedUser = await getUserRecord(actorKey);

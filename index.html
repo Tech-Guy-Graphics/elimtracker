@@ -19,7 +19,7 @@
     [hidden]{display:none!important}
 
     .topbar{min-height:62px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);color:var(--muted);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;gap:10px}
-    .brand,.account-profile{display:flex;align-items:center;gap:10px}.brand img{display:block;width:34px;height:34px;object-fit:contain}
+    .brand,.account-profile{display:flex;align-items:center;gap:10px}.brand img{display:block;width:54px;height:54px;object-fit:contain}
     .account-profile{position:relative;letter-spacing:0;text-transform:none;color:var(--paper);font-size:13px;font-weight:600}
     .account-trigger{display:flex;align-items:center;gap:10px;padding:5px 8px;border:1px solid transparent;border-radius:3px;background:transparent;color:var(--paper);cursor:pointer;font-weight:600}
     .account-trigger:hover,.account-trigger[aria-expanded="true"]{border-color:var(--line);background:var(--panel)}
@@ -358,7 +358,8 @@
       auth, db, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signInAnonymously, signOut,
       onDisconnect, onValue, ref, set, get, update,
       startDiscordOAuth, extractDiscordTokenFromUrl, calculateChallengePoints,
-      getUserRecord, getUserRecordByDiscordId, getGameCatalog, normalizeRowsFromBoard, runFirebaseChallengeAction
+      getUserRecord, getUserRecordByDiscordId, getGameCatalog, normalizeRowsFromBoard,
+      runFirebaseChallengeAction, startChallengeTracker
     } from "./firebase-bridge.js";
 
     const state = {
@@ -646,6 +647,7 @@
       challengeCenterButton.hidden = false;
 
       startPresence();
+      startChallengeTracker();
       subscribeToChallenges();
       loadGamesFromFirebase();
     }

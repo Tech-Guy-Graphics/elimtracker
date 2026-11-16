@@ -204,8 +204,12 @@
       <!-- TAB 3: USERS & ADMIN PERMISSIONS -->
       <section id="panel-users" class="card" hidden>
         <div class="card-header">
-          <h2>Approved Users & Admin Permissions</h2>
+          <div>
+            <h2>Approved Users & Admin Permissions</h2>
+            <p id="missing-users-notice" style="margin:6px 0 0;font-size:12px;color:#f3c75e" hidden></p>
+          </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn" id="sync-missing-users-btn" type="button">Import Missing Leaderboard Players</button>
             <button class="btn" id="add-user-btn" type="button">+ Add User</button>
             <button class="btn primary" id="save-users-btn" type="button">Save Users & Admin Roles</button>
           </div>
@@ -237,9 +241,9 @@
     const esc = (v) => String(v ?? "")
   .replace(/&/g, "&amp;")
   .replace(/"/g, "&quot;")
+  .replace(/'/g, "&#39;")
   .replace(/</g, "&lt;")
   .replace(/>/g, "&gt;");
-
 
     const toastEl = document.querySelector("#toast");
     function showToast(msg) {
@@ -362,6 +366,26 @@
       if (!handled) await evaluateAdminSession(user);
     });
 
+    function findMatchingUserForRow(boardName, gameUsername, leaderboardName) {
+      const gLower = String(boardName || "").trim().toLowerCase();
+      const uLower = String(gameUsername || "").trim().toLowerCase();
+      const nLower = String(leaderboardName || "").trim().toLowerCase();
+      const allUsers = Object.values(usersCache);
+
+      if (uLower) {
+        const byGameAccount = allUsers.find(u =>
+          Object.entries(u.gameAccounts || {}).some(
+            ([g, un]) => g.trim().toLowerCase() === gLower && String(un || "").trim().toLowerCase() === uLower
+          )
+        );
+        if (byGameAccount) return byGameAccount;
+      }
+      if (nLower) {
+        return allUsers.find(u => String(u.leaderboardName || "").trim().toLowerCase() === nLower) || null;
+      }
+      return null;
+    }
+
     function bindRealtimeAdminData() {
       onValue(ref(db, "leaderboards"), (snap) => {
         boardsCache = snap.exists() ? snap.val() : {};
@@ -375,6 +399,7 @@
       });
       onValue(ref(db, "users"), (snap) => {
         usersCache = snap.exists() ? snap.val() : {};
+        renderBoardTable();
         renderUsersTable();
       });
     }
@@ -416,7 +441,7 @@
       }
 
       const rows = normalizeRowsFromBoard(board);
-      tbody.replaceChildren(...rows.map(r => createBoardRowTr(r, isFortnite)));
+      tbody.replaceChildren(...rows.map(r => createBoardRowTr(r, isFortnite, board.name)));
 
       const treasureCard = document.querySelector("#fortnite-treasure-card");
       treasureCard.hidden = !isFortnite;
@@ -429,13 +454,21 @@
       }
     }
 
-    function createBoardRowTr(r = ["", 0, "", "", "", false, 0], isFortnite = false) {
+    function createBoardRowTr(r = ["", 0, "", "", "", false, 0], isFortnite = false, boardName = "") {
       const tr = document.createElement("tr");
-      const imgUrl = String(r[0] || "");
+      const matchedUser = findMatchingUserForRow(boardName, r[3], r[2]);
+      const imgUrl = String((matchedUser && (matchedUser.profileImageUrl || matchedUser.profileImage)) || r[0] || "");
+      const displayName = String((matchedUser && matchedUser.leaderboardName) || r[2] || "");
+
       tr.innerHTML = `
-        <td><button class="avatar-edit board-avatar-edit" type="button" title="Click to change profile image" style="border:0;background:none;cursor:pointer;padding:0"><img class="avatar-preview" src="${esc(imgUrl)}" alt=""></button><input type="hidden" data-col="0" value="${esc(imgUrl)}"></td>
+        <td>
+          <img class="avatar-preview" src="${esc(imgUrl)}" alt="" title="Managed in Users & Admin Roles">
+          <input type="hidden" data-col="0" value="${esc(imgUrl)}">
+        </td>
         <td><input type="number" inputmode="numeric" data-col="1" value="${Number(r[1]) || 0}"></td>
-        <td><input type="text" data-col="2" value="${esc(r[2])}" placeholder="Display Name"></td>
+        <td>
+          <input type="text" data-col="2" value="${esc(displayName)}" readonly title="Edit Leaderboard Name in Users & Admin Roles" style="opacity:0.75;cursor:not-allowed">
+        </td>
         <td><input type="text" data-col="3" value="${esc(r[3])}" placeholder="In-Game Username"></td>
         <td ${isFortnite ? "hidden" : ""}><input type="text" data-col="4" value="${esc(r[4])}" placeholder="Character"></td>
         <td style="text-align:center"><input type="checkbox" data-col="5" ${r[5] === true || String(r[5]).toLowerCase() === "true" ? "checked" : ""}></td>
@@ -445,14 +478,18 @@
       const previewImg = tr.querySelector(".avatar-preview");
       previewImg.addEventListener("error", () => { previewImg.style.opacity = "0.2"; });
 
-      tr.querySelector(".board-avatar-edit")?.addEventListener("click", () => {
-        const field = tr.querySelector('input[data-col="0"]');
-        const next = prompt("Enter the profile image URL (leave blank to clear):", field.value);
-        if (next === null) return;
-        field.value = next.trim();
-        previewImg.src = field.value;
-        previewImg.style.opacity = field.value ? "1" : "0.25";
+      // Auto-fill read-only name and avatar when typing a matching Game Username on a new row
+      tr.querySelector('[data-col="3"]')?.addEventListener("input", (e) => {
+        const u = findMatchingUserForRow(boardName, e.target.value, "");
+        if (u) {
+          const nextImg = u.profileImageUrl || u.profileImage || "";
+          tr.querySelector('[data-col="0"]').value = nextImg;
+          previewImg.src = nextImg;
+          previewImg.style.opacity = nextImg ? "1" : "0.2";
+          tr.querySelector('[data-col="2"]').value = u.leaderboardName || "";
+        }
       });
+
       tr.querySelector("td:last-child button")?.addEventListener("click", () => tr.remove());
       return tr;
     }
@@ -497,7 +534,7 @@
       const board = boardsCache[selectedBoardId];
       if (!board) return;
       const isFortnite = String(board.name || "").trim().toLowerCase() === "fortnite";
-      document.querySelector("#board-tbody").append(createBoardRowTr(["", 0, "", "", "", false, 0], isFortnite));
+      document.querySelector("#board-tbody").append(createBoardRowTr(["", 0, "", "", "", false, 0], isFortnite, board.name));
     });
 
     document.querySelector("#recalc-ranks-btn").addEventListener("click", () => {
@@ -521,10 +558,13 @@
       const players = {};
 
       trs.forEach((tr, idx) => {
-        const img = tr.querySelector('[data-col="0"]').value.trim();
-        const elims = Number(tr.querySelector('[data-col="1"]').value) || 0;
-        const name = tr.querySelector('[data-col="2"]').value.trim();
         const gameUsername = tr.querySelector('[data-col="3"]').value.trim();
+        const rawName = tr.querySelector('[data-col="2"]').value.trim();
+        const matchedUser = findMatchingUserForRow(board.name, gameUsername, rawName);
+
+        const img = (matchedUser && (matchedUser.profileImageUrl || matchedUser.profileImage)) || tr.querySelector('[data-col="0"]').value.trim();
+        const elims = Number(tr.querySelector('[data-col="1"]').value) || 0;
+        const name = (matchedUser && matchedUser.leaderboardName) || rawName || gameUsername;
         const character = isFortnite ? "" : tr.querySelector('[data-col="4"]').value.trim();
         const active = tr.querySelector('[data-col="5"]').checked;
         const placement = Number(tr.querySelector('[data-col="6"]').value) || (idx + 1);
@@ -617,10 +657,49 @@
     });
 
     document.querySelector("#reset-hunt-btn").addEventListener("click", async () => {
-      if (!confirm("Reset Pirate Hunt eliminations, wins, and losses to 0?")) return;
-      await update(ref(db, "session/fortnite"), { eliminations: 0, wins: 0, losses: 0 });
-      showToast("Pirate Hunt stats reset to 0.");
+      if (!confirm("Reset Pirate Hunt eliminations, wins, losses to 0 and clear start time?")) return;
+      await update(ref(db, "session/fortnite"), { eliminations: 0, wins: 0, losses: 0, startTime: "" });
+      document.querySelector("#fn-start").value = "";
+      showToast("Pirate Hunt stats reset and start time cleared.");
     });
+
+    function detectMissingUsersFromBoards() {
+      const missingMap = new Map();
+      const existingUsers = Object.values(usersCache);
+
+      for (const board of Object.values(boardsCache)) {
+        const gameName = String(board.name || "").trim();
+        if (!gameName) continue;
+        const rows = normalizeRowsFromBoard(board);
+        for (const r of rows) {
+          const img = String(r[0] || "").trim();
+          const lbName = String(r[2] || "").trim();
+          const gameUser = String(r[3] || "").trim();
+          if (!lbName && !gameUser) continue;
+
+          const matched = findMatchingUserForRow(gameName, gameUser, lbName);
+          if (matched) continue;
+
+          const groupKey = (lbName || gameUser).toLowerCase();
+          if (!missingMap.has(groupKey)) {
+            missingMap.set(groupKey, {
+              uid: "",
+              discordId: "",
+              leaderboardName: lbName || gameUser,
+              profileImageUrl: img,
+              label: "Imported from Leaderboard",
+              challengePoints: 0,
+              isAdmin: false,
+              gameAccounts: {}
+            });
+          }
+          const entry = missingMap.get(groupKey);
+          if (!entry.profileImageUrl && img) entry.profileImageUrl = img;
+          if (gameUser) entry.gameAccounts[gameName] = gameUser;
+        }
+      }
+      return [...missingMap.values()];
+    }
 
     function renderUsersTable() {
       const games = Object.values(boardsCache).map(b => b.name).filter(Boolean);
@@ -640,6 +719,18 @@
       </tr>`;
 
       tbody.replaceChildren(...Object.values(usersCache).map(u => createUserTr(u, games)));
+
+      const missing = detectMissingUsersFromBoards();
+      const notice = document.querySelector("#missing-users-notice");
+      const syncBtn = document.querySelector("#sync-missing-users-btn");
+      if (missing.length > 0) {
+        notice.textContent = `${missing.length} player(s) exist on leaderboard sheets without a Users entry (${missing.map(m => m.leaderboardName).join(", ")}).`;
+        notice.hidden = false;
+        syncBtn.textContent = `Import ${missing.length} Missing Player(s)`;
+      } else {
+        notice.hidden = true;
+        syncBtn.textContent = "Import Missing Leaderboard Players";
+      }
     }
 
     function createUserTr(u = { uid: "", label: "", challengePoints: 0, isAdmin: false, gameAccounts: {} }, games = []) {
@@ -671,21 +762,95 @@
       return tr;
     }
 
+    document.querySelector("#sync-missing-users-btn").addEventListener("click", () => {
+      const missing = detectMissingUsersFromBoards();
+      if (!missing.length) {
+        showToast("All leaderboard players are already in the Users sheet!");
+        return;
+      }
+      const games = Object.values(boardsCache).map(b => b.name).filter(Boolean);
+      const tbody = document.querySelector("#users-tbody");
+      missing.forEach(m => tbody.append(createUserTr(m, games)));
+      showToast(`Added ${missing.length} player(s) to the table. Add their UID or Discord ID and click Save.`);
+    });
+
     document.querySelector("#add-user-btn").addEventListener("click", () => {
       const games = Object.values(boardsCache).map(b => b.name).filter(Boolean);
       document.querySelector("#users-tbody").append(createUserTr({ uid: "", label: "", challengePoints: 0, isAdmin: false, gameAccounts: {} }, games));
     });
+
+    async function propagateUserUpdatesToLeaderboards(nextUsers) {
+      const userList = Object.values(nextUsers);
+      const boardUpdates = {};
+
+      for (const [boardId, board] of Object.entries(boardsCache)) {
+        if (!board) continue;
+        const gameName = String(board.name || "").trim().toLowerCase();
+        const rows = normalizeRowsFromBoard(board);
+        let boardChanged = false;
+
+        const updatedRows = rows.map(r => {
+          const row = [...r];
+          const rowGameUser = String(row[3] || "").trim().toLowerCase();
+          const rowLbName = String(row[2] || "").trim().toLowerCase();
+
+          const matchedUser = userList.find(u => {
+            const accUser = Object.entries(u.gameAccounts || {}).find(
+              ([g]) => g.trim().toLowerCase() === gameName
+            )?.[1];
+            if (accUser && rowGameUser && String(accUser).trim().toLowerCase() === rowGameUser) return true;
+            if (rowLbName && String(u.leaderboardName || "").trim().toLowerCase() === rowLbName) return true;
+            return false;
+          });
+
+          if (matchedUser) {
+            const newImg = matchedUser.profileImageUrl || matchedUser.profileImage || "";
+            const newName = matchedUser.leaderboardName || row[2];
+            if (row[0] !== newImg || row[2] !== newName) {
+              row[0] = newImg;
+              row[2] = newName;
+              boardChanged = true;
+            }
+          }
+          return row;
+        });
+
+        if (boardChanged) {
+          const updatedPlayers = {};
+          updatedRows.forEach((r, idx) => {
+            const safeKey = (String(r[3] || `player_${idx}`)).replace(/[.#$\[\]\/]/g, "_");
+            updatedPlayers[safeKey] = {
+              image: r[0] || "",
+              eliminations: Number(r[1]) || 0,
+              name: r[2] || "",
+              gameUsername: r[3] || "",
+              character: r[4] || "",
+              active: Boolean(r[5]),
+              placement: Number(r[6]) || (idx + 1)
+            };
+          });
+          boardUpdates[`leaderboards/${boardId}/rows`] = updatedRows;
+          boardUpdates[`leaderboards/${boardId}/players`] = updatedPlayers;
+        }
+      }
+
+      if (Object.keys(boardUpdates).length > 0) {
+        await update(ref(db), boardUpdates);
+      }
+    }
 
     document.querySelector("#save-users-btn").addEventListener("click", async () => {
       const trs = [...document.querySelectorAll("#users-tbody tr")];
       const nextUsers = {};
       let adminCount = 0;
 
-      trs.forEach(tr => {
+      trs.forEach((tr, idx) => {
         const uid = tr.querySelector('[data-field="uid"]').value.trim();
-        const discordId = tr.querySelector('[data-field="discordId"]').value.trim();
-        if (!uid && !discordId) return;
-        const recordKey = uid || `discord_${discordId}`;
+        const discordId = tr.querySelector('[data-field="discordId"]').value.trim().replace(/^discord_/i, "");
+        const leaderboardName = tr.querySelector('[data-field="leaderboardName"]').value.trim();
+        if (!uid && !discordId && !leaderboardName) return;
+
+        const recordKey = uid || (discordId ? `discord_${discordId}` : `unlinked_${leaderboardName.toLowerCase().replace(/[^a-z0-9]/g, "_")}_${idx}`);
         const existing = usersCache[recordKey] || {};
         const isAdmin = tr.querySelector('[data-field="isAdmin"]').checked;
         if (isAdmin) adminCount++;
@@ -694,14 +859,16 @@
           const val = inp.value.trim();
           if (val) gameAccounts[inp.dataset.game] = val;
         });
+        const imgUrl = tr.querySelector('[data-field="profileImageUrl"]').value.trim();
         nextUsers[recordKey] = {
           ...existing,
           uid: uid || "",
           recordKey,
           authUid: recordKey,
           discordId,
-          leaderboardName: tr.querySelector('[data-field="leaderboardName"]').value.trim(),
-          profileImageUrl: tr.querySelector('[data-field="profileImageUrl"]').value.trim(),
+          leaderboardName,
+          profileImage: imgUrl,
+          profileImageUrl: imgUrl,
           label: tr.querySelector('[data-field="label"]').value.trim(),
           challengePoints: Math.max(0, Number(tr.querySelector('[data-field="points"]').value) || 0),
           isAdmin,
@@ -715,7 +882,8 @@
       }
 
       await set(ref(db, "users"), nextUsers);
-      showToast(`Saved ${Object.keys(nextUsers).length} users!`);
+      await propagateUserUpdatesToLeaderboards(nextUsers);
+      showToast(`Saved ${Object.keys(nextUsers).length} users and synced all leaderboards!`);
     });
   </script>
 </body>
