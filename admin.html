@@ -18,15 +18,23 @@
     .topbar{min-height:64px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);gap:12px}
     .brand{display:flex;align-items:center;gap:12px;font:800 22px var(--display);letter-spacing:1px;text-transform:uppercase}
     .brand img{width:34px;height:34px}
-    .nav-links{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-    .admin-greeting{display:flex;align-items:center;gap:9px;color:var(--paper);font-size:13px;font-weight:700;text-transform:none;letter-spacing:0}
-    .admin-greeting img{width:34px;height:34px;border:1px solid var(--line);border-radius:50%;object-fit:cover}
-    .admin-greeting img[hidden]{display:none}
+    .nav-links{display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:relative}
+    .account-trigger{display:flex;align-items:center;gap:10px;padding:5px 8px;border:1px solid transparent;border-radius:3px;background:transparent;color:var(--paper);cursor:pointer;font-size:13px;font-weight:600}
+    .account-trigger:hover,.account-trigger[aria-expanded="true"]{border-color:var(--line);background:var(--panel)}
+    .account-trigger img,.profile-menu-identity img{width:34px;height:34px;border:1px solid var(--line);border-radius:50%;object-fit:cover}
+    .profile-menu{position:absolute;z-index:20;top:calc(100% + 8px);right:0;width:min(320px,calc(100vw - 28px));padding:14px;border:1px solid var(--line);border-radius:4px;background:var(--panel);box-shadow:0 16px 38px #0008}
+    .profile-menu-identity{position:relative;display:flex;align-items:center;gap:11px;padding:12px;border-bottom:1px solid var(--line);border-radius:3px;overflow:hidden;background-size:cover;background-position:center}
+    .profile-menu-identity::before{content:"";position:absolute;inset:0;background:rgba(24,34,57,0.85);z-index:1}
+    .profile-menu-identity img,.profile-menu-identity div{position:relative;z-index:2}
+    .profile-menu-identity img{width:42px;height:42px}
+    .profile-menu-name{display:block;overflow-wrap:anywhere;color:var(--paper);font-size:13px;font-weight:700}
+    .profile-menu-email{display:block;margin-top:3px;overflow-wrap:anywhere;color:var(--muted);font-size:11px}
+    .profile-menu-uid{display:grid;gap:6px;padding:13px 0;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase}
+    .profile-menu-uid code{overflow-wrap:anywhere;color:var(--paper);font:11px ui-monospace,Consolas,monospace}
     .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:36px;padding:0 14px;border:1px solid var(--line);border-radius:3px;background:var(--soft);color:var(--paper);cursor:pointer;font-size:12px;font-weight:700;text-decoration:none}
     .btn:hover{border-color:var(--lime)}
     .btn.primary{background:var(--lime);border-color:var(--lime);color:var(--ink)}
     .btn.danger{border-color:#ff795b80;background:#ff795b20;color:#ff9c87}
-    .btn.success{border-color:#5bf28c80;background:#5bf28c20;color:#84f7ab}
     .btn:disabled{opacity:.5;cursor:not-allowed}
     .gate{margin:40px auto;max-width:480px;padding:26px;border:1px solid var(--line);background:var(--panel);border-radius:4px}
     .gate h1{margin:0 0 8px;font:900 36px/1 var(--display);text-transform:uppercase}
@@ -42,14 +50,13 @@
     .field label{color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px}
     .field input,.field select{height:38px;padding:0 10px;border:1px solid var(--line);border-radius:3px;background:var(--ink);color:var(--paper)}
     .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:3px;background:var(--ink)}
-    table{width:100%;border-collapse:collapse;min-width:860px}
+    table{width:100%;border-collapse:collapse;min-width:780px}
     th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:12px;vertical-align:middle}
     th{background:var(--soft);color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;white-space:nowrap}
     td input[type="text"],td input[type="number"],td input[type="url"]{width:100%;min-width:90px;height:32px;padding:0 8px;border:1px solid transparent;border-radius:2px;background:#ffffff08;color:var(--paper)}
     td input:focus{border-color:var(--lime);background:var(--panel);outline:none}
     td input[type="checkbox"]{width:18px;height:18px;accent-color:var(--lime);cursor:pointer}
     .avatar-preview{width:30px;height:30px;border-radius:3px;object-fit:cover;border:1px solid var(--line);background:var(--panel);vertical-align:middle}
-    .badge-admin{display:inline-block;padding:2px 7px;border-radius:2px;background:#0095ff25;border:1px solid var(--lime);color:#72c5ff;font-size:10px;font-weight:800;text-transform:uppercase}
     .toast{position:fixed;right:20px;bottom:20px;z-index:99;padding:12px 16px;border:1px solid var(--line);border-left:3px solid var(--lime);background:var(--panel);box-shadow:0 12px 32px #000a;font-size:13px;font-weight:600}
     [hidden]{display:none!important}
   </style>
@@ -61,15 +68,28 @@
       <div class="nav-links" id="nav-links" hidden>
         <a class="btn" href="index.html">Leaderboard</a>
         <a class="btn" href="fortnitehunt.html">Pirate Hunt</a>
-        <span class="admin-greeting"><span id="admin-greeting-text">Hi, Admin</span><img id="admin-pfp" alt="" hidden></span>
-        <button class="btn" id="signout-btn" type="button">Sign out</button>
+        <button class="account-trigger" id="account-trigger" type="button" aria-haspopup="true" aria-expanded="false">
+          <span id="account-greeting"></span>
+          <img id="account-photo" alt="" hidden>
+        </button>
+        <div class="profile-menu" id="account-menu" role="menu" hidden>
+          <div class="profile-menu-identity" id="profile-menu-identity">
+            <img id="menu-photo" alt="" hidden>
+            <div><span class="profile-menu-name" id="menu-name"></span><span class="profile-menu-email" id="menu-email"></span></div>
+          </div>
+          <div class="profile-menu-uid"><span>User ID / Discord ID</span><code id="menu-uid"></code></div>
+          <button class="btn" id="signout-btn" type="button" style="width:100%">Sign out</button>
+        </div>
       </div>
     </header>
 
     <section class="gate" id="auth-gate">
       <h1 id="gate-title">Admin Sign In</h1>
-      <p id="gate-desc">Sign in with an approved admin Google account to manage leaderboards, session stats, and user permissions directly in Firebase.</p>
-      <button class="btn primary" id="signin-btn" type="button">Continue with Google</button>
+      <p id="gate-desc">Sign in with an approved admin Google or Discord account to manage leaderboards, session stats, and user permissions directly in Firebase.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn primary" id="signin-btn" type="button">Continue with Google</button>
+        <button class="btn primary" id="discord-signin-btn" type="button" style="background:#5865F2;border-color:#5865F2;color:#fff">Continue with Discord</button>
+      </div>
       <div id="gate-actions" style="margin-top:12px" hidden>
         <code id="gate-uid" style="display:block;margin-bottom:10px;padding:8px;background:var(--ink);border:1px solid var(--line);font-size:11px"></code>
         <button class="btn" id="gate-signout" type="button">Sign out</button>
@@ -84,46 +104,63 @@
       </div>
 
       <!-- TAB 1: LEADERBOARDS -->
-      <section id="panel-leaderboards" class="card">
-        <div class="card-header">
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-            <h2>Game Sheet</h2>
-            <select id="game-select" style="height:36px;padding:0 12px;border:1px solid var(--line);border-radius:3px;background:var(--ink);color:var(--paper);font-weight:700"></select>
-            <button class="btn" id="new-game-btn" type="button">+ New Game Tab</button>
-            <button class="btn danger" id="delete-game-btn" type="button">Delete Tab</button>
+      <section id="panel-leaderboards">
+        <div class="card">
+          <div class="card-header">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              <h2>Game Sheet</h2>
+              <select id="game-select" style="height:36px;padding:0 12px;border:1px solid var(--line);border-radius:3px;background:var(--ink);color:var(--paper);font-weight:700"></select>
+              <button class="btn" id="new-game-btn" type="button">+ New Game Tab</button>
+              <button class="btn danger" id="delete-game-btn" type="button">Delete Tab</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <button class="btn" id="recalc-ranks-btn" type="button">Auto-Rank by Elims</button>
+              <button class="btn" id="add-player-btn" type="button">+ Add Player Row</button>
+              <button class="btn primary" id="save-board-btn" type="button">Save Sheet Changes</button>
+            </div>
           </div>
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-            <button class="btn" id="recalc-ranks-btn" type="button">Auto-Rank by Elims</button>
-            <button class="btn" id="add-player-btn" type="button">+ Add Player Row</button>
-            <button class="btn primary" id="save-board-btn" type="button">Save Sheet Changes</button>
-          </div>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th style="width:64px">Profile Image</th>
-                <th style="width:95px">Eliminations</th>
-                <th>Leaderboard Name</th>
-                <th>Game Username</th>
-                <th id="character-column-heading">Character / MVPs</th>
-                <th style="width:70px">Online</th>
-                <th style="width:75px">Place</th>
-                <th style="width:65px">Row</th>
-              </tr>
-            </thead>
-            <tbody id="board-tbody"></tbody>
-          </table>
-        </div>
-        <section id="treasure-editor" class="card" style="margin:18px 0 0;padding:14px" hidden>
-          <div class="card-header"><h2>Fortnite Treasure Sheet</h2><span style="color:var(--muted);font-size:11px">Managed separately from leaderboard stats</span></div>
           <div class="table-wrap">
-            <table style="min-width:560px">
-              <thead><tr><th>Player</th><th>Game Username</th><th>Treasure Icon URL</th><th>Quantity</th></tr></thead>
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:64px">Profile Image</th>
+                  <th style="width:95px">Eliminations</th>
+                  <th>Leaderboard Name</th>
+                  <th>Game Username</th>
+                  <th id="character-column-heading">Character / MVPs</th>
+                  <th style="width:70px">Online</th>
+                  <th style="width:75px">Place</th>
+                  <th style="width:65px">Row</th>
+                </tr>
+              </thead>
+              <tbody id="board-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SEPARATE FORTNITE TREASURE SHEET BELOW MAIN SHEET -->
+        <div class="card" id="fortnite-treasure-card" hidden>
+          <div class="card-header">
+            <h2 style="color:#f3c75e">Pirate Hunt Treasure Sheet</h2>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <button class="btn" id="add-treasure-btn" type="button">+ Add Treasure Row</button>
+              <button class="btn primary" id="save-treasure-btn" type="button">Save Treasure Sheet</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table style="min-width:540px">
+              <thead>
+                <tr>
+                  <th style="width:64px">Preview</th>
+                  <th>Treasure Icon URL</th>
+                  <th style="width:120px">Quantity</th>
+                  <th style="width:65px">Row</th>
+                </tr>
+              </thead>
               <tbody id="treasure-tbody"></tbody>
             </table>
           </div>
-        </section>
+        </div>
       </section>
 
       <!-- TAB 2: SESSION & HUNT CONTROLS -->
@@ -132,7 +169,7 @@
           <h2>Live Session & Pirate Hunt Controls</h2>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button class="btn danger" id="reset-session-btn" type="button">Reset Main Session</button>
-            <button class="btn danger" id="reset-fortnite-hunt-btn" type="button">Reset Fortnite Hunt Stats</button>
+            <button class="btn danger" id="reset-hunt-btn" type="button">Reset Hunt Stats</button>
             <button class="btn primary" id="save-session-btn" type="button">Save Session Settings</button>
           </div>
         </div>
@@ -173,7 +210,6 @@
             <button class="btn primary" id="save-users-btn" type="button">Save Users & Admin Roles</button>
           </div>
         </div>
-        <p style="color:var(--muted);margin:0 0 14px;font-size:12px">Toggle <strong>Admin</strong> to grant or revoke access to this control panel. Game accounts map directly to each game leaderboard username.</p>
         <div class="table-wrap">
           <table>
             <thead id="users-thead"></thead>
@@ -187,9 +223,11 @@
   <div class="toast" id="toast" hidden></div>
 
   <script type="module">
-    import { auth, db, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, ref, get, set, update, remove, onValue, normalizeRowsFromBoard } from "./firebase-bridge.js";
+    import {
+      auth, db, DISCORD_CLIENT_ID, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signInAnonymously, signOut,
+      ref, get, set, update, remove, onValue, getUserRecord, getUserRecordByDiscordId, normalizeRowsFromBoard
+    } from "./firebase-bridge.js";
 
-    let currentUser = null;
     let boardsCache = {};
     let sessionCache = {};
     let usersCache = {};
@@ -203,7 +241,6 @@
       toastEl._t = setTimeout(() => toastEl.hidden = true, 4000);
     }
 
-    // Tabs
     document.querySelectorAll(".tab-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         document.querySelectorAll(".tab-btn").forEach(b => b.setAttribute("aria-selected", String(b === btn)));
@@ -214,51 +251,100 @@
       });
     });
 
-    document.querySelector("#signin-btn").addEventListener("click", () => signInWithPopup(auth, new GoogleAuthProvider()));
-    document.querySelector("#signout-btn").addEventListener("click", () => signOut(auth));
-    document.querySelector("#gate-signout").addEventListener("click", () => signOut(auth));
+    document.querySelector("#account-trigger").addEventListener("click", () => {
+      const menu = document.querySelector("#account-menu");
+      menu.hidden = !menu.hidden;
+    });
 
-    onAuthStateChanged(auth, async (user) => {
-      currentUser = user;
+    document.querySelector("#signin-btn").addEventListener("click", () => signInWithPopup(auth, new GoogleAuthProvider()));
+    document.querySelector("#discord-signin-btn").addEventListener("click", () => {
+      const redirectUri = encodeURIComponent(window.location.origin + window.location.pathname);
+      window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=token&scope=identify`;
+    });
+
+    const handleSignOut = async () => {
+      localStorage.removeItem("discordId");
+      await signOut(auth);
+      window.location.reload();
+    };
+    document.querySelector("#signout-btn").addEventListener("click", handleSignOut);
+    document.querySelector("#gate-signout").addEventListener("click", handleSignOut);
+
+    async function handleDiscordAdminRedirect() {
+      const fragment = new URLSearchParams(window.location.hash.slice(1));
+      const accessToken = fragment.get("access_token");
+      if (!accessToken) return false;
+      try {
+        if (!auth.currentUser) await signInAnonymously(auth);
+        const res = await fetch("https://discord.com/api/users/@me", { headers: { Authorization: `Bearer ${accessToken}` } });
+        const data = await res.json();
+        if (data && data.id) {
+          localStorage.setItem("discordId", data.id);
+          history.replaceState(null, "", window.location.pathname);
+          await evaluateAdminSession(auth.currentUser);
+          return true;
+        }
+      } catch (e) {}
+      return false;
+    }
+
+    async function evaluateAdminSession(user) {
       const gate = document.querySelector("#auth-gate");
       const app = document.querySelector("#admin-app");
       const nav = document.querySelector("#nav-links");
 
-      if (!user) {
+      let record = null;
+      const storedDiscordId = localStorage.getItem("discordId");
+      if (storedDiscordId) {
+        if (!user) await signInAnonymously(auth).catch(() => {});
+        record = await getUserRecordByDiscordId(storedDiscordId);
+      } else if (user && !user.isAnonymous) {
+        record = await getUserRecord(user.uid);
+      }
+
+      if (!record) {
         gate.hidden = false;
         app.hidden = true;
         nav.hidden = true;
-        document.querySelector("#gate-title").textContent = "Admin Sign In";
-        document.querySelector("#gate-desc").textContent = "Sign in with an approved admin Google account to manage Firebase data.";
-        document.querySelector("#signin-btn").hidden = false;
-        document.querySelector("#gate-actions").hidden = true;
         return;
       }
 
-      const snap = await get(ref(db, `users/${user.uid}`));
-      const record = snap.exists() ? snap.val() : null;
-
-      if (!record || record.isAdmin !== true) {
+      if (record.isAdmin !== true) {
         gate.hidden = false;
         app.hidden = true;
         nav.hidden = true;
         document.querySelector("#gate-title").textContent = "Admin Access Denied";
-        document.querySelector("#gate-desc").textContent = "Your account does not have isAdmin enabled in Firebase. Ask an existing admin to enable your UID.";
-        document.querySelector("#signin-btn").hidden = true;
+        document.querySelector("#gate-desc").textContent = "Your account does not have isAdmin enabled in Firebase.";
         document.querySelector("#gate-actions").hidden = false;
-        document.querySelector("#gate-uid").textContent = `UID: ${user.uid}`;
+        document.querySelector("#gate-uid").textContent = `ID: ${record.recordKey}`;
         return;
       }
 
       gate.hidden = true;
       app.hidden = false;
       nav.hidden = false;
-      document.querySelector("#admin-greeting-text").textContent = `Hi, ${record.leaderboardName || user.displayName || "Admin"}`;
-      const adminPhoto = record.profileImageUrl || record.profileImage || user.photoURL || "";
-      const adminPfp = document.querySelector("#admin-pfp");
-      adminPfp.hidden = !adminPhoto;
-      if (adminPhoto) adminPfp.src = adminPhoto;
+
+      const dispName = record.leaderboardName || user?.displayName || "Admin";
+      document.querySelector("#account-greeting").textContent = `Hi, ${dispName}`;
+      document.querySelector("#menu-name").textContent = dispName;
+      document.querySelector("#menu-email").textContent = user?.email || `Discord ID: ${record.discordId || "Admin"}`;
+      document.querySelector("#menu-uid").textContent = `UID: ${record.uid || "N/A"} | Discord: ${record.discordId || "N/A"}`;
+
+      const photoUrl = record.profileImageUrl || record.profileImage || user?.photoURL;
+      if (photoUrl) {
+        document.querySelector("#account-photo").src = photoUrl;
+        document.querySelector("#menu-photo").src = photoUrl;
+        document.querySelector("#account-photo").hidden = false;
+        document.querySelector("#menu-photo").hidden = false;
+        document.querySelector("#profile-menu-identity").style.backgroundImage = `url('${photoUrl}')`;
+      }
+
       bindRealtimeAdminData();
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      const handled = await handleDiscordAdminRedirect();
+      if (!handled) await evaluateAdminSession(user);
     });
 
     function bindRealtimeAdminData() {
@@ -287,20 +373,10 @@
         selectedBoardId = entries[0]?.[0] || "";
       }
 
-      gameSelect.replaceChildren(...entries.map(([id, b]) => {
-        const opt = document.createElement("option");
-        opt.value = id;
-        opt.textContent = b.name || id;
-        return opt;
-      }));
+      gameSelect.replaceChildren(...entries.map(([id, b]) => Object.assign(document.createElement("option"), { value: id, textContent: b.name || id })));
       gameSelect.value = selectedBoardId;
 
-      sessGame.replaceChildren(...entries.map(([id, b]) => {
-        const opt = document.createElement("option");
-        opt.value = b.name || id;
-        opt.textContent = b.name || id;
-        return opt;
-      }));
+      sessGame.replaceChildren(...entries.map(([id, b]) => Object.assign(document.createElement("option"), { value: b.name || id, textContent: b.name || id })));
       if (sessionCache.gameTitle) sessGame.value = sessionCache.gameTitle;
     }
 
@@ -319,54 +395,39 @@
       const isFortnite = String(board.name || "").trim().toLowerCase() === "fortnite";
       const isCS2 = String(board.name || "").trim().toLowerCase() === "counter-strike 2";
       const characterHeading = document.querySelector("#character-column-heading");
-      if (characterHeading) { characterHeading.hidden = isFortnite; characterHeading.textContent = isCS2 ? "MVPs" : "Character"; }
-      document.querySelector("#treasure-editor").hidden = !isFortnite;
+      if (characterHeading) {
+        characterHeading.hidden = isFortnite;
+        characterHeading.textContent = isCS2 ? "MVPs" : "Character";
+      }
 
       const rows = normalizeRowsFromBoard(board);
-      tbody.replaceChildren(...rows.map((r, idx) => {
-        const row = createBoardRowTr(r, isFortnite);
-        row.dataset.rowIndex = String(idx);
-        return row;
-      }));
-      renderTreasureTable(rows, isFortnite);
+      tbody.replaceChildren(...rows.map(r => createBoardRowTr(r, isFortnite)));
+
+      // Separate Treasure Sheet below main sheet for Fortnite
+      const treasureCard = document.querySelector("#fortnite-treasure-card");
+      treasureCard.hidden = !isFortnite;
+      if (isFortnite) {
+        const treasureTbody = document.querySelector("#treasure-tbody");
+        const existingTreasures = Array.isArray(board.treasures) && board.treasures.length
+          ? board.treasures
+          : rows.map(r => ({ icon: r[8] || "", quantity: Number(r[9]) || 0 })).filter(t => t.icon || t.quantity > 0);
+        treasureTbody.replaceChildren(...existingTreasures.map(t => createTreasureRowTr(t)));
+      }
     }
 
-    function renderTreasureTable(rows = [], isFortnite = false) {
-      const tbody = document.querySelector("#treasure-tbody");
-      if (!tbody) return;
-      tbody.replaceChildren();
-      if (!isFortnite) return;
-      rows.forEach((r, idx) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${String(r[2] || "").replace(/</g, "&lt;")}</td>
-          <td>${String(r[3] || "").replace(/</g, "&lt;")}</td>
-          <td><div style="display:flex;align-items:center;gap:6px"><img class="avatar-preview treasure-preview" src="${String(r[8] || "").replace(/"/g, "&quot;")}" alt=""><input type="url" data-treasure-icon value="${String(r[8] || "").replace(/"/g, "&quot;")}" placeholder="Treasure image URL"></div></td>
-          <td><input type="number" min="0" step="1" data-treasure-qty value="${Number(r[9]) || 0}"></td>`;
-        tr.dataset.rowIndex = String(idx);
-        tr.querySelector("[data-treasure-icon]").addEventListener("input", e => {
-          tr.querySelector(".treasure-preview").src = e.target.value;
-        });
-        tbody.append(tr);
-      });
-    }
-
-    function createBoardRowTr(r = ["", 0, "", "", "", false, 0, "", "", 0], isFortnite = false) {
+    function createBoardRowTr(r = ["", 0, "", "", "", false, 0], isFortnite = false) {
       const tr = document.createElement("tr");
       const imgUrl = String(r[0] || "");
       tr.innerHTML = `
-        <td><button class="avatar-edit board-avatar-edit" type="button" title="Click to change profile image" style="border:0;background:none;cursor:pointer;padding:0"><img class="avatar-preview" src="${imgUrl}" onerror="this.style.opacity='0.2'" alt=""></button><input type="hidden" data-col="0" value="${imgUrl.replace(/"/g, "&quot;")}"></td>
+        <td><button class="avatar-edit board-avatar-edit" type="button" title="Click to change profile image" style="border:0;background:none;cursor:pointer;padding:0"><img class="avatar-preview" src="${imgUrl}" onerror="this.style.opacity='0.2'" alt=""></button><input type="hidden" data-col="0" value="${imgUrl.replace(/"/g, """)}"></td>
         <td><input type="number" data-col="1" value="${Number(r[1]) || 0}"></td>
-        <td><input type="text" data-col="2" value="${String(r[2] || "").replace(/"/g, "&quot;")}" placeholder="Display Name"></td>
-        <td><input type="text" data-col="3" value="${String(r[3] || "").replace(/"/g, "&quot;")}" placeholder="In-Game Username"></td>
-        <td ${isFortnite ? "hidden" : ""}><input type="text" data-col="4" value="${String(r[4] || "").replace(/"/g, "&quot;")}" placeholder="${String(document.querySelector("#character-column-heading")?.textContent || "Character")}"></td>
+        <td><input type="text" data-col="2" value="${String(r[2] || "").replace(/"/g, """)}" placeholder="Display Name"></td>
+        <td><input type="text" data-col="3" value="${String(r[3] || "").replace(/"/g, """)}" placeholder="In-Game Username"></td>
+        <td ${isFortnite ? "hidden" : ""}><input type="text" data-col="4" value="${String(r[4] || "").replace(/"/g, """)}" placeholder="Character"></td>
         <td style="text-align:center"><input type="checkbox" data-col="5" ${r[5] === true || String(r[5]).toLowerCase() === "true" ? "checked" : ""}></td>
         <td><input type="number" data-col="6" value="${Number(r[6]) || 0}"></td>
         <td><button class="btn danger" type="button" style="min-height:28px;padding:0 8px">×</button></td>
       `;
-      tr.querySelector('input[data-col="8"]')?.addEventListener("input", e => {
-        const img = tr.querySelector(".treasure-preview"); if (img) img.src = e.target.value;
-      });
       tr.querySelector(".board-avatar-edit")?.addEventListener("click", () => {
         const field = tr.querySelector('input[data-col="0"]');
         const next = prompt("Enter the profile image URL (leave blank to clear):", field.value);
@@ -376,48 +437,61 @@
         img.src = field.value;
         img.style.opacity = field.value ? "1" : "0.25";
       });
-      tr.querySelector("td:last-child button")?.addEventListener("click", () => {
-        const index = tr.dataset.rowIndex;
-        if (index !== undefined) document.querySelector(`#treasure-tbody tr[data-row-index="${index}"]`)?.remove();
-        tr.remove();
-        [...document.querySelectorAll("#board-tbody tr")].forEach((row, idx) => row.dataset.rowIndex = String(idx));
-        [...document.querySelectorAll("#treasure-tbody tr")].forEach((row, idx) => row.dataset.rowIndex = String(idx));
-      });
+      tr.querySelector("td:last-child button")?.addEventListener("click", () => tr.remove());
       return tr;
     }
+
+    function createTreasureRowTr(t = { icon: "", quantity: 0 }) {
+      const tr = document.createElement("tr");
+      const iconUrl = String(t.icon || "");
+      tr.innerHTML = `
+        <td><img class="avatar-preview treasure-preview" src="${iconUrl.replace(/"/g, """)}" onerror="this.style.opacity='0.2'" alt=""></td>
+        <td><input type="url" data-tcol="icon" value="${iconUrl.replace(/"/g, """)}" placeholder="https://... treasure icon URL"></td>
+        <td><input type="number" data-tcol="quantity" min="0" value="${Number(t.quantity) || 0}"></td>
+        <td><button class="btn danger" type="button" style="min-height:28px;padding:0 8px">×</button></td>
+      `;
+      tr.querySelector('[data-tcol="icon"]')?.addEventListener("input", e => {
+        const img = tr.querySelector(".treasure-preview");
+        img.src = e.target.value;
+        img.style.opacity = e.target.value ? "1" : "0.2";
+      });
+      tr.querySelector("td:last-child button")?.addEventListener("click", () => tr.remove());
+      return tr;
+    }
+
+    document.querySelector("#add-treasure-btn").addEventListener("click", () => {
+      document.querySelector("#treasure-tbody").append(createTreasureRowTr({ icon: "", quantity: 1 }));
+    });
+
+    document.querySelector("#save-treasure-btn").addEventListener("click", async () => {
+      const board = boardsCache[selectedBoardId];
+      if (!board) return;
+      const treasures = [...document.querySelectorAll("#treasure-tbody tr")].map(tr => ({
+        icon: tr.querySelector('[data-tcol="icon"]').value.trim(),
+        quantity: Number(tr.querySelector('[data-tcol="quantity"]').value) || 0
+      })).filter(t => t.icon || t.quantity > 0);
+
+      await update(ref(db, `leaderboards/${selectedBoardId}`), { treasures });
+      showToast(`Saved ${treasures.length} treasure items!`);
+    });
 
     document.querySelector("#add-player-btn").addEventListener("click", () => {
       const board = boardsCache[selectedBoardId];
       if (!board) return;
       const isFortnite = String(board.name || "").trim().toLowerCase() === "fortnite";
-      const mainBody = document.querySelector("#board-tbody");
-      const rowIndex = mainBody.querySelectorAll("tr").length;
-      const newMainRow = createBoardRowTr(["", 0, "", "", "", false, 0, "", "", 0], isFortnite);
-      newMainRow.dataset.rowIndex = String(rowIndex);
-      mainBody.append(newMainRow);
-      if (isFortnite) {
-        const treasureBody = document.querySelector("#treasure-tbody");
-        const treasureRow = document.createElement("tr");
-        treasureRow.dataset.rowIndex = String(rowIndex);
-        treasureRow.innerHTML = `<td>New Player</td><td></td><td><div style="display:flex;align-items:center;gap:6px"><img class="avatar-preview treasure-preview" alt=""><input type="url" data-treasure-icon placeholder="Treasure image URL"></div></td><td><input type="number" min="0" step="1" data-treasure-qty value="0"></td>`;
-        treasureRow.querySelector("[data-treasure-icon]").addEventListener("input", e => treasureRow.querySelector(".treasure-preview").src = e.target.value);
-        treasureBody.append(treasureRow);
-      }
+      document.querySelector("#board-tbody").append(createBoardRowTr(["", 0, "", "", "", false, 0], isFortnite));
     });
 
     document.querySelector("#recalc-ranks-btn").addEventListener("click", () => {
       const trs = [...document.querySelectorAll("#board-tbody tr")];
-      const parsed = trs.map(tr => ({
-        tr,
-        elims: Number(tr.querySelector('[data-col="1"]').value) || 0
-      }));
+      const parsed = trs.map(tr => ({ tr, elims: Number(tr.querySelector('[data-col="1"]').value) || 0 }));
       parsed.sort((a, b) => b.elims - a.elims);
       const tbody = document.querySelector("#board-tbody");
       parsed.forEach((item, idx) => {
         item.tr.querySelector('[data-col="6"]').value = idx + 1;
         tbody.append(item.tr);
       });
-      showToast("Sorted and ranked rows by eliminations. Click Save Sheet Changes to publish.");
+      showToast("Sorted and ranked rows by eliminations.");
     });
 
     document.querySelector("#save-board-btn").addEventListener("click", async () => {
@@ -429,62 +503,38 @@
       const players = {};
 
       trs.forEach((tr, idx) => {
-        const enteredImage = tr.querySelector('[data-col="0"]').value.trim();
+        const img = tr.querySelector('[data-col="0"]').value.trim();
         const elims = Number(tr.querySelector('[data-col="1"]').value) || 0;
-        const enteredName = tr.querySelector('[data-col="2"]').value.trim();
+        const name = tr.querySelector('[data-col="2"]').value.trim();
         const gameUsername = tr.querySelector('[data-col="3"]').value.trim();
-        const linkedUser = Object.values(usersCache).find(user =>
-          String(user.gameAccounts?.[board.name] || "").trim().toLowerCase() === gameUsername.toLowerCase()
-        );
-        const img = linkedUser?.profileImageUrl || enteredImage;
-        const name = linkedUser?.leaderboardName || enteredName;
         const character = isFortnite ? "" : tr.querySelector('[data-col="4"]').value.trim();
         const active = tr.querySelector('[data-col="5"]').checked;
         const placement = Number(tr.querySelector('[data-col="6"]').value) || (idx + 1);
+
         if (!name && !gameUsername) return;
-        const treasureRow = isFortnite
-          ? document.querySelector(`#treasure-tbody tr[data-row-index="${idx}"]`)
-          : null;
-        const tIcon = treasureRow?.querySelector("[data-treasure-icon]")?.value.trim() || "";
-        const tQty = Number(treasureRow?.querySelector("[data-treasure-qty]")?.value) || 0;
-        const rowArr = isFortnite
-          ? [img, elims, name, gameUsername, character, active, placement, "", tIcon, tQty]
-          : [img, elims, name, gameUsername, character, active, placement];
-        rows.push(rowArr);
+        rows.push([img, elims, name, gameUsername, character, active, placement]);
 
         const safeKey = (gameUsername || `player_${idx}`).replace(/[.#$\[\]\/]/g, "_");
-        players[safeKey] = {
-          image: img,
-          eliminations: elims,
-          name,
-          gameUsername,
-          character,
-          active,
-          placement,
-          treasureIcon: tIcon,
-          treasureQuantity: tQty
-        };
+        players[safeKey] = { image: img, eliminations: elims, name, gameUsername, character, active, placement };
       });
 
-      await set(ref(db, `leaderboards/${selectedBoardId}`), {
-        id: selectedBoardId,
-        name: board.name,
-        rows,
-        players
-      });
+      const updates = { id: selectedBoardId, name: board.name, rows, players };
+      if (isFortnite) {
+        updates.treasures = [...document.querySelectorAll("#treasure-tbody tr")].map(tr => ({
+          icon: tr.querySelector('[data-tcol="icon"]').value.trim(),
+          quantity: Number(tr.querySelector('[data-tcol="quantity"]').value) || 0
+        })).filter(t => t.icon || t.quantity > 0);
+      }
+
+      await update(ref(db, `leaderboards/${selectedBoardId}`), updates);
       showToast(`Saved ${board.name} (${rows.length} players) to Firebase!`);
     });
 
     document.querySelector("#new-game-btn").addEventListener("click", async () => {
-      const name = prompt("Enter new game tab name (e.g., Valorant, Overwatch 2):");
+      const name = prompt("Enter new game tab name:");
       if (!name || !name.trim()) return;
       const newId = String(Date.now());
-      await set(ref(db, `leaderboards/${newId}`), {
-        id: newId,
-        name: name.trim(),
-        rows: [],
-        players: {}
-      });
+      await set(ref(db, `leaderboards/${newId}`), { id: newId, name: name.trim(), rows: [], players: {} });
       selectedBoardId = newId;
       showToast(`Created game tab "${name.trim()}".`);
     });
@@ -498,7 +548,6 @@
       showToast(`Deleted "${board.name}".`);
     });
 
-    // SESSION TAB
     function populateSessionForm() {
       document.querySelector("#sess-elims").value = Number(sessionCache.eliminations) || 0;
       document.querySelector("#sess-wins").value = Number(sessionCache.wins) || 0;
@@ -515,24 +564,11 @@
     document.querySelector("#fn-now-btn").addEventListener("click", () => {
       const now = new Date();
       const parts = new Intl.DateTimeFormat("en-GB", {
-        timeZone: "America/New_York",
-        hour: "2-digit", minute: "2-digit", second: "2-digit",
-        day: "2-digit", month: "2-digit", year: "2-digit",
-        hour12: false
+        timeZone: "America/New_York", hour: "2-digit", minute: "2-digit", second: "2-digit", day: "2-digit", month: "2-digit", year: "2-digit", hour12: false
       }).formatToParts(now);
       const getPart = t => parts.find(p => p.type === t)?.value || "00";
       document.querySelector("#fn-start").value = `${getPart("hour")}:${getPart("minute")}:${getPart("second")} ${getPart("day")}/${getPart("month")}/${getPart("year")}`;
     });
-
-    async function clearOtherGameOnlineStatus(activeGameId) {
-      for (const [id, board] of Object.entries(boardsCache)) {
-        if (String(id) === String(activeGameId)) continue;
-        const rows = normalizeRowsFromBoard(board).map(row => { const copy = [...row]; copy[5] = false; return copy; });
-        const players = { ...(board.players || {}) };
-        Object.values(players).forEach(player => { player.active = false; });
-        await update(ref(db, `leaderboards/${id}`), { rows, players });
-      }
-    }
 
     document.querySelector("#save-session-btn").addEventListener("click", async () => {
       const gameTitle = document.querySelector("#sess-game").value;
@@ -552,34 +588,30 @@
           startTime: document.querySelector("#fn-start").value.trim()
         }
       };
-      if (payload.activeGameId && String(sessionCache.activeGameId || "") !== String(payload.activeGameId)) {
-        await clearOtherGameOnlineStatus(payload.activeGameId);
-      }
       await set(ref(db, "session"), payload);
       showToast("Session & Pirate Hunt settings saved!");
     });
 
     document.querySelector("#reset-session-btn").addEventListener("click", async () => {
-      if (!confirm("Reset session eliminations, wins, and losses to 0? Online status will not be changed.")) return;
+      if (!confirm("Reset main session eliminations, wins, and losses to 0?")) return;
       await update(ref(db, "session"), { eliminations: 0, wins: 0, losses: 0 });
-      showToast("Session counters reset. Online status was left unchanged.");
+      showToast("Main session counters reset to 0.");
     });
 
-    document.querySelector("#reset-fortnite-hunt-btn").addEventListener("click", async () => {
-      if (!confirm("Reset Fortnite Hunt eliminations, wins, and losses to 0? This does not change leaderboard treasure or player totals.")) return;
+    document.querySelector("#reset-hunt-btn").addEventListener("click", async () => {
+      if (!confirm("Reset Pirate Hunt eliminations, wins, and losses to 0?")) return;
       await update(ref(db, "session/fortnite"), { eliminations: 0, wins: 0, losses: 0 });
-      showToast("Fortnite Hunt session stats reset.");
+      showToast("Pirate Hunt stats reset to 0.");
     });
 
-    // USERS & ADMIN ROLES TAB
     function renderUsersTable() {
       const games = Object.values(boardsCache).map(b => b.name).filter(Boolean);
       const thead = document.querySelector("#users-thead");
       const tbody = document.querySelector("#users-tbody");
 
       thead.innerHTML = `<tr>
-        <th>Firebase UID (optional)</th>
-        <th>Discord User ID (optional)</th>
+        <th>Firebase UID</th>
+        <th>Discord User ID</th>
         <th>Leaderboard Name</th>
         <th>Profile Image</th>
         <th>Note / Label</th>
@@ -589,47 +621,32 @@
         <th style="width:65px">Remove</th>
       </tr>`;
 
-      const userList = Object.values(usersCache);
-      tbody.replaceChildren(...userList.map(u => createUserTr(u, games)));
+      tbody.replaceChildren(...Object.values(usersCache).map(u => createUserTr(u, games)));
     }
 
     function createUserTr(u = { uid: "", label: "", challengePoints: 0, isAdmin: false, gameAccounts: {} }, games = []) {
       const tr = document.createElement("tr");
       const accs = u.gameAccounts || {};
-      const inferredRow = Object.entries(accs).map(([gameName, username]) => {
-        const board = Object.values(boardsCache).find(item => String(item.name || "").toLowerCase() === String(gameName).toLowerCase());
-        return normalizeRowsFromBoard(board).find(row => String(row[3] || "").trim().toLowerCase() === String(username || "").trim().toLowerCase());
-      }).find(Boolean);
-      const legacyLabelIsUrl = /^https?:\/\//i.test(String(u.label || "").trim());
-      const leaderboardName = u.leaderboardName || inferredRow?.[2] || "";
-      const profileImageUrl = u.profileImageUrl || (legacyLabelIsUrl ? u.label : inferredRow?.[0]) || "";
-      const noteLabel = legacyLabelIsUrl ? "" : (u.label || "");
+      const profileImageUrl = u.profileImageUrl || u.profileImage || "";
       tr.innerHTML = `
-        <td><input type="text" data-field="uid" value="${String(u.uid || "").replace(/"/g, "&quot;")}" placeholder="Firebase Auth UID"></td>
-        <td><input type="text" data-field="discordId" value="${String(u.discordId || "").replace(/"/g, "&quot;")}" placeholder="Discord User ID"></td>
-        <td><input type="text" data-field="leaderboardName" value="${String(leaderboardName).replace(/"/g, "&quot;")}" placeholder="Main leaderboard name"></td>
-        <td><button type="button" class="avatar-edit" title="Click to change profile image" style="border:0;background:none;cursor:pointer"><img class="avatar-preview user-avatar" src="${String(profileImageUrl).replace(/"/g, "&quot;")}" alt="Edit profile image"></button><input type="hidden" data-field="profileImageUrl" value="${String(profileImageUrl).replace(/"/g, "&quot;")}"></td>
-        <td><input type="text" data-field="label" value="${String(noteLabel).replace(/"/g, "&quot;")}" placeholder="Note / label"></td>
+        <td><input type="text" data-field="uid" value="${String(u.uid || "").replace(/"/g, """)}" placeholder="Firebase Auth UID"></td>
+        <td><input type="text" data-field="discordId" value="${String(u.discordId || "").replace(/"/g, """)}" placeholder="Discord User ID"></td>
+        <td><input type="text" data-field="leaderboardName" value="${String(u.leaderboardName || "").replace(/"/g, """)}" placeholder="Main leaderboard name"></td>
+        <td><button type="button" class="avatar-edit" title="Click to change profile image" style="border:0;background:none;cursor:pointer"><img class="avatar-preview user-avatar" src="${String(profileImageUrl).replace(/"/g, """)}" alt=""></button><input type="hidden" data-field="profileImageUrl" value="${String(profileImageUrl).replace(/"/g, """)}"></td>
+        <td><input type="text" data-field="label" value="${String(u.label || "").replace(/"/g, """)}" placeholder="Note"></td>
         <td><input type="number" data-field="points" value="${Number(u.challengePoints) || 0}"></td>
         <td style="text-align:center"><input type="checkbox" data-field="isAdmin" ${u.isAdmin === true ? "checked" : ""}></td>
-        ${games.map(g => `<td><input type="text" data-game="${g.replace(/"/g, "&quot;")}" value="${String(accs[g] || "").replace(/"/g, "&quot;")}" placeholder="${g} ID"></td>`).join("")}
+        ${games.map(g => `<td><input type="text" data-game="${g.replace(/"/g, """)}" value="${String(accs[g] || "").replace(/"/g, """)}" placeholder="${g} ID"></td>`).join("")}
         <td><button class="btn danger" type="button" style="min-height:28px;padding:0 8px">×</button></td>
       `;
       tr.querySelector(".avatar-edit")?.addEventListener("click", () => {
         const field = tr.querySelector('[data-field="profileImageUrl"]');
-        const next = prompt("Enter the profile image URL (leave blank to clear):", field.value);
+        const next = prompt("Enter profile image URL:", field.value);
         if (next === null) return;
         field.value = next.trim();
-        const image = tr.querySelector(".user-avatar");
-        image.src = field.value; image.style.opacity = field.value ? "1" : "0.25";
+        tr.querySelector(".user-avatar").src = field.value;
       });
-      tr.querySelector("td:last-child button")?.addEventListener("click", () => {
-        const index = tr.dataset.rowIndex;
-        if (index !== undefined) document.querySelector(`#treasure-tbody tr[data-row-index="${index}"]`)?.remove();
-        tr.remove();
-        [...document.querySelectorAll("#board-tbody tr")].forEach((row, idx) => row.dataset.rowIndex = String(idx));
-        [...document.querySelectorAll("#treasure-tbody tr")].forEach((row, idx) => row.dataset.rowIndex = String(idx));
-      });
+      tr.querySelector("td:last-child button")?.addEventListener("click", () => tr.remove());
       return tr;
     }
 
@@ -657,6 +674,7 @@
         });
         nextUsers[recordKey] = {
           uid: uid || "",
+          recordKey,
           authUid: recordKey,
           discordId,
           leaderboardName: tr.querySelector('[data-field="leaderboardName"]').value.trim(),
@@ -669,37 +687,12 @@
       });
 
       if (adminCount === 0) {
-        alert("At least one user must remain an Admin so you do not lock yourself out!");
+        alert("At least one user must remain an Admin!");
         return;
       }
 
       await set(ref(db, "users"), nextUsers);
-      // Keep public leaderboard display names and profile images synchronized from the central user directory.
-      for (const [boardId, board] of Object.entries(boardsCache)) {
-        const rows = normalizeRowsFromBoard(board).map(row => {
-          const copy = [...row];
-          const linked = Object.values(nextUsers).find(user =>
-            String(user.gameAccounts?.[board.name] || "").trim().toLowerCase() === String(copy[3] || "").trim().toLowerCase()
-          );
-          if (linked) {
-            if (linked.leaderboardName) copy[2] = linked.leaderboardName;
-            if (Object.prototype.hasOwnProperty.call(linked, "profileImageUrl")) copy[0] = linked.profileImageUrl || "";
-          }
-          return copy;
-        });
-        const players = { ...(board.players || {}) };
-        for (const player of Object.values(players)) {
-          const linked = Object.values(nextUsers).find(user =>
-            String(user.gameAccounts?.[board.name] || "").trim().toLowerCase() === String(player.gameUsername || "").trim().toLowerCase()
-          );
-          if (linked) {
-            if (linked.leaderboardName) player.name = linked.leaderboardName;
-            if (Object.prototype.hasOwnProperty.call(linked, "profileImageUrl")) player.image = linked.profileImageUrl || "";
-          }
-        }
-        await update(ref(db, `leaderboards/${boardId}`), { rows, players });
-      }
-      showToast(`Saved ${Object.keys(nextUsers).length} users (${adminCount} admin${adminCount === 1 ? "" : "s"})!`);
+      showToast(`Saved ${Object.keys(nextUsers).length} users!`);
     });
   </script>
 </body>

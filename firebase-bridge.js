@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { GoogleAuthProvider, getAuth, onAuthStateChanged, signInWithPopup, signInWithCustomToken, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { GoogleAuthProvider, getAuth, onAuthStateChanged, signInWithPopup, signInWithCustomToken, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getDatabase, onDisconnect, onValue, ref, set, update, get, runTransaction, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 export const FIREBASE_CONFIG = {
@@ -10,31 +10,38 @@ export const FIREBASE_CONFIG = {
   appId: "1:888950181547:web:2349883ef1a2d82e0631ee"
 };
 
+export const DISCORD_CLIENT_ID = "1570639449400942692";
+
 const app = initializeApp(FIREBASE_CONFIG);
 export const auth = getAuth(app);
 export const db = getDatabase(app, FIREBASE_CONFIG.databaseURL);
-export { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signInWithCustomToken, signOut, onDisconnect, onValue, ref, set, update, get, runTransaction, remove };
-
-export async function getUserRecord(uid) {
-  if (!uid) return null;
-  const snap = await get(ref(db, `users/${uid}`));
-  return snap.exists() ? snap.val() : null;
-}
+export { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signInWithCustomToken, signInAnonymously, signOut, onDisconnect, onValue, ref, set, update, get, runTransaction, remove };
 
 export async function getAllUsers() {
   const snap = await get(ref(db, "users"));
-  return snap.exists() ? snap.val() : {};
+  if (!snap.exists()) return {};
+  const raw = snap.val();
+  const normalized = {};
+  for (const [key, val] of Object.entries(raw)) {
+    if (val && typeof val === "object") {
+      normalized[key] = { recordKey: key, uid: val.uid || key, ...val };
+    }
+  }
+  return normalized;
+}
+
+export async function getUserRecord(uid) {
+  if (!uid) return null;
+  const users = await getAllUsers();
+  if (users[uid]) return users[uid];
+  return Object.values(users).find(u => u.uid === uid || u.authUid === uid) || null;
 }
 
 export async function getUserRecordByDiscordId(discordId) {
   if (!discordId) return null;
+  const cleanId = String(discordId).trim();
   const users = await getAllUsers();
-  for (const [uid, userData] of Object.entries(users)) {
-    if (userData.discordId === discordId) {
-      return { uid, ...userData };
-    }
-  }
-  return null;
+  return Object.values(users).find(u => String(u.discordId || "").trim() === cleanId) || null;
 }
 
 export async function getGameCatalog() {
@@ -102,10 +109,10 @@ export async function computeOverallEliminations(gameAccounts) {
   return total;
 }
 
-export async function resolveLeaderboardIdentity(gameAccounts, preferredGameTitle = "") {
-  if (!gameAccounts || typeof gameAccounts !== "object") return { name: "Player", image: "" };
+export async function resolveLeaderboardIdentity(gameAccounts, preferredGameTitle = "", fallbackName = "Player", fallbackImage = "") {
+  if (!gameAccounts || typeof gameAccounts !== "object") return { name: fallbackName, image: fallbackImage };
   const snap = await get(ref(db, "leaderboards"));
-  if (!snap.exists()) return { name: "Player", image: "" };
+  if (!snap.exists()) return { name: fallbackName, image: fallbackImage };
   const boards = snap.val();
   const titles = Object.keys(gameAccounts);
   if (preferredGameTitle && gameAccounts[preferredGameTitle]) {
@@ -123,17 +130,24 @@ export async function resolveLeaderboardIdentity(gameAccounts, preferredGameTitl
     const match = rows.find(r => String(r[3] || "").trim().toLowerCase() === username);
     if (match) {
       return {
-        name: String(match[2] || "Player").trim(),
-        image: String(match[0] || "").trim()
+        name: String(match[2] || fallbackName).trim(),
+        image: String(match[0] || fallbackImage).trim()
       };
     }
   }
-  return { name: "Player", image: "" };
+  return { name: fallbackName, image: fallbackImage };
 }
 
 export async function runFirebaseChallengeAction(currentUser, userRecord, action, payload = {}) {
-  const uid = currentUser.uid;
-  const myIdentity = await resolveLeaderboardIdentity(userRecord.gameAccounts, payload.gameTitle);
+  const actorKey = userRecord?.recordKey || userRecord?.uid || currentUser?.uid;
+  if (!actorKey) throw new Error("Unable to identify your user account.");
+
+  const myIdentity = await resolveLeaderboardIdentity(
+    userRecord.gameAccounts,
+    payload.gameTitle,
+    userRecord.leaderboardName || "Player",
+    userRecord.profileImageUrl || userRecord.profileImage || ""
+  );
 
   if (action === "profile") {
     const users = await getAllUsers();
@@ -146,10 +160,15 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
       );
     });
     if (!matchedEntry) throw new Error("That player is not linked to an approved user account.");
-    const targetIdentity = await resolveLeaderboardIdentity(matchedEntry.gameAccounts, payload.gameTitle);
+    const targetIdentity = await resolveLeaderboardIdentity(
+      matchedEntry.gameAccounts,
+      payload.gameTitle,
+      matchedEntry.leaderboardName || payload.gameUsername,
+      matchedEntry.profileImageUrl || matchedEntry.profileImage || ""
+    );
     const overallEliminations = await computeOverallEliminations(matchedEntry.gameAccounts);
     return {
-      actorId: matchedEntry.uid,
+      actorId: matchedEntry.recordKey,
       name: targetIdentity.name || payload.gameUsername,
       image: targetIdentity.image || "",
       overallEliminations,
@@ -165,8 +184,7 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
     const eliminations = Math.floor(Number(payload.eliminations));
     const noTimeLimit = payload.mode === "1v1" && payload.noTimeLimit === true;
     const timeLimitMinutes = noTimeLimit ? 0 : Math.floor(Number(payload.timeLimitMinutes));
-    
-    // New Challenge Parameters
+
     const maxDeaths = payload.maxDeaths !== undefined && payload.maxDeaths !== "" ? Math.floor(Number(payload.maxDeaths)) : null;
     const requireMatchEnd = Boolean(payload.requireMatchEnd);
     const characterRequirement = String(payload.characterRequirement || "").trim();
@@ -188,11 +206,15 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
     if (isGroup) {
       const presenceSnap = await get(ref(db, "presence"));
       const presence = presenceSnap.exists() ? presenceSnap.val() : {};
-      targets.push({ actorId: uid, name: myIdentity.name, image: myIdentity.image });
-      for (const [pUid, pInfo] of Object.entries(presence)) {
-        if (pUid !== uid && users[pUid] && pInfo?.online === true && Date.now() - Number(pInfo.lastSeen || 0) < 90000) {
-          const iden = await resolveLeaderboardIdentity(users[pUid].gameAccounts, payload.gameTitle);
-          targets.push({ actorId: pUid, name: iden.name, image: iden.image });
+      targets.push({ actorId: actorKey, name: myIdentity.name, image: myIdentity.image });
+
+      for (const [pKey, pInfo] of Object.entries(presence)) {
+        const matchedUser = users[pKey] || Object.values(users).find(u => u.uid === pKey || u.discordId === pKey || u.recordKey === pKey);
+        if (matchedUser && matchedUser.recordKey !== actorKey && pInfo?.online === true && Date.now() - Number(pInfo.lastSeen || 0) < 90000) {
+          if (!targets.some(t => t.actorId === matchedUser.recordKey)) {
+            const iden = await resolveLeaderboardIdentity(matchedUser.gameAccounts, payload.gameTitle, matchedUser.leaderboardName || "Player", matchedUser.profileImageUrl || "");
+            targets.push({ actorId: matchedUser.recordKey, name: iden.name, image: iden.image });
+          }
         }
       }
     } else {
@@ -204,14 +226,14 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
         )
       );
       if (!targetEntry) throw new Error("That player is not linked to an approved account.");
-      if (targetEntry.uid === uid) throw new Error("You cannot challenge yourself.");
-      const targetIden = await resolveLeaderboardIdentity(targetEntry.gameAccounts, payload.gameTitle);
+      if (targetEntry.recordKey === actorKey) throw new Error("You cannot challenge yourself.");
+      const targetIden = await resolveLeaderboardIdentity(targetEntry.gameAccounts, payload.gameTitle, targetEntry.leaderboardName || payload.gameUsername, targetEntry.profileImageUrl || "");
       if (isDuel) {
         const maxWager = Math.min(Number(userRecord.challengePoints) || 0, Number(targetEntry.challengePoints) || 0);
         if (wagerPoints > maxWager) throw new Error("Wager cannot exceed the lower player's balance.");
-        targets.push({ actorId: uid, name: myIdentity.name, image: myIdentity.image });
+        targets.push({ actorId: actorKey, name: myIdentity.name, image: myIdentity.image });
       }
-      targets.push({ actorId: targetEntry.uid, name: targetIden.name, image: targetIden.image });
+      targets.push({ actorId: targetEntry.recordKey, name: targetIden.name, image: targetIden.image });
     }
 
     const participants = {};
@@ -220,7 +242,7 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
       participants[t.actorId] = {
         name: t.name,
         image: t.image || "",
-        status: isDuel && t.actorId === uid ? "waiting" : "pending",
+        status: isDuel && t.actorId === actorKey ? "waiting" : "pending",
         deaths: 0,
         updatedAt: now
       };
@@ -241,7 +263,7 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
       maxDeaths,
       requireMatchEnd,
       characterRequirement,
-      creatorId: uid,
+      creatorId: actorKey,
       creatorName: myIdentity.name.slice(0, 50),
       createdAt: now,
       invitationExpiresAt: now + 10 * 60 * 1000,
@@ -257,14 +279,19 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
     const snap = await get(challengeRef);
     if (!snap.exists()) throw new Error("Challenge not found.");
     const challenge = snap.val();
-    const participant = challenge.participants?.[uid];
+
+    // Match participant by actorKey, uid, or discordId
+    const possibleKeys = [actorKey, userRecord.uid, userRecord.recordKey, userRecord.discordId ? `discord_${userRecord.discordId}` : null].filter(Boolean);
+    const participantKey = possibleKeys.find(k => challenge.participants && challenge.participants[k]);
+    const participant = participantKey ? challenge.participants[participantKey] : null;
+
     if (!participant || participant.status !== "pending") {
       throw new Error("This invitation is no longer awaiting your response.");
     }
 
     const now = Date.now();
     if (Number(challenge.invitationExpiresAt) && now > Number(challenge.invitationExpiresAt)) {
-      await update(ref(db, `challenges/${payload.challengeId}/participants/${uid}`), {
+      await update(ref(db, `challenges/${payload.challengeId}/participants/${participantKey}`), {
         status: "expired", updatedAt: now
       });
       throw new Error("This challenge invitation has expired.");
@@ -272,26 +299,26 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
 
     if (!payload.accept) {
       const changes = {
-        [`participants/${uid}/status`]: "denied",
-        [`participants/${uid}/updatedAt`]: now
+        [`participants/${participantKey}/status`]: "denied",
+        [`participants/${participantKey}/updatedAt`]: now
       };
       if (challenge.mode === "1v1") {
         changes.status = "denied";
-        for (const actorId of Object.keys(challenge.participants || {})) {
-          changes[`participants/${actorId}/status`] = "denied";
-          changes[`participants/${actorId}/updatedAt`] = now;
+        for (const pId of Object.keys(challenge.participants || {})) {
+          changes[`participants/${pId}/status`] = "denied";
+          changes[`participants/${pId}/updatedAt`] = now;
         }
       }
       await update(challengeRef, changes);
     } else if (challenge.mode === "1v1") {
       const users = await getAllUsers();
       const changes = { status: "active", startedAt: now };
-      for (const actorId of Object.keys(challenge.participants || {})) {
-        const uRec = users[actorId];
+      for (const pId of Object.keys(challenge.participants || {})) {
+        const uRec = users[pId] || Object.values(users).find(u => u.uid === pId || u.recordKey === pId);
         if (!uRec) throw new Error("A participant is no longer approved. The challenge cannot start.");
         const startElims = await computeOverallEliminations(uRec.gameAccounts);
-        changes[`participants/${actorId}`] = {
-          ...challenge.participants[actorId],
+        changes[`participants/${pId}`] = {
+          ...challenge.participants[pId],
           status: "active",
           acceptedAt: now,
           startingEliminations: startElims,
@@ -302,7 +329,7 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
           updatedAt: now
         };
         if (Number(challenge.wagerPoints) > 0) {
-          await runTransaction(ref(db, `users/${actorId}/challengePoints`), pts =>
+          await runTransaction(ref(db, `users/${uRec.recordKey}/challengePoints`), pts =>
             Math.max(0, (Number(pts) || 0) - Number(challenge.wagerPoints))
           );
         }
@@ -321,10 +348,10 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
         deaths: 0,
         updatedAt: now
       };
-      await update(ref(db, `challenges/${payload.challengeId}/participants/${uid}`), participantUpdate);
+      await update(ref(db, `challenges/${payload.challengeId}/participants/${participantKey}`), participantUpdate);
     }
 
-    const updatedUser = await getUserRecord(uid);
+    const updatedUser = await getUserRecord(actorKey);
     const latest = await get(challengeRef);
     return {
       challenge: latest.exists() ? latest.val() : null,
@@ -337,51 +364,24 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
     const snap = await get(challengeRef);
     if (!snap.exists()) throw new Error("Challenge not found.");
     const challenge = snap.val();
-    if (!challenge.participants?.[uid] || challenge.participants[uid].status !== "active") {
+    const possibleKeys = [actorKey, userRecord.uid, userRecord.recordKey, userRecord.discordId ? `discord_${userRecord.discordId}` : null].filter(Boolean);
+    const participantKey = possibleKeys.find(k => challenge.participants && challenge.participants[k]);
+
+    if (!participantKey || challenge.participants[participantKey].status !== "active") {
       throw new Error("No active challenge to abandon.");
     }
-    challenge.participants[uid].status = "abandoned";
-    challenge.participants[uid].updatedAt = Date.now();
+    challenge.participants[participantKey].status = "abandoned";
+    challenge.participants[participantKey].updatedAt = Date.now();
     if (challenge.mode === "1v1") {
       challenge.status = "abandoned";
       if (challenge.wagerEscrowed && challenge.wagerPoints > 0) {
-        for (const actorId of Object.keys(challenge.participants)) {
-          await runTransaction(ref(db, `users/${actorId}/challengePoints`), pts => (Number(pts) || 0) + challenge.wagerPoints);
+        for (const pId of Object.keys(challenge.participants)) {
+          await runTransaction(ref(db, `users/${pId}/challengePoints`), pts => (Number(pts) || 0) + challenge.wagerPoints);
         }
       }
     }
     await set(challengeRef, challenge);
     return { challenge };
-  }
-
-  if (action === "bet") {
-    const challengeRef = ref(db, `challenges/${payload.challengeId}`);
-    const snap = await get(challengeRef);
-    if (!snap.exists()) throw new Error("Challenge not found.");
-    const challenge = snap.val();
-    const stake = Math.floor(Number(payload.amount));
-    if (challenge.mode !== "1v1" || challenge.status !== "active") throw new Error("1v1 is not accepting bets.");
-    if (challenge.participants?.[uid]) throw new Error("Participants cannot bet.");
-    if (!Number.isInteger(stake) || stake < 1) throw new Error("Minimum bet is 1 point.");
-    const freshUser = await getUserRecord(uid);
-    const bal = Number(freshUser?.challengePoints) || 0;
-    if (stake > bal) throw new Error("Insufficient challenge points.");
-
-    await set(ref(db, `users/${uid}/challengePoints`), bal - stake);
-    challenge.bets = challenge.bets || {};
-    const existing = challenge.bets[uid];
-    if (existing && existing.sideActorId !== payload.sideActorId) {
-      throw new Error("You can only add points to the player you already backed.");
-    }
-    challenge.bets[uid] = {
-      sideActorId: payload.sideActorId,
-      amount: (Number(existing?.amount) || 0) + stake,
-      name: myIdentity.name,
-      status: "held",
-      updatedAt: Date.now()
-    };
-    await set(challengeRef, challenge);
-    return { challenge, challengePoints: bal - stake };
   }
 
   throw new Error("Unknown challenge action.");

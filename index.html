@@ -25,31 +25,25 @@
     .hero{display:grid;grid-template-columns:1fr auto;align-items:end;gap:24px;padding:58px 0 35px;animation:arrive .4s ease-out both}h1{margin:0;font:900 clamp(56px,9vw,92px)/.85 var(--display);text-transform:uppercase}.hero-copy{max-width:460px;margin:16px 0 0;color:var(--muted);line-height:1.6}
     .refresh{display:inline-flex;min-height:42px;align-items:center;gap:9px;padding:0 15px;border:1px solid var(--line);border-radius:3px;background:var(--panel);color:var(--paper);cursor:pointer;font-size:12px;font-weight:700}.refresh:hover{border-color:var(--lime);background:var(--soft)}.refresh:disabled{cursor:wait;opacity:.65}
     .stats-wrap{display:flex;align-items:center;gap:12px;margin-bottom:28px}
-    .stats{display:grid;grid-template-columns:repeat(3,1fr);flex:1;border:1px solid var(--line);background:#202520d1;animation:arrive .5s .06s ease-out both}.stat{min-height:90px;padding:17px 20px}.stat+.stat{border-left:1px solid var(--line)}.stat-label{display:block;margin-bottom:5px;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase}.stat-value{display:block;overflow:hidden;font:800 30px/1 var(--display);text-overflow:ellipsis;text-transform:uppercase;white-space:nowrap}.stat:first-child .stat-value{color:var(--lime)}
-    .board{border:1px solid var(--line);background:var(--panel);animation:arrive .56s .12s ease-out both}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 16px;border-bottom:1px solid var(--line)}h2{margin:0;font:800 22px var(--display);text-transform:uppercase}.controls{display:flex;align-items:center;gap:10px}.tabs{display:flex;gap:3px;padding:3px;border:1px solid var(--line);border-radius:3px;background:var(--ink)}.tab{min-height:30px;padding:0 10px;border:0;border-radius:2px;background:transparent;color:var(--muted);cursor:pointer;font-size:11px;font-weight:700}.tab[aria-pressed=true]{background:var(--soft);color:var(--lime)}
-    .sheet-select{height:38px;max-width:180px;padding:0 30px 0 10px;border:1px solid var(--line);border-radius:3px;background:var(--ink);color:var(--paper);font-size:12px}.sheet-select:disabled{color:var(--muted)}.name-line{display:flex;min-width:0;align-items:center;gap:7px}.name-line .name{min-width:0}.you-badge{flex:0 0 auto;padding:2px 6px;border:1px solid #0095ff80;border-radius:2px;background:#0095ff1a;color:#72c5ff;font-size:9px;font-weight:800;letter-spacing:.6px;text-transform:uppercase}
-    .search-wrap{position:relative}.search-icon{position:absolute;top:50%;left:10px;width:14px;height:14px;transform:translateY(-50%);fill:none;stroke:var(--muted);stroke-width:1.8;pointer-events:none}.search{width:190px;height:38px;padding:0 10px 0 32px;border:1px solid var(--line);border-radius:3px;background:var(--ink);color:var(--paper);font-size:12px}.search::placeholder{color:#858d81}
-    .columns,.entry{display:grid;grid-template-columns:66px minmax(190px,1.6fr) minmax(115px,1fr) 120px;align-items:center;column-gap:12px}.columns{min-height:36px;padding:0 18px;color:var(--muted);font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase}.columns span:last-child{text-align:right}.entry{min-height:76px;padding:9px 18px;border-top:1px solid var(--line);transition:background .13s}.entry:hover{background:var(--soft)}.entry[data-place="1"]{--medal:#e8bb49;--medal-wash:#e8bb4933}.entry[data-place="2"]{--medal:#c4d0df;--medal-wash:#c4d0df2b}.entry[data-place="3"]{--medal:#d58d5d;--medal-wash:#d58d5d30}.entry[data-place]{background:linear-gradient(90deg,var(--medal-wash),transparent 78%);box-shadow:inset 3px 0 var(--medal)}.entry[data-place]:hover{background:linear-gradient(90deg,var(--medal-wash),var(--medal-wash) 78%)}.entry[data-place] .rank,.entry[data-place] .elims{color:var(--medal)}.rank{color:var(--muted);font:800 24px var(--display)}.entry:first-child .rank{color:var(--lime)}.player{display:flex;min-width:0;align-items:center;gap:12px}.avatar{display:grid;width:44px;height:44px;flex:0 0 44px;place-items:center;overflow:hidden;border:1px solid #4b5547;border-radius:3px;background:#343b31;color:var(--lime);font:800 18px var(--display);text-transform:uppercase}.avatar img{width:100%;height:100%;object-fit:cover}.copy{min-width:0}.name{overflow:hidden;font-size:14px;font-weight:700;text-overflow:ellipsis;white-space:nowrap}.name-line{display:flex;min-width:0;align-items:center;gap:7px}.participation-dot{width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#5bf28c;box-shadow:0 0 7px #5bf28c,0 0 14px #28d96c99}.participation-dot.inactive{background:#758198;box-shadow:none}.character{overflow:hidden;color:#d7dbd1;font-size:12px;text-overflow:ellipsis;white-space:nowrap}.elims{color:var(--lime);font:800 25px var(--display);text-align:right}.elims small{display:none;color:var(--muted);font:600 10px var(--body)}
-    .empty{display:none;padding:48px 20px;color:var(--muted);text-align:center}.empty strong{display:block;margin-bottom:5px;color:var(--paper);font:800 24px var(--display);text-transform:uppercase}.error{display:none;margin:0 0 18px;padding:12px 14px;border:1px solid #ff795b70;border-radius:3px;background:#ff795b14;color:#ffb09d;line-height:1.5}.footer{display:flex;justify-content:space-between;gap:15px;padding:14px 2px 28px;color:var(--muted);font-size:10px}.footer strong{color:#d7dbd1;font-weight:600}
-    .access-panel{margin-bottom:28px;padding:22px;border:1px solid var(--line);background:var(--panel)}.access-panel h2{margin-bottom:7px}.access-message{margin:0 0 16px;color:var(--muted);line-height:1.55}.access-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px}.access-button{display:inline-flex;min-height:40px;align-items:center;justify-content:center;gap:9px;padding:0 14px;border:1px solid var(--line);border-radius:3px;background:var(--soft);color:var(--paper);cursor:pointer;font-size:12px;font-weight:700}.access-button:hover{border-color:var(--lime)}.access-button.primary{border-color:var(--lime);background:var(--lime);color:var(--ink)}.access-button:disabled{cursor:wait;opacity:.6}.access-button svg{width:16px;height:16px;fill:currentColor}.access-panel [hidden]{display:none!important}.login-loading{display:flex;align-items:center;gap:12px;color:var(--paper);font-size:14px;font-weight:700}.loading-spinner{width:20px;height:20px;border:2px solid #ffffff35;border-top-color:var(--lime);border-radius:50%;animation:spin .8s linear infinite}.access-denied p,.verification-error p{color:var(--muted);line-height:1.5}.footer-meta{display:flex;flex-wrap:wrap;gap:6px}
-    @keyframes spin{to{transform:rotate(360deg)}}@keyframes arrive{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .board{border:1px solid var(--line);background:var(--panel);animation:arrive .56s .12s ease-out both}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 16px;border-bottom:1px solid var(--line)}h2{margin:0;font:800 22px var(--display);text-transform:uppercase}.controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.tabs{display:flex;gap:3px;padding:3px;border:1px solid var(--line);border-radius:3px;background:var(--ink)}.tab{min-height:30px;padding:0 10px;border:0;border-radius:2px;background:transparent;color:var(--muted);cursor:pointer;font-size:11px;font-weight:700}.tab[aria-pressed=true]{background:var(--soft);color:var(--lime)}
+    .sheet-select{height:38px;max-width:180px;padding:0 30px 0 10px;border:1px solid var(--line);border-radius:3px;background:var(--ink);color:var(--paper);font-size:12px}.sheet-select:disabled{color:var(--muted)}
+    .search-wrap{position:relative}.search-icon{position:absolute;top:50%;left:10px;width:14px;height:14px;transform:translateY(-50%);fill:none;stroke:#a6b4cb;stroke-width:1.8;pointer-events:none;z-index:1}.search{width:190px;height:38px;padding:0 10px 0 32px;border:1px solid var(--line);border-radius:3px;background:var(--ink);color:var(--paper);font-size:12px}.search::placeholder{color:#858d81}
+    .columns,.entry{display:grid;grid-template-columns:66px minmax(190px,1.6fr) minmax(115px,1fr) 120px;align-items:center;column-gap:12px}.columns{min-height:36px;padding:0 18px;color:var(--muted);font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase}.columns span:last-child{text-align:right}.entry{min-height:76px;padding:9px 18px;border-top:1px solid var(--line);transition:background .13s}.entry:hover{background:var(--soft)}.entry[data-place="1"]{--medal:#e8bb49;--medal-wash:#e8bb4933}.entry[data-place="2"]{--medal:#c4d0df;--medal-wash:#c4d0df2b}.entry[data-place="3"]{--medal:#d58d5d;--medal-wash:#d58d5d30}.entry[data-place]{background:linear-gradient(90deg,var(--medal-wash),transparent 78%);box-shadow:inset 3px 0 var(--medal)}.entry[data-place]:hover{background:linear-gradient(90deg,var(--medal-wash),var(--medal-wash) 78%)}.entry[data-place] .rank,.entry[data-place] .elims{color:var(--medal)}.rank{color:var(--muted);font:800 24px var(--display)}.entry:first-child .rank{color:var(--lime)}.player{display:flex;min-width:0;align-items:center;gap:12px}.avatar{display:grid;width:44px;height:44px;flex:0 0 44px;place-items:center;overflow:hidden;border:1px solid #4b5547;border-radius:3px;background:#343b31;color:var(--lime);font:800 18px var(--display);text-transform:uppercase}.avatar img{width:100%;height:100%;object-fit:cover}.copy{min-width:0}.name{overflow:hidden;font-size:14px;font-weight:700;text-overflow:ellipsis;white-space:nowrap}.name-line{display:flex;min-width:0;align-items:center;gap:7px}.participation-dot{width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#5bf28c;box-shadow:0 0 7px #5bf28c,0 0 14px #28d96c99}.participation-dot.inactive{background:#758198;box-shadow:none}.character{overflow:hidden;color:#d7dbd1;font-size:12px;text-overflow:ellipsis;white-space:nowrap}.elims{color:var(--lime);font:800 25px var(--display);text-align:right;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;column-gap:6px}.elims small{display:none;color:var(--muted);font:600 10px var(--body)}
+    .empty{display:none;padding:48px 20px;color:var(--muted);text-align:center}.empty strong{display:block;margin-bottom:5px;color:var(--paper);font:800 24px var(--display);text-transform:uppercase}.error{display:none;margin:0 0 18px;padding:12px 14px;border:1px solid #ff795b70;border-radius:3px;background:#ff795b14;color:#ffb09d;line-height:1.5}
+    .footer{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:14px 2px 28px;color:var(--muted);font-size:11px}
+    .footer a{color:var(--muted);text-underline-offset:3px}.footer a:hover{color:var(--paper)}
+    .access-panel{margin-bottom:28px;padding:22px;border:1px solid var(--line);background:var(--panel)}.access-panel h2{margin-bottom:7px}.access-message{margin:0 0 16px;color:var(--muted);line-height:1.55}.access-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px}.access-button{display:inline-flex;min-height:40px;align-items:center;justify-content:center;gap:9px;padding:0 14px;border:1px solid var(--line);border-radius:3px;background:var(--soft);color:var(--paper);cursor:pointer;font-size:12px;font-weight:700}.access-button:hover{border-color:var(--lime)}.access-button.primary{border-color:var(--lime);background:var(--lime);color:var(--ink)}.access-panel [hidden]{display:none!important}
+    @keyframes arrive{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
     h1{color:#45a8ff;background:linear-gradient(110deg,#65d2ff 0%,#168cff 52%,#3648ed 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-    .search-icon{z-index:1;display:block;stroke:#a6b4cb}
-    .counter-counter{display:inline-flex;align-items:center;gap:0;direction:ltr;line-height:1;vertical-align:middle}
-    .counter-digit{position:relative;display:inline-block;width:.55em;height:1em;overflow:hidden;font-variant-numeric:tabular-nums;vertical-align:top}
-    .counter-number{position:absolute;top:0;right:0;bottom:0;left:0;display:flex;align-items:center;justify-content:center;width:100%;height:100%;line-height:1;will-change:transform}
-    .counter-separator{display:inline-block;width:.22em;text-align:center;vertical-align:top;line-height:1}
-    .counter-digit[hidden],.counter-separator[hidden]{display:none}
-    .elims{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;column-gap:6px;row-gap:2px}.elims small{flex-basis:100%}
-    .counter-delta{display:inline-block;padding:2px 5px;border:1px solid;border-radius:2px;font:700 10px/1 var(--body);white-space:nowrap}.counter-delta.increase{border-color:#39df8c80;background:#39df8c20;color:#72f2ad}.counter-delta.decrease{border-color:#ff795b80;background:#ff795b20;color:#ff9c87}
-    .privacy-link{padding:0 2px 24px;color:var(--muted);font-size:11px}.privacy-link a{color:var(--muted);text-underline-offset:3px}.privacy-link a:hover{color:var(--paper)}
     .player-trigger{width:100%;padding:0;border:0;background:transparent;color:inherit;text-align:left;cursor:pointer}.player-trigger:hover .name{text-decoration:underline;text-decoration-color:var(--lime);text-underline-offset:3px}
     .hero-actions{display:flex;align-items:center;gap:9px}
-    .profile-identity{display:flex;align-items:center;gap:13px;margin:0 0 16px}.profile-avatar{width:58px;height:58px;flex:0 0 58px;border:1px solid var(--line);border-radius:3px;object-fit:cover;background:var(--ink)}.profile-loading{min-height:128px;justify-content:center}#profile-loading[hidden],.profile-actions[hidden],.profile-summary[hidden],.challenge-wager[hidden],.spectator-bet[hidden]{display:none}
-    dialog{width:min(460px,calc(100% - 28px));max-height:min(84vh,700px);overflow:auto;padding:22px;border:1px solid var(--line);border-radius:4px;background:var(--panel);color:var(--paper);box-shadow:0 22px 70px #000b}dialog::backdrop{background:#070b13c9;backdrop-filter:blur(4px)}.dialog-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}.dialog-heading h2{font:800 27px/1 var(--display);text-transform:uppercase}.dialog-close{width:34px;height:34px;flex:0 0 34px;border:1px solid var(--line);border-radius:3px;background:var(--ink);color:var(--paper);cursor:pointer;font-size:18px}.dialog-copy{margin:0 0 16px;color:var(--muted);line-height:1.55}
+    .profile-identity{display:flex;align-items:center;gap:13px;margin:0 0 16px}.profile-avatar{width:58px;height:58px;flex:0 0 58px;border:1px solid var(--line);border-radius:3px;object-fit:cover;background:var(--ink)}.profile-loading{min-height:128px;justify-content:center}#profile-loading[hidden],.profile-actions[hidden],.profile-summary[hidden]{display:none}
+    dialog{width:min(520px,calc(100% - 28px));max-height:min(84vh,720px);overflow:auto;padding:22px;border:1px solid var(--line);border-radius:4px;background:var(--panel);color:var(--paper);box-shadow:0 22px 70px #000b}dialog::backdrop{background:#070b13c9;backdrop-filter:blur(4px)}.dialog-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}.dialog-heading h2{font:800 27px/1 var(--display);text-transform:uppercase}.dialog-close{width:34px;height:34px;flex:0 0 34px;border:1px solid var(--line);border-radius:3px;background:var(--ink);color:var(--paper);cursor:pointer;font-size:18px}.dialog-copy{margin:0 0 16px;color:var(--muted);line-height:1.55}
     .challenge-form{display:grid;gap:13px}.challenge-form label{display:grid;gap:6px;color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.7px;text-transform:uppercase}.challenge-form input{width:100%;height:40px;padding:0 10px;border:1px solid var(--line);border-radius:3px;background:var(--ink);color:var(--paper);font-size:13px}
     .challenge-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:4px}.challenge-button{min-height:40px;padding:0 14px;border:1px solid var(--line);border-radius:3px;background:var(--soft);color:var(--paper);cursor:pointer;font-size:12px;font-weight:700}.challenge-button.primary{border-color:var(--lime);background:var(--lime);color:var(--ink)}.challenge-button.danger{border-color:#ff795b80;background:#ff795b20;color:#ff9c87}
+    .challenge-card{padding:14px;border:1px solid var(--line);border-radius:3px;background:var(--ink);margin-bottom:12px}
     .challenge-toast{position:fixed;z-index:50;right:20px;bottom:20px;width:min(370px,calc(100vw - 32px));padding:14px 16px;border:1px solid var(--line);border-left:3px solid var(--lime);background:var(--panel);box-shadow:0 12px 35px #0008;color:var(--paper);line-height:1.5}.challenge-toast[hidden]{display:none}
+    .badge-count{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--lime);color:var(--ink);font-size:10px;font-weight:800}
   </style>
 </head>
 <body>
@@ -58,6 +52,7 @@
       <div class="brand"><img src="icon.png" alt=""></div>
       <div class="account-profile" id="account-profile" hidden>
         <a class="refresh" id="admin-link" href="admin.html" style="min-height:34px;padding:0 11px;font-size:11px;text-decoration:none" hidden>Admin Panel</a>
+        <a class="refresh" id="pirate-hunt-link" href="fortnitehunt.html" style="min-height:34px;padding:0 11px;font-size:11px;text-decoration:none;background:#f3c75e22;border-color:#f3c75e88;color:#f3c75e" hidden>Pirate Hunt</a>
         <button class="account-trigger" id="account-trigger" type="button" aria-haspopup="true" aria-expanded="false"><span id="account-greeting"></span><img id="account-photo" alt="" hidden></button>
         <div class="profile-menu" id="account-menu" role="menu" hidden>
           <div class="profile-menu-identity" id="profile-menu-identity">
@@ -76,8 +71,7 @@
           <p class="hero-copy">Earn elims, complete challenges, and get to the top!</p>
         </div>
         <div class="hero-actions">
-          <a class="refresh" href="fortnitehunt.html" style="text-decoration:none;background:#f3c75e22;border-color:#f3c75e88;color:#f3c75e">Pirate Hunt</a>
-          <button class="refresh" id="challenge-center" type="button" hidden>Challenges</button>
+          <button class="refresh" id="challenge-center" type="button" hidden>Challenges <span class="badge-count" id="challenge-badge" hidden>0</span></button>
           <button class="refresh" id="group-challenge" type="button" title="Challenge everyone online" hidden>Group Challenge</button>
         </div>
       </section>
@@ -90,9 +84,7 @@
             <button class="access-button primary" id="discord-signin" type="button" style="background:#5865F2;border-color:#5865F2;color:#fff"><span>Continue with Discord</span></button>
           </div>
         </div>
-        <div class="login-loading" id="loading-state" role="status" hidden><span class="loading-spinner" aria-hidden="true"></span><span>Logging In...</span></div>
         <div class="access-denied" id="denied-state" hidden><h2>Access denied</h2><p>Please contact TGG for help.</p><button class="access-button signout-button" type="button">Sign out</button></div>
-        <div class="verification-error" id="verification-error" hidden><h2 id="verification-error-title">Could not verify access</h2><p id="verification-error-message"></p><div class="access-actions"><button class="access-button" id="retry-access" type="button">Retry check</button><button class="access-button signout-button" type="button">Sign out</button></div></div>
       </section>
       <div class="member-content" id="member-content" hidden>
         <p class="error" id="error" role="alert"></p>
@@ -116,10 +108,12 @@
           <div id="leaderboard" aria-live="polite"></div>
           <div class="empty" id="empty"><strong>No players found</strong><span>Try another name or change the filter.</span></div>
         </section>
-
+        <footer class="footer">
+          <a href="privacy.html">Privacy Policy</a>
+          <span>Powered by Tech Guy Graphics</span>
+        </footer>
       </div>
     </main>
-    <footer class="privacy-link"><a href="privacy.html">Privacy Policy</a></footer>
   </div>
 
   <!-- Game Switch Popup Dialog -->
@@ -132,42 +126,44 @@
     </div>
   </dialog>
 
-  <!-- Other Modals (Profile, Challenge, etc.) -->
-  <dialog id="profile-dialog" aria-labelledby="profile-title"><div class="dialog-heading"><h2 id="profile-title">Player Profile</h2><button class="dialog-close" type="button" data-close-dialog>×</button></div><div class="profile-identity"><img class="profile-avatar" id="profile-avatar" alt=""><p class="dialog-copy" id="profile-name">Loading profile…</p></div><div class="login-loading profile-loading" id="profile-loading" role="status"><span class="loading-spinner" aria-hidden="true"></span><span>Loading player stats…</span></div><div class="profile-summary" id="profile-summary" hidden><div class="profile-metric"><span>Overall Eliminations</span><strong id="profile-eliminations">--</strong></div><div class="profile-metric"><span>Challenge Points</span><strong id="profile-points">--</strong></div></div><div class="challenge-actions profile-actions" id="profile-actions" hidden><button class="challenge-button primary" id="profile-challenge" type="button">Challenge</button><button class="challenge-button primary" id="profile-1v1" type="button">1v1</button></div><div class="challenge-actions"><button class="challenge-button" type="button" data-close-dialog>Close</button></div></dialog>
+  <!-- Player Profile Modal -->
+  <dialog id="profile-dialog" aria-labelledby="profile-title"><div class="dialog-heading"><h2 id="profile-title">Player Profile</h2><button class="dialog-close" type="button" data-close-dialog>×</button></div><div class="profile-identity"><img class="profile-avatar" id="profile-avatar" alt=""><p class="dialog-copy" id="profile-name">Loading profile…</p></div><div class="login-loading profile-loading" id="profile-loading" role="status"><span>Loading player stats…</span></div><div class="profile-summary" id="profile-summary" hidden><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px"><div style="padding:12px;background:var(--ink);border:1px solid var(--line)"><span>Overall Eliminations</span><br><strong id="profile-eliminations" style="font:800 26px var(--display);color:var(--lime)">--</strong></div><div style="padding:12px;background:var(--ink);border:1px solid var(--line)"><span>Challenge Points</span><br><strong id="profile-points" style="font:800 26px var(--display);color:var(--lime)">--</strong></div></div></div><div class="challenge-actions profile-actions" id="profile-actions" hidden><button class="challenge-button primary" id="profile-challenge" type="button">Challenge</button><button class="challenge-button primary" id="profile-1v1" type="button">1v1</button></div><div class="challenge-actions"><button class="challenge-button" type="button" data-close-dialog>Close</button></div></dialog>
 
+  <!-- Create Challenge Modal -->
   <dialog id="challenge-dialog" class="challenge-dialog" aria-labelledby="challenge-title">
     <div class="dialog-heading"><h2 id="challenge-title">Create Challenge</h2><button class="dialog-close" type="button" data-close-dialog>×</button></div>
     <p class="challenge-target" id="challenge-target"></p>
     <form class="challenge-form" id="challenge-form">
       <label>Challenge title<input id="challenge-name" name="title" maxlength="60" required placeholder="Most eliminations wins"></label>
       <label>Eliminations required<input id="challenge-eliminations" name="eliminations" type="number" min="1" max="1000" step="1" value="10" required></label>
-      
-      <!-- Challenge Parameters -->
       <label>Max Deaths allowed (optional)<input id="challenge-max-deaths" name="maxDeaths" type="number" min="0" step="1" placeholder="e.g. 3"></label>
       <label style="display:flex;align-items:center;gap:8px"><input id="challenge-require-end" type="checkbox" style="width:16px;height:16px">Must complete before match ends</label>
-      <label>Required Character / Hero Name (optional)<input id="challenge-character" name="characterRequirement" type="text" placeholder="e.g. Tracer (Exact full spelling recommended)"><span style="font-size:10px;color:var(--muted)">Note: Ensure correct spelling. Case-insensitive, but must match game character name.</span></label>
-
+      <label>Required Character / Hero Name (optional)<input id="challenge-character" name="characterRequirement" type="text" placeholder="e.g. Tracer"></label>
       <label id="time-limit-field">Time limit in minutes<input id="challenge-time" name="timeLimitMinutes" type="number" min="1" max="1440" step="1" value="30" required></label>
       <div class="challenge-actions"><button class="challenge-button primary" type="submit" id="send-challenge">Send Challenge</button><button class="challenge-button" type="button" data-close-dialog>Cancel</button></div>
     </form>
   </dialog>
 
-  <dialog id="incoming-dialog" class="challenge-dialog"><div class="dialog-heading"><h2 id="incoming-title">Challenge</h2><button class="dialog-close" type="button" data-close-dialog>×</button></div><p class="dialog-copy" id="incoming-copy"></p><p class="challenge-status" id="incoming-status"></p><div class="participant-progress" id="incoming-participants"></div><div class="challenge-actions" id="incoming-actions"><button class="challenge-button primary" id="accept-challenge" type="button">Accept</button><button class="challenge-button danger" id="deny-challenge" type="button">Deny</button></div><button class="challenge-button danger" id="abandon-challenge" type="button" hidden>Abandon</button></dialog>
-  <dialog id="challenge-center-dialog" class="challenge-dialog"><div class="dialog-heading"><h2>Challenges</h2><button class="dialog-close" type="button" data-close-dialog>×</button></div><div id="challenge-center-list"></div></dialog>
-  <div class="challenge-toast" id="challenge-toast" hidden><strong id="toast-title"></strong><span id="toast-message"></span></div>
+  <!-- Challenges Center Modal (Visible to Everyone) -->
+  <dialog id="challenge-center-dialog" class="challenge-dialog">
+    <div class="dialog-heading"><h2>All Live Challenges</h2><button class="dialog-close" type="button" data-close-dialog>×</button></div>
+    <div id="challenge-center-list"></div>
+  </dialog>
+
+  <div class="challenge-toast" id="challenge-toast" hidden><strong id="toast-title"></strong> <span id="toast-message"></span></div>
 
   <script type="module">
     import {
-      auth, db, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signInWithCustomToken, signOut,
+      auth, db, DISCORD_CLIENT_ID, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signInAnonymously, signOut,
       onDisconnect, onValue, ref, set, get, update,
-      getUserRecord, getGameCatalog, normalizeRowsFromBoard, runFirebaseChallengeAction
+      getUserRecord, getUserRecordByDiscordId, getGameCatalog, normalizeRowsFromBoard, runFirebaseChallengeAction
     } from "./firebase-bridge.js";
 
     const state = {
       players: [], filter: "all", query: "", authorized: false, isAdmin: false,
       user: null, userRecord: null, actorId: "", gameAccounts: {}, challengePoints: 0,
       sheetNames: [], sheetIds: {}, selectedSheet: "", activeGameTitle: "", challenges: {}, profileTarget: null,
-      challengeMode: "individual"
+      challengeMode: "individual", promptedChallenges: new Set()
     };
 
     const list = document.querySelector("#leaderboard"), empty = document.querySelector("#empty"), errorBox = document.querySelector("#error");
@@ -175,10 +171,9 @@
     const pirateHuntLink = document.querySelector("#pirate-hunt-link"), adminLink = document.querySelector("#admin-link");
     const accountProfile = document.querySelector("#account-profile"), accountTrigger = document.querySelector("#account-trigger"), accountMenu = document.querySelector("#account-menu");
 
-    let unsubscribeLeaderboard = null, unsubscribeSession = null, unsubscribePresence = null, unsubscribeChallenges = null, unsubscribeUserDoc = null, presenceHeartbeat = null;
+    let unsubscribeLeaderboard = null, unsubscribeSession = null, unsubscribePresence = null, unsubscribeChallenges = null, presenceHeartbeat = null;
 
     function number(value) { const parsed = Number.parseInt(String(value ?? "").replace(/,/g, ""), 10); return Number.isFinite(parsed) ? parsed : 0; }
-    function displayChallengeName(value) { const name = String(value || "").trim(); return !name || name.includes("@") ? "Player" : name; }
 
     function updateSessionStats(data) {
       const stats = [document.querySelector("#session-eliminations"), document.querySelector("#session-wins"), document.querySelector("#session-losses")];
@@ -191,12 +186,12 @@
       if (activeGame && activeGame !== state.activeGameTitle) {
         state.activeGameTitle = activeGame;
         if (state.selectedSheet && activeGame.toLowerCase() !== state.selectedSheet.toLowerCase()) {
-          // Popup prompt to switch game display
           document.querySelector("#game-switch-copy").textContent = `The active game has changed to "${activeGame}". Would you like to switch the leaderboard display?`;
           document.querySelector("#confirm-game-switch").onclick = () => {
             state.selectedSheet = activeGame;
             const selectEl = document.querySelector("#sheet-select");
             if (selectEl) selectEl.value = activeGame;
+            updatePirateHuntButton();
             subscribeToSelectedSheet();
             document.querySelector("#game-switch-dialog").close();
           };
@@ -206,126 +201,9 @@
     }
 
     async function bridgeAction(action, payload = {}) {
-      if (!state.user || !state.userRecord) throw new Error("Not signed in.");
+      if (!state.userRecord) throw new Error("Not signed in.");
       return runFirebaseChallengeAction(state.user, state.userRecord, action, payload);
     }
-
-    let activeChallengeId = null;
-    const seenChallengeInvites = new Set();
-
-    function challengeStatusText(challenge, participant) {
-      const status = participant?.status || challenge.status || "open";
-      return status.charAt(0).toUpperCase() + status.slice(1);
-    }
-
-    function openIncomingChallenge(challengeId, challenge) {
-      activeChallengeId = challengeId;
-      const me = challenge.participants?.[state.user?.uid] || {};
-      document.querySelector("#incoming-title").textContent = challenge.title || "Challenge invitation";
-      document.querySelector("#incoming-copy").textContent =
-        `${challenge.creatorName || "A player"} invited you to a ${challenge.mode || "individual"} challenge: reach ${number(challenge.eliminations)} eliminations.`;
-      document.querySelector("#incoming-status").textContent =
-        `Status: ${challengeStatusText(challenge, me)}${challenge.timeLimitMinutes ? ` · ${challenge.timeLimitMinutes} min` : " · No time limit"}`;
-      const list = document.querySelector("#incoming-participants");
-      list.replaceChildren();
-      Object.values(challenge.participants || {}).forEach(p => {
-        const item = document.createElement("div");
-        item.textContent = `${p.name || "Player"} — ${p.status || "pending"}${p.progress != null ? ` (${p.progress}/${challenge.eliminations})` : ""}`;
-        list.append(item);
-      });
-      const pending = me.status === "pending";
-      document.querySelector("#incoming-actions").hidden = !pending;
-      document.querySelector("#accept-challenge").hidden = !pending;
-      document.querySelector("#deny-challenge").hidden = !pending;
-      document.querySelector("#abandon-challenge").hidden = me.status !== "active";
-      const dialog = document.querySelector("#incoming-dialog");
-      if (!dialog.open) dialog.showModal();
-    }
-
-    function renderChallengeCenter() {
-      const list = document.querySelector("#challenge-center-list");
-      if (!list) return;
-      list.replaceChildren();
-      const uid = state.user?.uid;
-      const entries = Object.entries(state.challenges || {})
-        .filter(([, c]) => c?.participants?.[uid])
-        .sort((a, b) => Number(b[1].createdAt || 0) - Number(a[1].createdAt || 0));
-      if (!entries.length) {
-        const empty = document.createElement("p");
-        empty.className = "dialog-copy";
-        empty.textContent = "No challenges yet.";
-        list.append(empty);
-        return;
-      }
-      entries.forEach(([id, challenge]) => {
-        const participant = challenge.participants[uid];
-        const card = document.createElement("div");
-        card.style.cssText = "padding:12px 0;border-top:1px solid var(--line)";
-        const title = document.createElement("strong");
-        title.textContent = challenge.title || "Challenge";
-        const detail = document.createElement("p");
-        detail.className = "dialog-copy";
-        detail.textContent = `${challenge.creatorName || "Player"} · ${challenge.eliminations || 0} eliminations · ${challengeStatusText(challenge, participant)}`;
-        const action = document.createElement("button");
-        action.className = "challenge-button" + (participant.status === "pending" ? " primary" : "");
-        action.textContent = participant.status === "pending" ? "Review invitation" : participant.status === "active" ? "View / Abandon" : "View details";
-        action.addEventListener("click", () => openIncomingChallenge(id, challenge));
-        card.append(title, detail, action);
-        list.append(card);
-      });
-    }
-
-    function subscribeToChallenges() {
-      if (unsubscribeChallenges) unsubscribeChallenges();
-      if (!state.user?.uid) return;
-      unsubscribeChallenges = onValue(ref(db, "challenges"), snapshot => {
-        state.challenges = snapshot.val() || {};
-        renderChallengeCenter();
-        const pending = Object.entries(state.challenges)
-          .filter(([id, c]) => c?.participants?.[state.user.uid]?.status === "pending" && !seenChallengeInvites.has(id));
-        pending.forEach(([id, challenge]) => {
-          seenChallengeInvites.add(id);
-          openIncomingChallenge(id, challenge);
-          toast("Challenge received", challenge.title || "You have a new challenge invitation.");
-        });
-      }, error => {
-        console.error("Could not load challenges:", error);
-        toast("Challenge error", error.message || "Could not load your challenges.");
-      });
-    }
-
-    document.querySelector("#challenge-center").addEventListener("click", () => {
-      renderChallengeCenter();
-      document.querySelector("#challenge-center-dialog").showModal();
-    });
-    document.querySelector("#accept-challenge").addEventListener("click", async () => {
-      if (!activeChallengeId) return;
-      const button = document.querySelector("#accept-challenge");
-      button.disabled = true;
-      try {
-        await bridgeAction("respond", { challengeId: activeChallengeId, accept: true });
-        document.querySelector("#incoming-dialog").close();
-        toast("Challenge accepted", "Your challenge is now active.");
-      } catch (error) {
-        toast("Could not accept", error.message || "Please try again.");
-      } finally { button.disabled = false; }
-    });
-    document.querySelector("#deny-challenge").addEventListener("click", async () => {
-      if (!activeChallengeId) return;
-      try {
-        await bridgeAction("respond", { challengeId: activeChallengeId, accept: false });
-        document.querySelector("#incoming-dialog").close();
-        toast("Challenge declined", "The invitation was declined.");
-      } catch (error) { toast("Could not decline", error.message || "Please try again."); }
-    });
-    document.querySelector("#abandon-challenge").addEventListener("click", async () => {
-      if (!activeChallengeId) return;
-      try {
-        await bridgeAction("abandon", { challengeId: activeChallengeId });
-        document.querySelector("#incoming-dialog").close();
-        toast("Challenge abandoned", "Your active challenge was abandoned.");
-      } catch (error) { toast("Could not abandon", error.message || "Please try again."); }
-    });
 
     function toast(title, message) {
       const toastBox = document.querySelector("#challenge-toast");
@@ -337,14 +215,14 @@
     }
 
     function startPresence() {
-      if (!state.user || !state.authorized) return;
+      if (!state.authorized || !state.actorId) return;
       if (unsubscribePresence) unsubscribePresence();
-      const connection = ref(db, ".info/connected"), presence = ref(db, `presence/${state.user.uid || state.user.discordId}`);
+      const connection = ref(db, ".info/connected"), presence = ref(db, `presence/${state.actorId}`);
       unsubscribePresence = onValue(connection, async snapshot => {
         if (snapshot.val() !== true) { window.clearInterval(presenceHeartbeat); return; }
         try {
           await onDisconnect(presence).remove();
-          const publish = () => set(presence, { online: true, displayName: state.user.displayName || "Player", lastSeen: Date.now() });
+          const publish = () => set(presence, { online: true, displayName: state.userRecord?.leaderboardName || "Player", lastSeen: Date.now() });
           await publish();
           window.clearInterval(presenceHeartbeat);
           presenceHeartbeat = window.setInterval(() => publish().catch(() => {}), 30000);
@@ -356,70 +234,61 @@
       window.clearInterval(presenceHeartbeat);
       presenceHeartbeat = null;
       if (unsubscribePresence) { unsubscribePresence(); unsubscribePresence = null; }
-      if (unsubscribeChallenges) { unsubscribeChallenges(); unsubscribeChallenges = null; }
-      state.challenges = {};
-      if (state.user?.uid) set(ref(db, `presence/${state.user.uid}`), null).catch(() => {});
+      if (state.actorId) set(ref(db, `presence/${state.actorId}`), null).catch(() => {});
     }
 
-    // Discord OAuth must be completed by a trusted HTTPS backend. Never put the
-    // Discord client secret in this browser file. The backend exchanges the
-    // authorization code and returns a Firebase custom token.
-    const DISCORD_CLIENT_ID = "1570639449400942692";
-    const DISCORD_AUTH_ENDPOINT = ""; // Set to your trusted backend HTTPS endpoint.
-    async function handleDiscordAuthCode() {
-      const params = new URLSearchParams(window.location.search);
-      const code = params.get("code");
-      const oauthState = params.get("state");
-      if (!code) return;
-      const expectedState = sessionStorage.getItem("discord_oauth_state");
-      if (!oauthState || !expectedState || oauthState !== expectedState) {
-        alert("Discord sign-in could not be verified. Please try again.");
-        return;
-      }
-      if (!DISCORD_AUTH_ENDPOINT) {
-        alert("Discord sign-in needs a trusted HTTPS backend to exchange the OAuth code and create a Firebase custom token. The Discord client secret must not be placed in this webpage.");
-        return;
-      }
+    // Discord OAuth Handler
+    async function handleDiscordAuth() {
+      const fragment = new URLSearchParams(window.location.hash.slice(1));
+      const accessToken = fragment.get("access_token");
+      if (!accessToken) return false;
+
       try {
-        const response = await fetch(DISCORD_AUTH_ENDPOINT, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            code,
-            redirectUri: window.location.origin + window.location.pathname
-          })
+        // Ensure active Firebase Auth session for DB rules
+        if (!auth.currentUser) {
+          await signInAnonymously(auth);
+        }
+        const res = await fetch("https://discord.com/api/users/@me", {
+          headers: { Authorization: `Bearer ${accessToken}` }
         });
-        const result = await response.json();
-        if (!response.ok || !result.customToken) throw new Error(result.error || "Discord authentication failed.");
-        await signInWithCustomToken(auth, result.customToken);
-        sessionStorage.removeItem("discord_oauth_state");
-        const cleanUrl = new URL(window.location.href);
-        cleanUrl.searchParams.delete("code");
-        cleanUrl.searchParams.delete("state");
-        history.replaceState({}, "", cleanUrl);
-      } catch (error) {
-        console.error("Discord sign-in failed:", error);
-        alert(error.message);
+        const data = await res.json();
+        if (data && data.id) {
+          const userRecord = await getUserRecordByDiscordId(data.id);
+          if (userRecord) {
+            const avatarUrl = data.avatar ? `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png` : "";
+            const updates = {};
+            if (avatarUrl) {
+              updates.profileImage = avatarUrl;
+              updates.profileImageUrl = avatarUrl;
+            }
+            const globalName = data.global_name || data.username;
+            if (globalName && userRecord.leaderboardName && globalName !== userRecord.leaderboardName) {
+              if (confirm(`Update leaderboard name from "${userRecord.leaderboardName}" to your Discord name "${globalName}"?`)) {
+                updates.leaderboardName = globalName;
+              }
+            }
+            if (Object.keys(updates).length) {
+              await update(ref(db, `users/${userRecord.recordKey}`), updates);
+            }
+            localStorage.setItem("discordId", data.id);
+            history.replaceState(null, "", window.location.pathname + window.location.search);
+            await initializeUserSession(auth.currentUser);
+            return true;
+          } else {
+            document.querySelector("#access-panel").hidden = false;
+            document.querySelector("#denied-state").hidden = false;
+            document.querySelector("#login-state").hidden = true;
+          }
+        }
+      } catch (e) {
+        console.error("Discord auth error:", e);
       }
+      return false;
     }
-    handleDiscordAuthCode();
 
     document.querySelector("#discord-signin").addEventListener("click", () => {
-      if (!DISCORD_AUTH_ENDPOINT) {
-        alert("Discord sign-in is not active yet. It requires a trusted HTTPS backend; the Discord client secret cannot safely be used in browser JavaScript.");
-        return;
-      }
-      const stateToken = crypto.randomUUID();
-      sessionStorage.setItem("discord_oauth_state", stateToken);
-      const redirectUri = window.location.origin + window.location.pathname;
-      const params = new URLSearchParams({
-        client_id: DISCORD_CLIENT_ID,
-        redirect_uri: redirectUri,
-        response_type: "code",
-        scope: "identify email",
-        state: stateToken
-      });
-      window.location.href = `https://discord.com/oauth2/authorize?${params.toString()}`;
+      const redirectUri = encodeURIComponent(window.location.origin + window.location.pathname);
+      window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=token&scope=identify`;
     });
 
     document.querySelector("#google-signin").addEventListener("click", async () => {
@@ -428,40 +297,36 @@
 
     document.querySelectorAll(".signout-button").forEach(b => b.addEventListener("click", async () => {
       localStorage.removeItem("discordId");
+      stopPresence();
       await signOut(auth);
       window.location.reload();
     }));
 
     async function initializeUserSession(authUser) {
       stopPresence();
-      state.authorized = false;
-      state.isAdmin = false;
-      state.user = authUser || null;
-      state.userRecord = null;
       let record = null;
-      let identifier = "";
 
-      if (authUser) {
-        identifier = authUser.uid;
-        record = await getUserRecord(identifier);
+      const storedDiscordId = localStorage.getItem("discordId");
+      if (storedDiscordId) {
+        if (!authUser) {
+          await signInAnonymously(auth).catch(() => {});
+        }
+        record = await getUserRecordByDiscordId(storedDiscordId);
+      } else if (authUser && !authUser.isAnonymous) {
+        record = await getUserRecord(authUser.uid);
       }
 
       if (!record) {
-        state.user = authUser || null;
-        state.userRecord = null;
-        accountProfile.hidden = true;
-        groupChallengeButton.hidden = true;
-        document.querySelector("#challenge-center").hidden = true;
         document.querySelector("#access-panel").hidden = false;
         document.querySelector("#member-content").hidden = true;
         return;
       }
 
+      state.user = authUser;
       state.authorized = true;
-      state.user = authUser || null;
       state.userRecord = record;
       state.isAdmin = record.isAdmin === true;
-      state.actorId = identifier;
+      state.actorId = record.recordKey;
       state.gameAccounts = record.gameAccounts || {};
       state.challengePoints = number(record.challengePoints);
 
@@ -471,9 +336,9 @@
       const dispName = record.leaderboardName || authUser?.displayName || "Player";
       document.querySelector("#account-greeting").textContent = `Hi, ${dispName}`;
       document.querySelector("#menu-name").textContent = dispName;
-      document.querySelector("#menu-email").textContent = authUser?.email || `Discord ID: ${record.discordId || identifier}`;
+      document.querySelector("#menu-email").textContent = authUser?.email || `Discord ID: ${record.discordId || "Linked"}`;
       document.querySelector("#menu-uid").textContent = `UID: ${record.uid || "N/A"} | Discord: ${record.discordId || "N/A"}`;
-      
+
       const photoUrl = record.profileImageUrl || record.profileImage || authUser?.photoURL;
       if (photoUrl) {
         document.querySelector("#account-photo").src = photoUrl;
@@ -495,7 +360,121 @@
     }
 
     onAuthStateChanged(auth, async (authUser) => {
-      await initializeUserSession(authUser);
+      const handledHash = await handleDiscordAuth();
+      if (!handledHash) {
+        await initializeUserSession(authUser);
+      }
+    });
+
+    function getMyParticipantEntry(challenge) {
+      if (!challenge || !challenge.participants || !state.userRecord) return null;
+      const keys = [
+        state.actorId,
+        state.userRecord.recordKey,
+        state.userRecord.uid,
+        state.userRecord.discordId ? `discord_${state.userRecord.discordId}` : null
+      ].filter(Boolean);
+      for (const k of keys) {
+        if (challenge.participants[k]) return { key: k, data: challenge.participants[k] };
+      }
+      return null;
+    }
+
+    function subscribeToChallenges() {
+      if (unsubscribeChallenges) unsubscribeChallenges();
+      unsubscribeChallenges = onValue(ref(db, "challenges"), (snap) => {
+        state.challenges = snap.exists() ? snap.val() : {};
+        renderChallengeCenter();
+      });
+    }
+
+    function renderChallengeCenter() {
+      const container = document.querySelector("#challenge-center-list");
+      const entries = Object.entries(state.challenges || {}).sort((a, b) => Number(b[1].createdAt || 0) - Number(a[1].createdAt || 0));
+
+      let pendingForMeCount = 0;
+      const activeOrOpenEntries = entries.filter(([, c]) => !["denied", "abandoned", "expired"].includes(c.status));
+
+      activeOrOpenEntries.forEach(([id, c]) => {
+        const myPart = getMyParticipantEntry(c);
+        if (myPart && myPart.data.status === "pending") {
+          pendingForMeCount++;
+          if (!state.promptedChallenges.has(id)) {
+            state.promptedChallenges.add(id);
+            toast("New Challenge!", `${c.creatorName} challenged you: "${c.title}" (${c.eliminations} elims)`);
+          }
+        }
+      });
+
+      const badge = document.querySelector("#challenge-badge");
+      if (pendingForMeCount > 0) {
+        badge.textContent = String(pendingForMeCount);
+        badge.hidden = false;
+      } else {
+        badge.hidden = true;
+      }
+
+      if (!activeOrOpenEntries.length) {
+        container.innerHTML = `<p style="color:var(--muted)">No live challenges right now. Click a player or "Group Challenge" to start one!</p>`;
+        return;
+      }
+
+      container.replaceChildren(...activeOrOpenEntries.map(([id, c]) => {
+        const card = document.createElement("div");
+        card.className = "challenge-card";
+        const myPart = getMyParticipantEntry(c);
+        const participantsList = Object.values(c.participants || {}).map(p => `${p.name} (${p.status}${p.progress ? `: ${p.progress}/${c.eliminations}` : ""})`).join(", ");
+
+        let actionsHtml = "";
+        if (myPart && myPart.data.status === "pending") {
+          actionsHtml = `
+            <div class="challenge-actions" style="margin-top:10px">
+              <button class="challenge-button primary" data-act="accept" type="button">Accept</button>
+              <button class="challenge-button danger" data-act="deny" type="button">Deny</button>
+            </div>`;
+        } else if (myPart && myPart.data.status === "active") {
+          actionsHtml = `
+            <div class="challenge-actions" style="margin-top:10px">
+              <button class="challenge-button danger" data-act="abandon" type="button">Abandon</button>
+            </div>`;
+        }
+
+        card.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+            <strong style="font-size:15px;color:var(--lime)">${c.title}</strong>
+            <span style="font-size:11px;text-transform:uppercase;color:var(--muted)">${c.mode} • ${c.rewardPoints} pts</span>
+          </div>
+          <p style="margin:6px 0;font-size:12px;color:var(--paper)">Goal: <strong>${c.eliminations} Eliminations</strong> ${c.timeLimitMinutes ? `in ${c.timeLimitMinutes}m` : ""} • Created by ${c.creatorName}</p>
+          <p style="margin:4px 0;font-size:11px;color:var(--muted)">Players: ${participantsList}</p>
+          ${actionsHtml}
+        `;
+
+        card.querySelector('[data-act="accept"]')?.addEventListener("click", async () => {
+          try {
+            await bridgeAction("respond", { challengeId: id, accept: true });
+            toast("Accepted!", `You joined "${c.title}"`);
+          } catch (err) { alert(err.message); }
+        });
+        card.querySelector('[data-act="deny"]')?.addEventListener("click", async () => {
+          try {
+            await bridgeAction("respond", { challengeId: id, accept: false });
+            toast("Declined", `Declined "${c.title}"`);
+          } catch (err) { alert(err.message); }
+        });
+        card.querySelector('[data-act="abandon"]')?.addEventListener("click", async () => {
+          try {
+            await bridgeAction("abandon", { challengeId: id });
+            toast("Abandoned", `Left "${c.title}"`);
+          } catch (err) { alert(err.message); }
+        });
+
+        return card;
+      }));
+    }
+
+    document.querySelector("#challenge-center").addEventListener("click", () => {
+      renderChallengeCenter();
+      document.querySelector("#challenge-center-dialog").showModal();
     });
 
     async function loadGamesFromFirebase() {
@@ -510,12 +489,11 @@
 
         const urlParams = new URLSearchParams(window.location.search);
         const requestedGame = urlParams.get("game");
-        
+
         let targetGame = "";
         if (requestedGame) {
           targetGame = state.sheetNames.find(n => n.toLowerCase() === requestedGame.trim().toLowerCase()) || "";
         } else {
-          // Load current active game from session if available, or first game
           const sessionSnap = await get(ref(db, "session"));
           const sessionData = sessionSnap.exists() ? sessionSnap.val() : {};
           targetGame = sessionData.gameTitle || state.sheetNames[0];
@@ -534,7 +512,8 @@
     }
 
     function updatePirateHuntButton() {
-      if (pirateHuntLink) pirateHuntLink.hidden = false;
+      const isFortnite = state.selectedSheet.trim().toLowerCase() === "fortnite";
+      if (pirateHuntLink) pirateHuntLink.hidden = !isFortnite;
     }
 
     function subscribeToLiveUpdates() {
@@ -639,8 +618,7 @@
 
     function openChallengeComposer(mode) {
       state.challengeMode = mode;
-      if (mode === "group") state.profileTarget = null;
-      document.querySelector("#challenge-target").textContent = mode === "group" ? "Group challenge to online players." : `Challenge ${state.profileTarget?.name}.`;
+      document.querySelector("#challenge-target").textContent = mode === "group" ? "Group challenge to all online players." : `Challenge ${state.profileTarget?.name}.`;
       document.querySelector("#challenge-dialog").showModal();
     }
 
@@ -659,7 +637,6 @@
           gameUsername: state.profileTarget?.gameUsername
         });
         document.querySelector("#challenge-dialog").close();
-        document.querySelector("#challenge-form").reset();
         toast("Challenge created", "Challenge successfully sent!");
       } catch (err) {
         alert(err.message);

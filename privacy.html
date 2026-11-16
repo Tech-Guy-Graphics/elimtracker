@@ -20,50 +20,20 @@
     <main class="content">
       <p class="eyebrow">Tech Guy Graphics</p>
       <h1>Privacy Policy</h1>
-      <p class="effective">Effective November 15, 2026</p>
-      <p class="intro">This policy explains what information is used when you access the Elimination Leaderboard and Pirate Token Hunt, how it is stored, and how it supports leaderboard, presence, and challenge features.</p>
+      <p class="effective">Effective November 16, 2026</p>
+      <p class="intro">This policy explains what information is used when you sign in to and use the Elimination Leaderboard, why it is used, and the choices available to you.</p>
 
       <section class="policy-section">
         <h2>Information We Use</h2>
         <ul>
-          <li>Account details supplied by the sign-in provider, such as a display name, email address where available, profile image, and provider account identifier.</li>
-          <li>Approved account details, including your leaderboard display name and the in-game usernames you choose to link for supported games.</li>
-          <li>Leaderboard and game information, such as eliminations, placements, characters or MVP counts, Fortnite hunt statistics, and treasure quantities.</li>
-          <li>Challenge information, including invitations, participation status, progress, points, and challenge results.</li>
-          <li>Online presence information, such as whether your account is online and the time of its most recent presence update.</li>
+          <li><strong>Account & Sign-In Data:</strong> When you sign in using Google or Discord, the service receives basic profile information including your display name, email address (if provided), avatar image URL, and account identifier (Firebase UID or Discord User ID).</li>
+          <li><strong>Game & Match Telemetry:</strong> Linked in-game usernames, elimination counts, match outcomes, and active character selections are synced in real time via Overwolf and stored in Firebase Realtime Database to display live standings and track player challenges.</li>
         </ul>
       </section>
 
       <section class="policy-section">
-        <h2>Sign-In Providers</h2>
-        <p>Google sign-in is used to authenticate accounts where enabled. Discord sign-in may be offered when the Discord OAuth integration is enabled. If Discord sign-in is enabled, Discord may provide your Discord user ID, username or display name, avatar, and email address if the requested permissions and your account settings make it available.</p>
-        <p>The Discord client secret is intended to remain on a trusted server and is not stored in the public website code. The service uses Firebase Authentication and Firebase Realtime Database to associate an approved account with its leaderboard data.</p>
-      </section>
-
-      <section class="policy-section">
-        <h2>How Information Is Used</h2>
-        <p>Information is used to display leaderboards, connect game usernames to approved accounts, update match and session statistics, show online status, deliver and track challenges, calculate challenge points, and display Fortnite treasure totals.</p>
-      </section>
-
-      <section class="policy-section">
         <h2>Storage and Retention</h2>
-        <p>Account records, leaderboard information, challenge data, and related application data are stored in Firebase Realtime Database. Firebase Authentication manages sign-in sessions. Some session tokens may be stored by your browser or the authentication SDK to keep you signed in.</p>
-        <p>Information may remain in the database while an account is approved or while it is needed to maintain leaderboard history, challenge records, and application functionality. Contact the service operator to request review or correction of account information.</p>
-      </section>
-
-      <section class="policy-section">
-        <h2>Sharing and Third-Party Services</h2>
-        <p>Leaderboard names, linked game usernames, profile images, rankings, and challenge-related information may be visible to other users of the service. Authentication and data storage are provided by Google Firebase. If Discord sign-in is enabled, Discord processes the OAuth sign-in according to its own privacy terms.</p>
-      </section>
-
-      <section class="policy-section">
-        <h2>Your Choices</h2>
-        <p>You can sign out using the account menu. You may contact the service operator to request correction of linked usernames or account details, or to ask about deletion of your account information. Some public leaderboard or historical records may be retained or displayed as part of the service.</p>
-      </section>
-
-      <section class="policy-section">
-        <h2>Contact</h2>
-        <p>For questions about this policy or your account information, contact the operator of Tech Guy Graphics through the support channel provided with the service.</p>
+        <p>Leaderboard standings, user account links, and challenge records are stored securely in Google Firebase Realtime Database. Authentication tokens and session identifiers may be stored locally in your browser so you remain signed in across visits. You can sign out at any time using the account menu.</p>
       </section>
     </main>
     <footer class="footer"><a href="index.html">Leaderboard</a><span>Privacy Policy</span></footer>
