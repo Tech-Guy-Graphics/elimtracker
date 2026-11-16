@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { GoogleAuthProvider, getAuth, onAuthStateChanged, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { GoogleAuthProvider, getAuth, onAuthStateChanged, signInWithPopup, signInWithCustomToken, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getDatabase, onDisconnect, onValue, ref, set, update, get, runTransaction, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 export const FIREBASE_CONFIG = {
@@ -13,7 +13,7 @@ export const FIREBASE_CONFIG = {
 const app = initializeApp(FIREBASE_CONFIG);
 export const auth = getAuth(app);
 export const db = getDatabase(app, FIREBASE_CONFIG.databaseURL);
-export { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, onDisconnect, onValue, ref, set, update, get, runTransaction, remove };
+export { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signInWithCustomToken, signOut, onDisconnect, onValue, ref, set, update, get, runTransaction, remove };
 
 export async function getUserRecord(uid) {
   if (!uid) return null;
@@ -24,6 +24,17 @@ export async function getUserRecord(uid) {
 export async function getAllUsers() {
   const snap = await get(ref(db, "users"));
   return snap.exists() ? snap.val() : {};
+}
+
+export async function getUserRecordByDiscordId(discordId) {
+  if (!discordId) return null;
+  const users = await getAllUsers();
+  for (const [uid, userData] of Object.entries(users)) {
+    if (userData.discordId === discordId) {
+      return { uid, ...userData };
+    }
+  }
+  return null;
 }
 
 export async function getGameCatalog() {
@@ -54,9 +65,9 @@ export function normalizeRowsFromBoard(board) {
     return entries.map((p, idx) => [
       p.image || "",
       Number(p.eliminations) || 0,
-      p.name || "",
+      p.leaderboardName || p.name || "",
       p.gameUsername || "",
-      p.character || "",
+      p.character || p.mvp || "",
       Boolean(p.active),
       Number(p.placement) || (idx + 1),
       "",
@@ -96,15 +107,6 @@ export async function resolveLeaderboardIdentity(gameAccounts, preferredGameTitl
   const snap = await get(ref(db, "leaderboards"));
   if (!snap.exists()) return { name: "Player", image: "" };
   const boards = snap.val();
-  const users = await getAllUsers();
-  const linkedRecord = Object.values(users).find(user =>
-    Object.entries(user.gameAccounts || {}).some(([game, username]) =>
-      Object.entries(gameAccounts).some(([mineGame, mineUsername]) =>
-        game.trim().toLowerCase() === mineGame.trim().toLowerCase() &&
-        String(username).trim().toLowerCase() === String(mineUsername).trim().toLowerCase()
-      )
-    )
-  );
   const titles = Object.keys(gameAccounts);
   if (preferredGameTitle && gameAccounts[preferredGameTitle]) {
     titles.splice(titles.indexOf(preferredGameTitle), 1);
@@ -121,16 +123,14 @@ export async function resolveLeaderboardIdentity(gameAccounts, preferredGameTitl
     const match = rows.find(r => String(r[3] || "").trim().toLowerCase() === username);
     if (match) {
       return {
-        name: String(linkedRecord?.leaderboardName || match[2] || "Player").trim(),
-        image: String(linkedRecord?.profileImageUrl || match[0] || "").trim(),
-        banner: String(linkedRecord?.discordBannerUrl || "")
+        name: String(match[2] || "Player").trim(),
+        image: String(match[0] || "").trim()
       };
     }
   }
-  return { name: linkedRecord?.leaderboardName || "Player", image: linkedRecord?.profileImageUrl || "", banner: linkedRecord?.discordBannerUrl || "" };
+  return { name: "Player", image: "" };
 }
 
-// Direct Firebase Challenge Engine (replaces Apps Script bridge)
 export async function runFirebaseChallengeAction(currentUser, userRecord, action, payload = {}) {
   const uid = currentUser.uid;
   const myIdentity = await resolveLeaderboardIdentity(userRecord.gameAccounts, payload.gameTitle);
@@ -145,14 +145,13 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
         ([g, un]) => g.trim().toLowerCase() === targetGame && String(un).trim().toLowerCase() === targetUser
       );
     });
-    if (!matchedEntry) throw new Error("That player is not linked to an approved Firebase account.");
+    if (!matchedEntry) throw new Error("That player is not linked to an approved user account.");
     const targetIdentity = await resolveLeaderboardIdentity(matchedEntry.gameAccounts, payload.gameTitle);
     const overallEliminations = await computeOverallEliminations(matchedEntry.gameAccounts);
     return {
-      actorId: matchedEntry.uid || matchedEntry.authUid,
+      actorId: matchedEntry.uid,
       name: targetIdentity.name || payload.gameUsername,
       image: targetIdentity.image || "",
-      banner: targetIdentity.banner || "",
       overallEliminations,
       challengePoints: Math.max(0, Number(matchedEntry.challengePoints) || 0),
       currentChallengePoints: Math.max(0, Number(userRecord.challengePoints) || 0),
@@ -165,22 +164,16 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
     const title = String(payload.title || "").trim().slice(0, 60);
     const eliminations = Math.floor(Number(payload.eliminations));
     const noTimeLimit = payload.mode === "1v1" && payload.noTimeLimit === true;
-    const constraints = {
-      maxDeaths: payload.maxDeaths === "" || payload.maxDeaths == null ? null : Math.floor(Number(payload.maxDeaths)),
-      beforeMatchEnds: payload.beforeMatchEnds === true,
-      requiredCharacter: String(payload.requiredCharacter || "").trim().slice(0, 60),
-      minMVPs: payload.minMVPs === "" || payload.minMVPs == null ? null : Math.floor(Number(payload.minMVPs))
-    };
     const timeLimitMinutes = noTimeLimit ? 0 : Math.floor(Number(payload.timeLimitMinutes));
+    
+    // New Challenge Parameters
+    const maxDeaths = payload.maxDeaths !== undefined && payload.maxDeaths !== "" ? Math.floor(Number(payload.maxDeaths)) : null;
+    const requireMatchEnd = Boolean(payload.requireMatchEnd);
+    const characterRequirement = String(payload.characterRequirement || "").trim();
+
     if (!title) throw new Error("Enter a challenge title.");
     if (!Number.isInteger(eliminations) || eliminations < 1 || eliminations > 1000) {
       throw new Error("Choose between 1 and 1,000 eliminations.");
-    }
-    if (constraints.maxDeaths !== null && (!Number.isInteger(constraints.maxDeaths) || constraints.maxDeaths < 1 || constraints.maxDeaths > 100)) {
-      throw new Error("Choose a death limit from 1 to 100.");
-    }
-    if (constraints.minMVPs !== null && (!Number.isInteger(constraints.minMVPs) || constraints.minMVPs < 1 || constraints.minMVPs > 100)) {
-      throw new Error("Choose a minimum MVP count from 1 to 100.");
     }
     if (!noTimeLimit && (!Number.isInteger(timeLimitMinutes) || timeLimitMinutes < 1 || timeLimitMinutes > 1440)) {
       throw new Error("Choose a time limit from 1 minute to 24 hours.");
@@ -195,11 +188,11 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
     if (isGroup) {
       const presenceSnap = await get(ref(db, "presence"));
       const presence = presenceSnap.exists() ? presenceSnap.val() : {};
-      targets.push({ actorId: uid, name: myIdentity.name, image: myIdentity.image, gameUsername: userRecord.gameAccounts?.[payload.gameTitle] || "" });
+      targets.push({ actorId: uid, name: myIdentity.name, image: myIdentity.image });
       for (const [pUid, pInfo] of Object.entries(presence)) {
         if (pUid !== uid && users[pUid] && pInfo?.online === true && Date.now() - Number(pInfo.lastSeen || 0) < 90000) {
           const iden = await resolveLeaderboardIdentity(users[pUid].gameAccounts, payload.gameTitle);
-          targets.push({ actorId: pUid, name: iden.name, image: iden.image, gameUsername: users[pUid].gameAccounts?.[payload.gameTitle] || "" });
+          targets.push({ actorId: pUid, name: iden.name, image: iden.image });
         }
       }
     } else {
@@ -211,14 +204,14 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
         )
       );
       if (!targetEntry) throw new Error("That player is not linked to an approved account.");
-      if ((targetEntry.uid || targetEntry.authUid) === uid) throw new Error("You cannot challenge yourself.");
+      if (targetEntry.uid === uid) throw new Error("You cannot challenge yourself.");
       const targetIden = await resolveLeaderboardIdentity(targetEntry.gameAccounts, payload.gameTitle);
       if (isDuel) {
         const maxWager = Math.min(Number(userRecord.challengePoints) || 0, Number(targetEntry.challengePoints) || 0);
         if (wagerPoints > maxWager) throw new Error("Wager cannot exceed the lower player's balance.");
-        targets.push({ actorId: uid, name: myIdentity.name, image: myIdentity.image, gameUsername: userRecord.gameAccounts?.[payload.gameTitle] || "" });
+        targets.push({ actorId: uid, name: myIdentity.name, image: myIdentity.image });
       }
-      targets.push({ actorId: targetEntry.uid || targetEntry.authUid, name: targetIden.name, image: targetIden.image, gameUsername: targetEntry.gameAccounts?.[payload.gameTitle] || payload.gameUsername });
+      targets.push({ actorId: targetEntry.uid, name: targetIden.name, image: targetIden.image });
     }
 
     const participants = {};
@@ -227,8 +220,8 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
       participants[t.actorId] = {
         name: t.name,
         image: t.image || "",
-        gameUsername: t.gameUsername || "",
         status: isDuel && t.actorId === uid ? "waiting" : "pending",
+        deaths: 0,
         updatedAt: now
       };
     }
@@ -238,9 +231,6 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
     const challenge = {
       title,
       eliminations,
-      constraints,
-      gameTitle: String(payload.gameTitle || ""),
-      gameSheetId: String(payload.gameSheetId || ""),
       timeLimitMinutes,
       rewardPoints,
       mode: isGroup ? "group" : isDuel ? "1v1" : "individual",
@@ -248,6 +238,9 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
       noTimeLimit,
       wagerPoints,
       baseRewardPoints: rewardPoints,
+      maxDeaths,
+      requireMatchEnd,
+      characterRequirement,
       creatorId: uid,
       creatorName: myIdentity.name.slice(0, 50),
       createdAt: now,
@@ -265,23 +258,39 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
     if (!snap.exists()) throw new Error("Challenge not found.");
     const challenge = snap.val();
     const participant = challenge.participants?.[uid];
-    if (!participant || participant.status !== "pending") throw new Error("Challenge is no longer awaiting response.");
+    if (!participant || participant.status !== "pending") {
+      throw new Error("This invitation is no longer awaiting your response.");
+    }
 
     const now = Date.now();
+    if (Number(challenge.invitationExpiresAt) && now > Number(challenge.invitationExpiresAt)) {
+      await update(ref(db, `challenges/${payload.challengeId}/participants/${uid}`), {
+        status: "expired", updatedAt: now
+      });
+      throw new Error("This challenge invitation has expired.");
+    }
+
     if (!payload.accept) {
-      participant.status = "denied";
-      participant.updatedAt = now;
+      const changes = {
+        [`participants/${uid}/status`]: "denied",
+        [`participants/${uid}/updatedAt`]: now
+      };
       if (challenge.mode === "1v1") {
-        challenge.status = "denied";
-        Object.values(challenge.participants).forEach(p => { p.status = "denied"; p.updatedAt = now; });
+        changes.status = "denied";
+        for (const actorId of Object.keys(challenge.participants || {})) {
+          changes[`participants/${actorId}/status`] = "denied";
+          changes[`participants/${actorId}/updatedAt`] = now;
+        }
       }
+      await update(challengeRef, changes);
     } else if (challenge.mode === "1v1") {
       const users = await getAllUsers();
-      for (const actorId of Object.keys(challenge.participants)) {
+      const changes = { status: "active", startedAt: now };
+      for (const actorId of Object.keys(challenge.participants || {})) {
         const uRec = users[actorId];
-        if (!uRec) throw new Error("Participant is no longer approved.");
+        if (!uRec) throw new Error("A participant is no longer approved. The challenge cannot start.");
         const startElims = await computeOverallEliminations(uRec.gameAccounts);
-        challenge.participants[actorId] = {
+        changes[`participants/${actorId}`] = {
           ...challenge.participants[actorId],
           status: "active",
           acceptedAt: now,
@@ -289,37 +298,38 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
           lastTotal: startElims,
           progress: 0,
           deaths: 0,
-          currentCharacter: "",
-          startingMatchEliminations: 0,
-          constraintsSatisfied: { eliminations: false, deaths: true, character: !constraints.requiredCharacter, mvps: !constraints.minMVPs },
-          deadline: challenge.noTimeLimit ? null : now + challenge.timeLimitMinutes * 60000,
+          deadline: challenge.noTimeLimit ? null : now + Number(challenge.timeLimitMinutes || 0) * 60000,
           updatedAt: now
         };
-        if (challenge.wagerPoints > 0) {
-          await runTransaction(ref(db, `users/${actorId}/challengePoints`), pts => Math.max(0, (Number(pts) || 0) - challenge.wagerPoints));
+        if (Number(challenge.wagerPoints) > 0) {
+          await runTransaction(ref(db, `users/${actorId}/challengePoints`), pts =>
+            Math.max(0, (Number(pts) || 0) - Number(challenge.wagerPoints))
+          );
         }
       }
-      challenge.wagerEscrowed = challenge.wagerPoints > 0;
-      challenge.status = "active";
-      challenge.startedAt = now;
+      changes.wagerEscrowed = Number(challenge.wagerPoints) > 0;
+      await update(challengeRef, changes);
     } else {
       const startElims = await computeOverallEliminations(userRecord.gameAccounts);
-      participant.status = "active";
-      participant.acceptedAt = now;
-      participant.deadline = now + challenge.timeLimitMinutes * 60000;
-      participant.startingEliminations = startElims;
-      participant.lastTotal = startElims;
-      participant.progress = 0;
-      participant.deaths = 0;
-      participant.currentCharacter = "";
-      participant.startingMatchEliminations = 0;
-      participant.constraintsSatisfied = { eliminations: false, deaths: true, character: !challenge.constraints?.requiredCharacter, mvps: !challenge.constraints?.minMVPs };
-      participant.updatedAt = now;
+      const participantUpdate = {
+        status: "active",
+        acceptedAt: now,
+        deadline: challenge.noTimeLimit ? null : now + Number(challenge.timeLimitMinutes || 0) * 60000,
+        startingEliminations: startElims,
+        lastTotal: startElims,
+        progress: 0,
+        deaths: 0,
+        updatedAt: now
+      };
+      await update(ref(db, `challenges/${payload.challengeId}/participants/${uid}`), participantUpdate);
     }
 
-    await set(challengeRef, challenge);
     const updatedUser = await getUserRecord(uid);
-    return { challenge, challengePoints: Number(updatedUser?.challengePoints) || 0 };
+    const latest = await get(challengeRef);
+    return {
+      challenge: latest.exists() ? latest.val() : null,
+      challengePoints: Number(updatedUser?.challengePoints) || 0
+    };
   }
 
   if (action === "abandon") {
@@ -375,16 +385,4 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
   }
 
   throw new Error("Unknown challenge action.");
-}
-
-export function getDiscordRedirectUri() {
-  return `${window.location.origin}${window.location.pathname}`;
-}
-
-// Discord OAuth must be exchanged for a Firebase custom token by a trusted HTTPS
-// endpoint. A Discord access token cannot safely be used as Firebase authentication.
-export async function signInWithDiscordPopup() {
-  throw new Error(
-    "Discord sign-in requires a Discord OAuth client ID and a deployed Firebase HTTPS/Callable Function that validates the Discord account and returns a Firebase custom token."
-  );
 }
