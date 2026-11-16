@@ -368,6 +368,8 @@
       challengeMode: "individual", promptedChallenges: new Set(), incomingChallengeId: null
     };
 
+    const esc = (v) => String(v ?? "").replace(/&/g, "&").replace(/"/g, """).replace(/</g, "<").replace(/>/g, ">");
+
     const list = document.querySelector("#leaderboard"), empty = document.querySelector("#empty"), errorBox = document.querySelector("#error");
     const heroActions = document.querySelector("#hero-actions");
     const groupChallengeButton = document.querySelector("#group-challenge");
@@ -508,15 +510,12 @@
               ? `#${data.accent_color.toString(16).padStart(6, "0")}`
               : "";
 
-            const updates = {};
+            const updates = {
+              discordBannerUrl: bannerUrl || ""
+            };
             if (avatarUrl) {
               updates.profileImage = avatarUrl;
               updates.profileImageUrl = avatarUrl;
-            }
-            if (bannerUrl) {
-              updates.discordBannerUrl = bannerUrl;
-            } else {
-              updates.discordBannerUrl = "";
             }
             if (accentHex) {
               updates.discordAccentColor = accentHex;
@@ -620,7 +619,6 @@
         document.querySelector("#menu-photo").hidden = false;
       }
 
-      // Use Discord banner if available, otherwise fall back to Discord accent_color (never avatar)
       const menuHeader = document.querySelector("#profile-menu-identity");
       if (record.discordBannerUrl) {
         menuHeader.style.backgroundImage = `url('${record.discordBannerUrl}')`;
@@ -680,7 +678,7 @@
       if (challenge.characterRequirement) constraints.push(`Required character: ${challenge.characterRequirement}`);
       constraints.push(`Reward: ${challenge.rewardPoints} PTS`);
 
-      document.querySelector("#incoming-details").innerHTML = constraints.map(c => `<div style="margin:3px 0">• ${c}</div>`).join("");
+      document.querySelector("#incoming-details").innerHTML = constraints.map(c => `<div style="margin:3px 0">• ${esc(c)}</div>`).join("");
 
       const dialog = document.querySelector("#incoming-challenge-dialog");
       if (!dialog.open) dialog.showModal();
@@ -770,11 +768,11 @@
         const timeLabel = c.requireMatchEnd ? "Before match ends" : (c.noTimeLimit ? "No time limit" : (c.timeLimitMinutes ? `${c.timeLimitMinutes}m` : ""));
         card.innerHTML = `
           <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-            <strong style="font-size:15px;color:var(--lime)">${c.title}</strong>
-            <span style="font-size:11px;text-transform:uppercase;color:var(--muted)">${c.mode} • ${c.rewardPoints} pts</span>
+            <strong style="font-size:15px;color:var(--lime)">${esc(c.title)}</strong>
+            <span style="font-size:11px;text-transform:uppercase;color:var(--muted)">${esc(c.mode)} • ${Number(c.rewardPoints) || 0} pts</span>
           </div>
-          <p style="margin:6px 0;font-size:12px;color:var(--paper)">Goal: <strong>${c.eliminations} Eliminations</strong> (${timeLabel}) • Created by ${c.creatorName}</p>
-          <p style="margin:4px 0;font-size:11px;color:var(--muted)">Players: ${participantsList}</p>
+          <p style="margin:6px 0;font-size:12px;color:var(--paper)">Goal: <strong>${Number(c.eliminations) || 0} Eliminations</strong> (${esc(timeLabel)}) • Created by ${esc(c.creatorName)}</p>
+          <p style="margin:4px 0;font-size:11px;color:var(--muted)">Players: ${esc(participantsList)}</p>
           ${actionsHtml}
         `;
 
@@ -885,20 +883,30 @@
         row.className = "entry";
         const place = p.placement || idx + 1;
         if (place <= 3) row.dataset.place = String(place);
-        const initial = p.name.slice(0, 1);
+        const initial = esc(p.name.slice(0, 1));
 
         row.innerHTML = `
           <span class="rank">${place}</span>
           <button class="player player-trigger" type="button">
-            <div class="avatar"><span class="init">${initial}</span>${p.image ? `<img src="${p.image.replace(/"/g, """)}" alt="" loading="lazy" onerror="this.remove()">` : ""}</div>
+            <div class="avatar"><span class="init">${initial}</span></div>
             <div class="copy">
-              <div class="name-line"><span class="participation-dot${p.active?"":" inactive"}"></span><div class="name">${p.name}</div></div>
-              ${p.character ? `<div class="character-sub">${p.character}</div>` : ""}
+              <div class="name-line"><span class="participation-dot${p.active?"":" inactive"}"></span><div class="name">${esc(p.name)}</div></div>
+              ${p.character ? `<div class="character-sub">${esc(p.character)}</div>` : ""}
             </div>
           </button>
-          <span class="character-col">${p.character || "—"}</span>
+          <span class="character-col">${esc(p.character || "—")}</span>
           <div class="elims"><span>${p.eliminations.toLocaleString()}</span><small>eliminations</small></div>
         `;
+
+        if (p.image) {
+          const img = document.createElement("img");
+          img.src = p.image;
+          img.alt = "";
+          img.loading = "lazy";
+          img.addEventListener("error", () => img.remove());
+          row.querySelector(".avatar").append(img);
+        }
+
         row.querySelector("button").addEventListener("click", () => openPlayerProfile(p));
         return row;
       }));

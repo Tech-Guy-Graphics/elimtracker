@@ -428,7 +428,7 @@
       const tr = document.createElement("tr");
       const imgUrl = String(r[0] || "");
       tr.innerHTML = `
-        <td><button class="avatar-edit board-avatar-edit" type="button" title="Click to change profile image" style="border:0;background:none;cursor:pointer;padding:0"><img class="avatar-preview" src="${esc(imgUrl)}" onerror="this.style.opacity='0.2'" alt=""></button><input type="hidden" data-col="0" value="${esc(imgUrl)}"></td>
+        <td><button class="avatar-edit board-avatar-edit" type="button" title="Click to change profile image" style="border:0;background:none;cursor:pointer;padding:0"><img class="avatar-preview" src="${esc(imgUrl)}" alt=""></button><input type="hidden" data-col="0" value="${esc(imgUrl)}"></td>
         <td><input type="number" inputmode="numeric" data-col="1" value="${Number(r[1]) || 0}"></td>
         <td><input type="text" data-col="2" value="${esc(r[2])}" placeholder="Display Name"></td>
         <td><input type="text" data-col="3" value="${esc(r[3])}" placeholder="In-Game Username"></td>
@@ -437,14 +437,16 @@
         <td><input type="number" inputmode="numeric" data-col="6" value="${Number(r[6]) || 0}"></td>
         <td><button class="btn danger" type="button" style="min-height:28px;padding:0 8px">×</button></td>
       `;
+      const previewImg = tr.querySelector(".avatar-preview");
+      previewImg.addEventListener("error", () => { previewImg.style.opacity = "0.2"; });
+
       tr.querySelector(".board-avatar-edit")?.addEventListener("click", () => {
         const field = tr.querySelector('input[data-col="0"]');
         const next = prompt("Enter the profile image URL (leave blank to clear):", field.value);
         if (next === null) return;
         field.value = next.trim();
-        const img = tr.querySelector(".avatar-preview");
-        img.src = field.value;
-        img.style.opacity = field.value ? "1" : "0.25";
+        previewImg.src = field.value;
+        previewImg.style.opacity = field.value ? "1" : "0.25";
       });
       tr.querySelector("td:last-child button")?.addEventListener("click", () => tr.remove());
       return tr;
@@ -454,15 +456,17 @@
       const tr = document.createElement("tr");
       const iconUrl = String(t.icon || "");
       tr.innerHTML = `
-        <td><img class="avatar-preview treasure-preview" src="${esc(iconUrl)}" onerror="this.style.opacity='0.2'" alt=""></td>
+        <td><img class="avatar-preview treasure-preview" src="${esc(iconUrl)}" alt=""></td>
         <td><input type="url" data-tcol="icon" value="${esc(iconUrl)}" placeholder="https://... treasure icon URL"></td>
         <td><input type="number" inputmode="numeric" data-tcol="quantity" min="0" value="${Number(t.quantity) || 0}"></td>
         <td><button class="btn danger" type="button" style="min-height:28px;padding:0 8px">×</button></td>
       `;
+      const previewImg = tr.querySelector(".treasure-preview");
+      previewImg.addEventListener("error", () => { previewImg.style.opacity = "0.2"; });
+
       tr.querySelector('[data-tcol="icon"]')?.addEventListener("input", e => {
-        const img = tr.querySelector(".treasure-preview");
-        img.src = e.target.value;
-        img.style.opacity = e.target.value ? "1" : "0.2";
+        previewImg.src = e.target.value;
+        previewImg.style.opacity = e.target.value ? "1" : "0.2";
       });
       tr.querySelector("td:last-child button")?.addEventListener("click", () => tr.remove());
       return tr;

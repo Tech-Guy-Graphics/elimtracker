@@ -96,6 +96,7 @@
     } from "./firebase-bridge.js";
 
     let dataBound = false;
+    const esc = (v) => String(v ?? "").replace(/&/g, "&").replace(/"/g, """).replace(/</g, "<").replace(/>/g, ">");
 
     document.querySelector("#hunt-google-signin").addEventListener("click", () => signInWithPopup(auth, new GoogleAuthProvider()));
     document.querySelector("#hunt-discord-signin").addEventListener("click", () => startDiscordOAuth());
@@ -194,7 +195,7 @@
             hasTreasure = true;
             const item = document.createElement("div");
             item.className = "treasure-item";
-            item.innerHTML = `<img class="treasure-icon" src="${iconUrl.replace(/"/g, """)}" alt=""><span class="treasure-quantity">×${qty}</span>`;
+            item.innerHTML = `<img class="treasure-icon" src="${esc(iconUrl)}" alt=""><span class="treasure-quantity">×${qty}</span>`;
             tList.append(item);
           }
         });
@@ -204,17 +205,24 @@
         boardEl.replaceChildren(...rows.map((r, idx) => {
           const name = String(r[2] || "").trim();
           const username = String(r[3] || "").trim();
-          const img = String(r[0] || "").trim();
+          const imgUrl = String(r[0] || "").trim();
           const div = document.createElement("div");
           div.className = "entry";
           div.innerHTML = `
-            <span class="rank">${r[6] || idx + 1}</span>
+            <span class="rank">${Number(r[6]) || idx + 1}</span>
             <div style="display:flex;align-items:center;gap:10px;min-width:0">
-              <div class="avatar"><span>${name.slice(0, 1)}</span>${img ? `<img src="${img.replace(/"/g, """)}" alt="" onerror="this.remove()">` : ""}</div>
-              <div style="min-width:0"><strong style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}</strong><small style="color:var(--muted);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${username}</small></div>
+              <div class="avatar"><span>${esc(name.slice(0, 1))}</span></div>
+              <div style="min-width:0"><strong style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(name)}</strong><small style="color:var(--muted);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(username)}</small></div>
             </div>
             <div class="elims">${(Number(r[1]) || 0).toLocaleString()}</div>
           `;
+          if (imgUrl) {
+            const img = document.createElement("img");
+            img.src = imgUrl;
+            img.alt = "";
+            img.addEventListener("error", () => img.remove());
+            div.querySelector(".avatar").append(img);
+          }
           return div;
         }));
       });
