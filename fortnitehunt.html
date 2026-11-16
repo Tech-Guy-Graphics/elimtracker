@@ -96,7 +96,12 @@
     } from "./firebase-bridge.js";
 
     let dataBound = false;
-    const esc = (v) => String(v ?? "").replace(/&/g, "&").replace(/"/g, """).replace(/</g, "<").replace(/>/g, ">");
+    const esc = (v) => String(v ?? "")
+  .replace(/&/g, "&amp;")
+  .replace(/"/g, "&quot;")
+  .replace(/</g, "&lt;")
+  .replace(/>/g, "&gt;");
+
 
     document.querySelector("#hunt-google-signin").addEventListener("click", () => signInWithPopup(auth, new GoogleAuthProvider()));
     document.querySelector("#hunt-discord-signin").addEventListener("click", () => startDiscordOAuth());

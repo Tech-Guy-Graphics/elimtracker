@@ -368,7 +368,14 @@
       challengeMode: "individual", promptedChallenges: new Set(), incomingChallengeId: null
     };
 
-    const esc = (v) => String(v ?? "").replace(/&/g, "&").replace(/"/g, """).replace(/</g, "<").replace(/>/g, ">");
+    const esc = (v) =>
+  String(v ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
 
     const list = document.querySelector("#leaderboard"), empty = document.querySelector("#empty"), errorBox = document.querySelector("#error");
     const heroActions = document.querySelector("#hero-actions");

@@ -234,7 +234,12 @@
     let usersCache = {};
     let selectedBoardId = "";
 
-    const esc = (v) => String(v ?? "").replace(/&/g, "&").replace(/"/g, """).replace(/</g, "<").replace(/>/g, ">");
+    const esc = (v) => String(v ?? "")
+  .replace(/&/g, "&amp;")
+  .replace(/"/g, "&quot;")
+  .replace(/</g, "&lt;")
+  .replace(/>/g, "&gt;");
+
 
     const toastEl = document.querySelector("#toast");
     function showToast(msg) {
