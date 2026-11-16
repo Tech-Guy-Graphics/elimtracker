@@ -11,99 +11,214 @@
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root{color-scheme:dark;--ink:#17120a;--panel:#261e0f;--soft:#3b2c14;--line:#725b2a;--paper:#fff3ce;--muted:#c5b88e;--lime:#e9b64d;--green:#e9b64d;--blue:#b57712;--display:"Barlow Condensed",Impact,sans-serif;--body:"DM Sans","Segoe UI",sans-serif}
-    *{box-sizing:border-box}body{min-width:320px;margin:0;background-color:var(--ink);background-image:radial-gradient(ellipse at 90% 0%,#d6941838,transparent 35%),repeating-linear-gradient(135deg,transparent 0 34px,#ffffff03 34px 35px);color:var(--paper);font:14px var(--body)}
-    .page{width:min(1120px,calc(100% - 40px));margin:auto}
-    .topbar{min-height:62px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
-    .brand img{width:34px;height:34px}
-    .hero{display:grid;grid-template-columns:1fr auto;align-items:end;gap:24px;padding:58px 0 35px}
-    h1{margin:0;font:900 clamp(56px,9vw,92px)/.85 var(--display);text-transform:uppercase;color:#f3c75e;background:linear-gradient(110deg,#fff1ad 0%,#f3c75e 52%,#c77d16 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-    .session-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:18px;border:1px solid var(--line);background:var(--panel)}.session-stat{padding:14px 18px}.session-stat+.session-stat{border-left:1px solid var(--line)}.session-stat-label{display:block;margin-bottom:5px;color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase}.session-stat-value{display:block;color:var(--lime);font:800 28px/1 var(--display)}
-    .treasure-board{margin-bottom:18px;border:1px solid var(--line);background:var(--panel)}.treasure-toolbar{padding:12px 16px;border-bottom:1px solid var(--line)}.treasure-list{display:flex;flex-wrap:wrap;gap:13px;padding:14px 16px}.treasure-item{display:grid;width:72px;justify-items:center;gap:6px}.treasure-icon{width:54px;height:54px;object-fit:contain;filter:drop-shadow(0 3px 8px #0008)}.treasure-quantity{color:var(--paper);font:800 15px/1 var(--display)}
-    .board{border:1px solid var(--line);background:var(--panel);padding:20px}
-    .entry{display:grid;grid-template-columns:66px minmax(190px,1.6fr) 120px;align-items:center;padding:12px 18px;border-top:1px solid var(--line)}
+    *{box-sizing:border-box}
+    body{min-width:320px;margin:0;background-color:var(--ink);background-image:radial-gradient(ellipse at 90% 0%,#d6941838,transparent 35%),repeating-linear-gradient(135deg,transparent 0 34px,#ffffff03 34px 35px);color:var(--paper);font:14px var(--body)}
+    [hidden]{display:none!important}
+    .page{width:min(1120px,calc(100% - 32px));margin:auto}
+    .topbar{min-height:62px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);gap:10px}
+    .brand img{width:34px;height:34px;display:block}
+    .nav-btn{display:inline-flex;min-height:36px;align-items:center;padding:0 14px;border:1px solid var(--line);border-radius:3px;background:var(--panel);color:var(--paper);text-decoration:none;font-size:12px;font-weight:700;cursor:pointer}
+    .nav-btn:hover{border-color:var(--lime);background:var(--soft)}
+    .hero{display:grid;grid-template-columns:1fr auto;align-items:end;gap:24px;padding:48px 0 32px}
+    h1{margin:0;font:900 clamp(48px,9vw,92px)/.85 var(--display);text-transform:uppercase;color:#f3c75e;background:linear-gradient(110deg,#fff1ad 0%,#f3c75e 52%,#c77d16 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .access-panel{margin-bottom:28px;padding:22px;border:1px solid var(--line);background:var(--panel)}
+    .access-panel h2{margin:0 0 10px;font:800 24px var(--display);text-transform:uppercase}
+    .session-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:18px;border:1px solid var(--line);background:var(--panel)}
+    .session-stat{padding:14px 16px}.session-stat+.session-stat{border-left:1px solid var(--line)}.session-stat-label{display:block;margin-bottom:5px;color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase}.session-stat-value{display:block;color:var(--lime);font:800 28px/1 var(--display)}
+    .treasure-board{margin-bottom:18px;border:1px solid var(--line);background:var(--panel)}.treasure-toolbar{padding:12px 16px;border-bottom:1px solid var(--line)}.treasure-toolbar h2{margin:0;font:800 22px var(--display);text-transform:uppercase}.treasure-list{display:flex;flex-wrap:wrap;gap:16px;padding:16px}.treasure-item{display:grid;width:82px;justify-items:center;gap:6px}.treasure-icon{width:54px;height:54px;object-fit:contain;filter:drop-shadow(0 3px 8px #0008)}.treasure-quantity{color:var(--paper);font:800 16px/1 var(--display)}
+    .board{border:1px solid var(--line);background:var(--panel);overflow:hidden}
+    .board-header{padding:14px 18px;border-bottom:1px solid var(--line)}.board-header h2{margin:0;font:800 22px var(--display);text-transform:uppercase}
+    .entry{display:grid;grid-template-columns:56px minmax(0,1fr) 90px;align-items:center;column-gap:10px;padding:12px 16px;border-top:1px solid var(--line)}
     .rank{font:800 24px var(--display);color:var(--muted)}.elims{font:800 25px var(--display);color:var(--lime);text-align:right}
+    .avatar{position:relative;display:grid;width:40px;height:40px;flex:0 0 40px;place-items:center;overflow:hidden;border:1px solid var(--line);border-radius:3px;background:var(--soft);color:var(--lime);font:800 16px var(--display);text-transform:uppercase}
+    .avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .footer{display:flex;justify-content:space-between;align-items:center;padding:18px 2px 32px;color:var(--muted);font-size:11px}
+    .footer a{color:var(--muted);text-underline-offset:3px}.footer a:hover{color:var(--paper)}
   </style>
 </head>
 <body>
   <div class="page">
     <header class="topbar">
-      <div class="brand"><a href="index.html"><img src="icon.png" alt=""></a></div>
-      <nav style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <a href="index.html" style="color:var(--paper);font-weight:700;text-decoration:none">Leaderboard</a>
-        <a href="privacy.html" style="color:var(--paper);font-weight:700;text-decoration:none">Privacy Policy</a>
-      </nav>
+      <div class="brand"><a href="index.html?game=Fortnite"><img src="icon.png" alt=""></a></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span id="hunt-user-greeting" style="font-size:12px;font-weight:600;color:var(--paper)" hidden></span>
+        <a class="nav-btn" href="index.html?game=Fortnite">Back to Fortnite Leaderboard</a>
+        <button class="nav-btn" id="hunt-signout-btn" type="button" hidden>Sign out</button>
+      </div>
     </header>
     <main>
       <section class="hero">
-        <div><h1>Pirate Token<br>Hunt</h1><p>Track the crew and treasure discovered in Firebase.</p></div>
+        <div><h1>Pirate Token<br>Hunt</h1><p style="color:var(--muted);margin:14px 0 0">Track the crew and treasure discovered in Firebase.</p></div>
       </section>
-      <section class="session-stats">
-        <div class="session-stat"><span class="session-stat-label">Fortnite Eliminations</span><strong class="session-stat-value" id="session-elims">--</strong></div>
-        <div class="session-stat"><span class="session-stat-label">Fortnite Wins</span><strong class="session-stat-value" id="session-wins">--</strong></div>
-        <div class="session-stat"><span class="session-stat-label">Fortnite Losses</span><strong class="session-stat-value" id="session-losses">--</strong></div>
-      </section>
-      <section class="treasure-board">
-        <div class="treasure-toolbar"><h2>Treasure Found</h2></div>
-        <div class="treasure-list" id="treasure-list"><span id="treasure-empty" style="color:var(--muted)">No treasure found yet.</span></div>
-      </section>
-      <section class="board">
-        <h2>Fortnite Standings</h2>
-        <div id="leaderboard"></div>
-      </section>
-    </main>
-    <footer style="padding:18px 0 28px;border-top:1px solid var(--line);color:var(--muted);font-size:11px">
-      <a href="privacy.html" style="color:var(--muted);text-underline-offset:3px">Privacy Policy</a>
-    </footer>
-  </div>
-  <script type="module">
-    import { db, ref, onValue } from "./firebase-bridge.js";
 
-    onValue(ref(db, "session"), (snap) => {
-      const data = snap.val() || {};
-      const fn = data.fortnite || {};
-      document.querySelector("#session-elims").textContent = Number(fn.eliminations) || 0;
-      document.querySelector("#session-wins").textContent = Number(fn.wins) || 0;
-      document.querySelector("#session-losses").textContent = Number(fn.losses) || 0;
-    });
-
-    onValue(ref(db, "leaderboards"), (snap) => {
-      const boards = snap.val() || {};
-      const fnBoard = Object.values(boards).find(b => String(b.name || "").trim().toLowerCase() === "fortnite");
-      if (!fnBoard) return;
-
-      const rows = fnBoard.rows || [];
-      const tList = document.querySelector("#treasure-list");
-      tList.replaceChildren();
-      let hasTreasure = false;
-
-      rows.forEach(r => {
-        const iconUrl = String(r[8] || "").trim();
-        const qty = Number(r[9]) || 0;
-        if (qty > 0 && /^https:\/\//i.test(iconUrl)) {
-          hasTreasure = true;
-          const item = document.createElement("div");
-          item.className = "treasure-item";
-          item.innerHTML = `<img class="treasure-icon" src="${iconUrl}" alt=""><span class="treasure-quantity">×${qty}</span>`;
-          tList.append(item);
-        }
-      });
-      document.querySelector("#treasure-empty").style.display = hasTreasure ? "none" : "block";
-
-      const boardEl = document.querySelector("#leaderboard");
-      boardEl.replaceChildren(...rows.map((r, idx) => {
-        const div = document.createElement("div");
-        div.className = "entry";
-        div.innerHTML = `
-          <span class="rank">${r[6] || idx + 1}</span>
-          <div style="display:flex;align-items:center;gap:10px">
-            <img src="${r[0]}" style="width:36px;height:36px;border-radius:3px;object-fit:cover" onerror="this.style.display='none'" alt="">
-            <div><strong>${r[2]}</strong><br><small style="color:var(--muted)">${r[3]}</small></div>
+      <section class="access-panel" id="hunt-login-panel">
+        <div id="hunt-login-box">
+          <h2>Sign in to View Pirate Hunt</h2>
+          <p style="color:var(--muted);margin:0 0 16px">Sign in with your approved Google or Discord account to load live Fortnite hunt stats.</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="nav-btn" id="hunt-google-signin" type="button" style="background:var(--lime);color:var(--ink);border-color:var(--lime)">Continue with Google</button>
+            <button class="nav-btn" id="hunt-discord-signin" type="button" style="background:#5865F2;color:#fff;border-color:#5865F2">Continue with Discord</button>
           </div>
-          <div class="elims">${r[1]}</div>
-        `;
-        return div;
-      }));
+        </div>
+        <div id="hunt-denied-box" hidden>
+          <h2>Access Denied</h2>
+          <p style="color:var(--muted)">Your account is not approved. Contact TGG for help.</p>
+          <button class="nav-btn" id="hunt-denied-signout" type="button">Sign out</button>
+        </div>
+      </section>
+
+      <div id="hunt-member-content" hidden>
+        <section class="session-stats">
+          <div class="session-stat"><span class="session-stat-label">Fortnite Eliminations</span><strong class="session-stat-value" id="session-elims">--</strong></div>
+          <div class="session-stat"><span class="session-stat-label">Fortnite Wins</span><strong class="session-stat-value" id="session-wins">--</strong></div>
+          <div class="session-stat"><span class="session-stat-label">Fortnite Losses</span><strong class="session-stat-value" id="session-losses">--</strong></div>
+        </section>
+        <section class="treasure-board">
+          <div class="treasure-toolbar"><h2>Treasure Found</h2></div>
+          <div class="treasure-list" id="treasure-list"><span id="treasure-empty" style="color:var(--muted)">No treasure found yet.</span></div>
+        </section>
+        <section class="board">
+          <div class="board-header"><h2>Fortnite Standings</h2></div>
+          <div id="leaderboard"></div>
+        </section>
+        <footer class="footer">
+          <a href="privacy.html">Privacy Policy</a>
+          <span>Powered by Tech Guy Graphics</span>
+        </footer>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import {
+      auth, db, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signInAnonymously, signOut,
+      ref, onValue, startDiscordOAuth, extractDiscordTokenFromUrl, getUserRecord, getUserRecordByDiscordId, normalizeRowsFromBoard
+    } from "./firebase-bridge.js";
+
+    let dataBound = false;
+
+    document.querySelector("#hunt-google-signin").addEventListener("click", () => signInWithPopup(auth, new GoogleAuthProvider()));
+    document.querySelector("#hunt-discord-signin").addEventListener("click", () => startDiscordOAuth());
+
+    const doSignOut = async () => {
+      localStorage.removeItem("discordId");
+      await signOut(auth);
+      window.location.href = "fortnitehunt.html";
+    };
+    document.querySelector("#hunt-signout-btn").addEventListener("click", doSignOut);
+    document.querySelector("#hunt-denied-signout").addEventListener("click", doSignOut);
+
+    async function handleDiscordReturn() {
+      const token = extractDiscordTokenFromUrl();
+      if (!token) return false;
+      try {
+        if (!auth.currentUser) await signInAnonymously(auth);
+        const res = await fetch("https://discord.com/api/users/@me", { headers: { Authorization: `Bearer ${token}` } });
+        const data = await res.json();
+        if (data && data.id) {
+          localStorage.setItem("discordId", data.id);
+          history.replaceState(null, "", window.location.pathname);
+          await verifyAndLoad(auth.currentUser);
+          return true;
+        }
+      } catch (e) {}
+      return false;
+    }
+
+    async function verifyAndLoad(user) {
+      let record = null;
+      const storedDiscordId = localStorage.getItem("discordId");
+      if (storedDiscordId) {
+        if (!user) await signInAnonymously(auth).catch(() => {});
+        record = await getUserRecordByDiscordId(storedDiscordId);
+      } else if (user && !user.isAnonymous) {
+        record = await getUserRecord(user.uid);
+      }
+
+      if (!record) {
+        document.querySelector("#hunt-login-panel").hidden = false;
+        document.querySelector("#hunt-member-content").hidden = true;
+        if (storedDiscordId || (user && !user.isAnonymous)) {
+          document.querySelector("#hunt-login-box").hidden = true;
+          document.querySelector("#hunt-denied-box").hidden = false;
+        }
+        return;
+      }
+
+      document.querySelector("#hunt-login-panel").hidden = true;
+      document.querySelector("#hunt-member-content").hidden = false;
+      document.querySelector("#hunt-signout-btn").hidden = false;
+      const greeting = document.querySelector("#hunt-user-greeting");
+      greeting.textContent = `Hi, ${record.leaderboardName || user?.displayName || "Player"}`;
+      greeting.hidden = false;
+
+      if (!dataBound) {
+        dataBound = true;
+        bindHuntData();
+      }
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      const handled = await handleDiscordReturn();
+      if (!handled) await verifyAndLoad(user);
     });
+
+    function bindHuntData() {
+      onValue(ref(db, "session"), (snap) => {
+        const data = snap.val() || {};
+        const fn = data.fortnite || {};
+        document.querySelector("#session-elims").textContent = (Number(fn.eliminations) || 0).toLocaleString();
+        document.querySelector("#session-wins").textContent = (Number(fn.wins) || 0).toLocaleString();
+        document.querySelector("#session-losses").textContent = (Number(fn.losses) || 0).toLocaleString();
+      });
+
+      onValue(ref(db, "leaderboards"), (snap) => {
+        const boards = snap.val() || {};
+        const fnBoard = Object.values(boards).find(b => String(b.name || "").trim().toLowerCase() === "fortnite");
+        if (!fnBoard) return;
+
+        const rows = normalizeRowsFromBoard(fnBoard);
+        const treasures = Array.isArray(fnBoard.treasures) ? fnBoard.treasures : [];
+        const tList = document.querySelector("#treasure-list");
+        tList.replaceChildren();
+        let hasTreasure = false;
+
+        const itemsToRender = treasures.length
+          ? treasures
+          : rows.map(r => ({ icon: r[8], quantity: r[9] })).filter(t => t.icon || t.quantity);
+
+        itemsToRender.forEach(t => {
+          const iconUrl = String(t.icon || "").trim();
+          const qty = Number(t.quantity) || 0;
+          if (qty > 0 && /^https?:\/\//i.test(iconUrl)) {
+            hasTreasure = true;
+            const item = document.createElement("div");
+            item.className = "treasure-item";
+            item.innerHTML = `<img class="treasure-icon" src="${iconUrl.replace(/"/g, """)}" alt=""><span class="treasure-quantity">×${qty}</span>`;
+            tList.append(item);
+          }
+        });
+        document.querySelector("#treasure-empty").style.display = hasTreasure ? "none" : "block";
+
+        const boardEl = document.querySelector("#leaderboard");
+        boardEl.replaceChildren(...rows.map((r, idx) => {
+          const name = String(r[2] || "").trim();
+          const username = String(r[3] || "").trim();
+          const img = String(r[0] || "").trim();
+          const div = document.createElement("div");
+          div.className = "entry";
+          div.innerHTML = `
+            <span class="rank">${r[6] || idx + 1}</span>
+            <div style="display:flex;align-items:center;gap:10px;min-width:0">
+              <div class="avatar"><span>${name.slice(0, 1)}</span>${img ? `<img src="${img.replace(/"/g, """)}" alt="" onerror="this.remove()">` : ""}</div>
+              <div style="min-width:0"><strong style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}</strong><small style="color:var(--muted);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${username}</small></div>
+            </div>
+            <div class="elims">${(Number(r[1]) || 0).toLocaleString()}</div>
+          `;
+          return div;
+        }));
+      });
+    }
   </script>
 </body>
 </html>

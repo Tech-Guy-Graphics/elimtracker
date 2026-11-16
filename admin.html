@@ -23,12 +23,12 @@
     .account-trigger:hover,.account-trigger[aria-expanded="true"]{border-color:var(--line);background:var(--panel)}
     .account-trigger img,.profile-menu-identity img{width:34px;height:34px;border:1px solid var(--line);border-radius:50%;object-fit:cover}
     .profile-menu{position:absolute;z-index:20;top:calc(100% + 8px);right:0;width:min(320px,calc(100vw - 28px));padding:14px;border:1px solid var(--line);border-radius:4px;background:var(--panel);box-shadow:0 16px 38px #0008}
-    .profile-menu-identity{position:relative;display:flex;align-items:center;gap:11px;padding:12px;border-bottom:1px solid var(--line);border-radius:3px;overflow:hidden;background-size:cover;background-position:center}
-    .profile-menu-identity::before{content:"";position:absolute;inset:0;background:rgba(24,34,57,0.85);z-index:1}
+    .profile-menu-identity{position:relative;display:flex;align-items:center;gap:11px;padding:14px 12px;border-bottom:1px solid var(--line);border-radius:3px;overflow:hidden;background-color:var(--soft);background-size:cover;background-position:center}
+    .profile-menu-identity::before{content:"";position:absolute;inset:0;background:rgba(16,22,36,0.68);z-index:1}
     .profile-menu-identity img,.profile-menu-identity div{position:relative;z-index:2}
     .profile-menu-identity img{width:42px;height:42px}
     .profile-menu-name{display:block;overflow-wrap:anywhere;color:var(--paper);font-size:13px;font-weight:700}
-    .profile-menu-email{display:block;margin-top:3px;overflow-wrap:anywhere;color:var(--muted);font-size:11px}
+    .profile-menu-email{display:block;margin-top:3px;overflow-wrap:anywhere;color:#d7e3f8;font-size:11px}
     .profile-menu-uid{display:grid;gap:6px;padding:13px 0;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase}
     .profile-menu-uid code{overflow-wrap:anywhere;color:var(--paper);font:11px ui-monospace,Consolas,monospace}
     .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:36px;padding:0 14px;border:1px solid var(--line);border-radius:3px;background:var(--soft);color:var(--paper);cursor:pointer;font-size:12px;font-weight:700;text-decoration:none}
@@ -57,7 +57,7 @@
     td input:focus{border-color:var(--lime);background:var(--panel);outline:none}
     td input[type="checkbox"]{width:18px;height:18px;accent-color:var(--lime);cursor:pointer}
     .avatar-preview{width:30px;height:30px;border-radius:3px;object-fit:cover;border:1px solid var(--line);background:var(--panel);vertical-align:middle}
-    .toast{position:fixed;right:20px;bottom:20px;z-index:99;padding:12px 16px;border:1px solid var(--line);border-left:3px solid var(--lime);background:var(--panel);box-shadow:0 12px 32px #000a;font-size:13px;font-weight:600}
+    .toast{position:fixed;right:20px;bottom:20px;z-index:2147483647;padding:12px 16px;border:1px solid var(--line);border-left:3px solid var(--lime);background:var(--panel);box-shadow:0 12px 32px #000a;font-size:13px;font-weight:600}
     [hidden]{display:none!important}
   </style>
 </head>
@@ -178,17 +178,17 @@
             <h3 style="margin:0 0 12px;font:800 18px var(--display);text-transform:uppercase;color:var(--lime)">Main Overlay & Session</h3>
             <div style="display:grid;gap:12px">
               <div class="field"><label>Active Overlay Game</label><select id="sess-game"></select></div>
-              <div class="field"><label>Session Eliminations</label><input id="sess-elims" type="number" min="0"></div>
-              <div class="field"><label>Session Wins</label><input id="sess-wins" type="number" min="0"></div>
-              <div class="field"><label>Session Losses</label><input id="sess-losses" type="number" min="0"></div>
+              <div class="field"><label>Session Eliminations</label><input id="sess-elims" type="number" inputmode="numeric" min="0"></div>
+              <div class="field"><label>Session Wins</label><input id="sess-wins" type="number" inputmode="numeric" min="0"></div>
+              <div class="field"><label>Session Losses</label><input id="sess-losses" type="number" inputmode="numeric" min="0"></div>
             </div>
           </div>
           <div class="card" style="margin:0;background:var(--ink)">
             <h3 style="margin:0 0 12px;font:800 18px var(--display);text-transform:uppercase;color:#f3c75e">Pirate Token Hunt</h3>
             <div style="display:grid;gap:12px">
-              <div class="field"><label>Hunt Eliminations</label><input id="fn-elims" type="number" min="0"></div>
-              <div class="field"><label>Hunt Wins</label><input id="fn-wins" type="number" min="0"></div>
-              <div class="field"><label>Hunt Losses</label><input id="fn-losses" type="number" min="0"></div>
+              <div class="field"><label>Hunt Eliminations</label><input id="fn-elims" type="number" inputmode="numeric" min="0"></div>
+              <div class="field"><label>Hunt Wins</label><input id="fn-wins" type="number" inputmode="numeric" min="0"></div>
+              <div class="field"><label>Hunt Losses</label><input id="fn-losses" type="number" inputmode="numeric" min="0"></div>
               <div class="field">
                 <label>Hunt Start Time ET (HH:mm:ss dd/MM/yy)</label>
                 <div style="display:flex;gap:6px">
@@ -224,14 +224,17 @@
 
   <script type="module">
     import {
-      auth, db, DISCORD_CLIENT_ID, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signInAnonymously, signOut,
-      ref, get, set, update, remove, onValue, getUserRecord, getUserRecordByDiscordId, normalizeRowsFromBoard
+      auth, db, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signInAnonymously, signOut,
+      ref, get, set, update, remove, onValue, startDiscordOAuth, extractDiscordTokenFromUrl,
+      getUserRecord, getUserRecordByDiscordId, normalizeRowsFromBoard
     } from "./firebase-bridge.js";
 
     let boardsCache = {};
     let sessionCache = {};
     let usersCache = {};
     let selectedBoardId = "";
+
+    const esc = (v) => String(v ?? "").replace(/&/g, "&").replace(/"/g, """).replace(/</g, "<").replace(/>/g, ">");
 
     const toastEl = document.querySelector("#toast");
     function showToast(msg) {
@@ -257,22 +260,18 @@
     });
 
     document.querySelector("#signin-btn").addEventListener("click", () => signInWithPopup(auth, new GoogleAuthProvider()));
-    document.querySelector("#discord-signin-btn").addEventListener("click", () => {
-      const redirectUri = encodeURIComponent(window.location.origin + window.location.pathname);
-      window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=token&scope=identify`;
-    });
+    document.querySelector("#discord-signin-btn").addEventListener("click", () => startDiscordOAuth());
 
     const handleSignOut = async () => {
       localStorage.removeItem("discordId");
       await signOut(auth);
-      window.location.reload();
+      window.location.href = "admin.html";
     };
     document.querySelector("#signout-btn").addEventListener("click", handleSignOut);
     document.querySelector("#gate-signout").addEventListener("click", handleSignOut);
 
     async function handleDiscordAdminRedirect() {
-      const fragment = new URLSearchParams(window.location.hash.slice(1));
-      const accessToken = fragment.get("access_token");
+      const accessToken = extractDiscordTokenFromUrl();
       if (!accessToken) return false;
       try {
         if (!auth.currentUser) await signInAnonymously(auth);
@@ -336,7 +335,18 @@
         document.querySelector("#menu-photo").src = photoUrl;
         document.querySelector("#account-photo").hidden = false;
         document.querySelector("#menu-photo").hidden = false;
-        document.querySelector("#profile-menu-identity").style.backgroundImage = `url('${photoUrl}')`;
+      }
+
+      const menuHeader = document.querySelector("#profile-menu-identity");
+      if (record.discordBannerUrl) {
+        menuHeader.style.backgroundImage = `url('${record.discordBannerUrl}')`;
+        menuHeader.style.backgroundColor = "";
+      } else if (record.discordAccentColor) {
+        menuHeader.style.backgroundImage = "none";
+        menuHeader.style.backgroundColor = record.discordAccentColor;
+      } else {
+        menuHeader.style.backgroundImage = "none";
+        menuHeader.style.backgroundColor = "var(--soft)";
       }
 
       bindRealtimeAdminData();
@@ -403,7 +413,6 @@
       const rows = normalizeRowsFromBoard(board);
       tbody.replaceChildren(...rows.map(r => createBoardRowTr(r, isFortnite)));
 
-      // Separate Treasure Sheet below main sheet for Fortnite
       const treasureCard = document.querySelector("#fortnite-treasure-card");
       treasureCard.hidden = !isFortnite;
       if (isFortnite) {
@@ -419,13 +428,13 @@
       const tr = document.createElement("tr");
       const imgUrl = String(r[0] || "");
       tr.innerHTML = `
-        <td><button class="avatar-edit board-avatar-edit" type="button" title="Click to change profile image" style="border:0;background:none;cursor:pointer;padding:0"><img class="avatar-preview" src="${imgUrl}" onerror="this.style.opacity='0.2'" alt=""></button><input type="hidden" data-col="0" value="${imgUrl.replace(/"/g, """)}"></td>
-        <td><input type="number" data-col="1" value="${Number(r[1]) || 0}"></td>
-        <td><input type="text" data-col="2" value="${String(r[2] || "").replace(/"/g, """)}" placeholder="Display Name"></td>
-        <td><input type="text" data-col="3" value="${String(r[3] || "").replace(/"/g, """)}" placeholder="In-Game Username"></td>
-        <td ${isFortnite ? "hidden" : ""}><input type="text" data-col="4" value="${String(r[4] || "").replace(/"/g, """)}" placeholder="Character"></td>
+        <td><button class="avatar-edit board-avatar-edit" type="button" title="Click to change profile image" style="border:0;background:none;cursor:pointer;padding:0"><img class="avatar-preview" src="${esc(imgUrl)}" onerror="this.style.opacity='0.2'" alt=""></button><input type="hidden" data-col="0" value="${esc(imgUrl)}"></td>
+        <td><input type="number" inputmode="numeric" data-col="1" value="${Number(r[1]) || 0}"></td>
+        <td><input type="text" data-col="2" value="${esc(r[2])}" placeholder="Display Name"></td>
+        <td><input type="text" data-col="3" value="${esc(r[3])}" placeholder="In-Game Username"></td>
+        <td ${isFortnite ? "hidden" : ""}><input type="text" data-col="4" value="${esc(r[4])}" placeholder="Character"></td>
         <td style="text-align:center"><input type="checkbox" data-col="5" ${r[5] === true || String(r[5]).toLowerCase() === "true" ? "checked" : ""}></td>
-        <td><input type="number" data-col="6" value="${Number(r[6]) || 0}"></td>
+        <td><input type="number" inputmode="numeric" data-col="6" value="${Number(r[6]) || 0}"></td>
         <td><button class="btn danger" type="button" style="min-height:28px;padding:0 8px">×</button></td>
       `;
       tr.querySelector(".board-avatar-edit")?.addEventListener("click", () => {
@@ -445,9 +454,9 @@
       const tr = document.createElement("tr");
       const iconUrl = String(t.icon || "");
       tr.innerHTML = `
-        <td><img class="avatar-preview treasure-preview" src="${iconUrl.replace(/"/g, """)}" onerror="this.style.opacity='0.2'" alt=""></td>
-        <td><input type="url" data-tcol="icon" value="${iconUrl.replace(/"/g, """)}" placeholder="https://... treasure icon URL"></td>
-        <td><input type="number" data-tcol="quantity" min="0" value="${Number(t.quantity) || 0}"></td>
+        <td><img class="avatar-preview treasure-preview" src="${esc(iconUrl)}" onerror="this.style.opacity='0.2'" alt=""></td>
+        <td><input type="url" data-tcol="icon" value="${esc(iconUrl)}" placeholder="https://... treasure icon URL"></td>
+        <td><input type="number" inputmode="numeric" data-tcol="quantity" min="0" value="${Number(t.quantity) || 0}"></td>
         <td><button class="btn danger" type="button" style="min-height:28px;padding:0 8px">×</button></td>
       `;
       tr.querySelector('[data-tcol="icon"]')?.addEventListener("input", e => {
@@ -617,7 +626,7 @@
         <th>Note / Label</th>
         <th style="width:110px">Challenge Pts</th>
         <th style="width:80px">Admin</th>
-        ${games.map(g => `<th>${g} Username</th>`).join("")}
+        ${games.map(g => `<th>${esc(g)} Username</th>`).join("")}
         <th style="width:65px">Remove</th>
       </tr>`;
 
@@ -628,17 +637,20 @@
       const tr = document.createElement("tr");
       const accs = u.gameAccounts || {};
       const profileImageUrl = u.profileImageUrl || u.profileImage || "";
+      const gameInputsHtml = games.map(g => `<td><input type="text" data-game="${esc(g)}" value="${esc(accs[g] || "")}" placeholder="${esc(g)} ID"></td>`).join("");
+
       tr.innerHTML = `
-        <td><input type="text" data-field="uid" value="${String(u.uid || "").replace(/"/g, """)}" placeholder="Firebase Auth UID"></td>
-        <td><input type="text" data-field="discordId" value="${String(u.discordId || "").replace(/"/g, """)}" placeholder="Discord User ID"></td>
-        <td><input type="text" data-field="leaderboardName" value="${String(u.leaderboardName || "").replace(/"/g, """)}" placeholder="Main leaderboard name"></td>
-        <td><button type="button" class="avatar-edit" title="Click to change profile image" style="border:0;background:none;cursor:pointer"><img class="avatar-preview user-avatar" src="${String(profileImageUrl).replace(/"/g, """)}" alt=""></button><input type="hidden" data-field="profileImageUrl" value="${String(profileImageUrl).replace(/"/g, """)}"></td>
-        <td><input type="text" data-field="label" value="${String(u.label || "").replace(/"/g, """)}" placeholder="Note"></td>
-        <td><input type="number" data-field="points" value="${Number(u.challengePoints) || 0}"></td>
+        <td><input type="text" data-field="uid" value="${esc(u.uid || "")}" placeholder="Firebase Auth UID"></td>
+        <td><input type="text" data-field="discordId" value="${esc(u.discordId || "")}" placeholder="Discord User ID"></td>
+        <td><input type="text" data-field="leaderboardName" value="${esc(u.leaderboardName || "")}" placeholder="Main leaderboard name"></td>
+        <td><button type="button" class="avatar-edit" title="Click to change profile image" style="border:0;background:none;cursor:pointer"><img class="avatar-preview user-avatar" src="${esc(profileImageUrl)}" alt=""></button><input type="hidden" data-field="profileImageUrl" value="${esc(profileImageUrl)}"></td>
+        <td><input type="text" data-field="label" value="${esc(u.label || "")}" placeholder="Note"></td>
+        <td><input type="number" inputmode="numeric" data-field="points" value="${Number(u.challengePoints) || 0}"></td>
         <td style="text-align:center"><input type="checkbox" data-field="isAdmin" ${u.isAdmin === true ? "checked" : ""}></td>
-        ${games.map(g => `<td><input type="text" data-game="${g.replace(/"/g, """)}" value="${String(accs[g] || "").replace(/"/g, """)}" placeholder="${g} ID"></td>`).join("")}
+        ${gameInputsHtml}
         <td><button class="btn danger" type="button" style="min-height:28px;padding:0 8px">×</button></td>
       `;
+
       tr.querySelector(".avatar-edit")?.addEventListener("click", () => {
         const field = tr.querySelector('[data-field="profileImageUrl"]');
         const next = prompt("Enter profile image URL:", field.value);
@@ -665,6 +677,7 @@
         const discordId = tr.querySelector('[data-field="discordId"]').value.trim();
         if (!uid && !discordId) return;
         const recordKey = uid || `discord_${discordId}`;
+        const existing = usersCache[recordKey] || {};
         const isAdmin = tr.querySelector('[data-field="isAdmin"]').checked;
         if (isAdmin) adminCount++;
         const gameAccounts = {};
@@ -673,6 +686,7 @@
           if (val) gameAccounts[inp.dataset.game] = val;
         });
         nextUsers[recordKey] = {
+          ...existing,
           uid: uid || "",
           recordKey,
           authUid: recordKey,

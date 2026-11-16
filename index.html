@@ -11,39 +11,157 @@
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root{color-scheme:dark;--ink:#101624;--panel:#182239;--soft:#22304b;--line:#394865;--paper:#eef4ff;--muted:#a6b4cb;--lime:#0095ff;--green:#0095ff;--blue:#0e2fcb;--display:"Barlow Condensed",Impact,sans-serif;--body:"DM Sans","Segoe UI",sans-serif}
-    *{box-sizing:border-box}body{min-width:320px;margin:0;background-color:var(--ink);background-image:radial-gradient(ellipse at 90% 0%,#0e2fcb55,transparent 35%),repeating-linear-gradient(135deg,transparent 0 34px,#ffffff03 34px 35px);color:var(--paper);font:14px var(--body)}
-    button,input{font:inherit}button:focus-visible,input:focus-visible{outline:2px solid var(--lime);outline-offset:3px}.page{width:min(1120px,calc(100% - 40px));margin:auto}
-    .topbar{min-height:62px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);color:var(--muted);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase}.brand,.account-profile{display:flex;align-items:center;gap:10px}.brand img{display:block;width:34px;height:34px;object-fit:contain}.account-profile{position:relative;letter-spacing:0;text-transform:none;color:var(--paper);font-size:13px;font-weight:600}.account-profile[hidden]{display:none}.account-trigger{display:flex;align-items:center;gap:10px;padding:5px 8px;border:1px solid transparent;border-radius:3px;background:transparent;color:var(--paper);cursor:pointer;font-weight:600}.account-trigger:hover,.account-trigger[aria-expanded="true"]{border-color:var(--line);background:var(--panel)}.account-trigger img,.profile-menu-identity img{width:34px;height:34px;border:1px solid var(--line);border-radius:50%;object-fit:cover}.account-trigger img[hidden],.profile-menu-identity img[hidden]{display:none}
-    .profile-menu{position:absolute;z-index:5;top:calc(100% + 8px);right:0;width:min(320px,calc(100vw - 28px));padding:14px;border:1px solid var(--line);border-radius:4px;background:var(--panel);box-shadow:0 16px 38px #0008}
-    .profile-menu[hidden]{display:none}
-    .profile-menu-identity{position:relative;display:flex;align-items:center;gap:11px;padding:12px;border-bottom:1px solid var(--line);border-radius:3px;overflow:hidden;background-size:cover;background-position:center}
-    .profile-menu-identity::before{content:"";position:absolute;inset:0;background:rgba(24,34,57,0.85);z-index:1}
-    .profile-menu-identity img, .profile-menu-identity div{position:relative;z-index:2}
+    *{box-sizing:border-box}
+    body{min-width:320px;margin:0;background-color:var(--ink);background-image:radial-gradient(ellipse at 90% 0%,#0e2fcb55,transparent 35%),repeating-linear-gradient(135deg,transparent 0 34px,#ffffff03 34px 35px);color:var(--paper);font:14px var(--body)}
+    button,input,select{font:inherit}
+    button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--lime);outline-offset:3px}
+    .page{width:min(1120px,calc(100% - 32px));margin:auto}
+    [hidden]{display:none!important}
+
+    .topbar{min-height:62px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);color:var(--muted);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;gap:10px}
+    .brand,.account-profile{display:flex;align-items:center;gap:10px}.brand img{display:block;width:34px;height:34px;object-fit:contain}
+    .account-profile{position:relative;letter-spacing:0;text-transform:none;color:var(--paper);font-size:13px;font-weight:600}
+    .account-trigger{display:flex;align-items:center;gap:10px;padding:5px 8px;border:1px solid transparent;border-radius:3px;background:transparent;color:var(--paper);cursor:pointer;font-weight:600}
+    .account-trigger:hover,.account-trigger[aria-expanded="true"]{border-color:var(--line);background:var(--panel)}
+    .account-trigger img,.profile-menu-identity img{width:34px;height:34px;border:1px solid var(--line);border-radius:50%;object-fit:cover}
+
+    .profile-menu{position:absolute;z-index:25;top:calc(100% + 8px);right:0;width:min(320px,calc(100vw - 28px));padding:14px;border:1px solid var(--line);border-radius:4px;background:var(--panel);box-shadow:0 16px 38px #0008}
+    .profile-menu-identity{position:relative;display:flex;align-items:center;gap:11px;padding:14px 12px;border-bottom:1px solid var(--line);border-radius:3px;overflow:hidden;background-color:var(--soft);background-size:cover;background-position:center}
+    .profile-menu-identity::before{content:"";position:absolute;inset:0;background:rgba(16,22,36,0.68);z-index:1}
+    .profile-menu-identity img,.profile-menu-identity div{position:relative;z-index:2}
     .profile-menu-identity img{width:42px;height:42px}
-    .profile-menu-name{display:block;overflow-wrap:anywhere;color:var(--paper);font-size:13px;font-weight:700}.profile-menu-email{display:block;margin-top:3px;overflow-wrap:anywhere;color:var(--muted);font-size:11px}
-    .profile-menu-uid{display:grid;gap:6px;padding:13px 0;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase}.profile-menu-uid code{overflow-wrap:anywhere;color:var(--paper);font:11px ui-monospace,Consolas,monospace;letter-spacing:0;text-transform:none}.profile-menu .signout-button{width:100%}
-    .hero{display:grid;grid-template-columns:1fr auto;align-items:end;gap:24px;padding:58px 0 35px;animation:arrive .4s ease-out both}h1{margin:0;font:900 clamp(56px,9vw,92px)/.85 var(--display);text-transform:uppercase}.hero-copy{max-width:460px;margin:16px 0 0;color:var(--muted);line-height:1.6}
-    .refresh{display:inline-flex;min-height:42px;align-items:center;gap:9px;padding:0 15px;border:1px solid var(--line);border-radius:3px;background:var(--panel);color:var(--paper);cursor:pointer;font-size:12px;font-weight:700}.refresh:hover{border-color:var(--lime);background:var(--soft)}.refresh:disabled{cursor:wait;opacity:.65}
-    .stats-wrap{display:flex;align-items:center;gap:12px;margin-bottom:28px}
-    .board{border:1px solid var(--line);background:var(--panel);animation:arrive .56s .12s ease-out both}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 16px;border-bottom:1px solid var(--line)}h2{margin:0;font:800 22px var(--display);text-transform:uppercase}.controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.tabs{display:flex;gap:3px;padding:3px;border:1px solid var(--line);border-radius:3px;background:var(--ink)}.tab{min-height:30px;padding:0 10px;border:0;border-radius:2px;background:transparent;color:var(--muted);cursor:pointer;font-size:11px;font-weight:700}.tab[aria-pressed=true]{background:var(--soft);color:var(--lime)}
-    .sheet-select{height:38px;max-width:180px;padding:0 30px 0 10px;border:1px solid var(--line);border-radius:3px;background:var(--ink);color:var(--paper);font-size:12px}.sheet-select:disabled{color:var(--muted)}
-    .search-wrap{position:relative}.search-icon{position:absolute;top:50%;left:10px;width:14px;height:14px;transform:translateY(-50%);fill:none;stroke:#a6b4cb;stroke-width:1.8;pointer-events:none;z-index:1}.search{width:190px;height:38px;padding:0 10px 0 32px;border:1px solid var(--line);border-radius:3px;background:var(--ink);color:var(--paper);font-size:12px}.search::placeholder{color:#858d81}
-    .columns,.entry{display:grid;grid-template-columns:66px minmax(190px,1.6fr) minmax(115px,1fr) 120px;align-items:center;column-gap:12px}.columns{min-height:36px;padding:0 18px;color:var(--muted);font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase}.columns span:last-child{text-align:right}.entry{min-height:76px;padding:9px 18px;border-top:1px solid var(--line);transition:background .13s}.entry:hover{background:var(--soft)}.entry[data-place="1"]{--medal:#e8bb49;--medal-wash:#e8bb4933}.entry[data-place="2"]{--medal:#c4d0df;--medal-wash:#c4d0df2b}.entry[data-place="3"]{--medal:#d58d5d;--medal-wash:#d58d5d30}.entry[data-place]{background:linear-gradient(90deg,var(--medal-wash),transparent 78%);box-shadow:inset 3px 0 var(--medal)}.entry[data-place]:hover{background:linear-gradient(90deg,var(--medal-wash),var(--medal-wash) 78%)}.entry[data-place] .rank,.entry[data-place] .elims{color:var(--medal)}.rank{color:var(--muted);font:800 24px var(--display)}.entry:first-child .rank{color:var(--lime)}.player{display:flex;min-width:0;align-items:center;gap:12px}.avatar{display:grid;width:44px;height:44px;flex:0 0 44px;place-items:center;overflow:hidden;border:1px solid #4b5547;border-radius:3px;background:#343b31;color:var(--lime);font:800 18px var(--display);text-transform:uppercase}.avatar img{width:100%;height:100%;object-fit:cover}.copy{min-width:0}.name{overflow:hidden;font-size:14px;font-weight:700;text-overflow:ellipsis;white-space:nowrap}.name-line{display:flex;min-width:0;align-items:center;gap:7px}.participation-dot{width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#5bf28c;box-shadow:0 0 7px #5bf28c,0 0 14px #28d96c99}.participation-dot.inactive{background:#758198;box-shadow:none}.character{overflow:hidden;color:#d7dbd1;font-size:12px;text-overflow:ellipsis;white-space:nowrap}.elims{color:var(--lime);font:800 25px var(--display);text-align:right;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;column-gap:6px}.elims small{display:none;color:var(--muted);font:600 10px var(--body)}
-    .empty{display:none;padding:48px 20px;color:var(--muted);text-align:center}.empty strong{display:block;margin-bottom:5px;color:var(--paper);font:800 24px var(--display);text-transform:uppercase}.error{display:none;margin:0 0 18px;padding:12px 14px;border:1px solid #ff795b70;border-radius:3px;background:#ff795b14;color:#ffb09d;line-height:1.5}
+    .profile-menu-name{display:block;overflow-wrap:anywhere;color:var(--paper);font-size:13px;font-weight:700;text-shadow:0 1px 3px #000a}
+    .profile-menu-email{display:block;margin-top:3px;overflow-wrap:anywhere;color:#d7e3f8;font-size:11px;text-shadow:0 1px 3px #000a}
+    .profile-menu-uid{display:grid;gap:6px;padding:13px 0;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase}
+    .profile-menu-uid code{overflow-wrap:anywhere;color:var(--paper);font:11px ui-monospace,Consolas,monospace;letter-spacing:0;text-transform:none}
+    .profile-menu .signout-button{width:100%}
+
+    .hero{display:grid;grid-template-columns:1fr auto;align-items:end;gap:24px;padding:48px 0 32px;animation:arrive .4s ease-out both}
+    h1{margin:0;font:900 clamp(48px,9vw,92px)/.85 var(--display);text-transform:uppercase;color:#45a8ff;background:linear-gradient(110deg,#65d2ff 0%,#168cff 52%,#3648ed 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .hero-copy{max-width:460px;margin:14px 0 0;color:var(--muted);line-height:1.6}
+    .hero-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+
+    .refresh{display:inline-flex;min-height:40px;align-items:center;justify-content:center;gap:8px;padding:0 14px;border:1px solid var(--line);border-radius:3px;background:var(--panel);color:var(--paper);cursor:pointer;font-size:12px;font-weight:700;text-decoration:none}
+    .refresh:hover{border-color:var(--lime);background:var(--soft)}
+    .refresh:disabled{cursor:wait;opacity:.65}
+
+    .stats-wrap{display:flex;align-items:stretch;gap:10px;margin-bottom:24px}
+    .session-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));flex:1;border:1px solid var(--line);background:var(--panel)}
+    .session-stat{padding:14px 16px;min-width:0}
+    .session-stat+.session-stat{border-left:1px solid var(--line)}
+    .session-stat-label{display:block;margin-bottom:5px;color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .session-stat-value{color:var(--lime);font:800 28px/1 var(--display)}
+    .reset-session-btn{padding:0 16px;flex-shrink:0}
+    .reset-session-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;display:none}
+
+    .board{border:1px solid var(--line);background:var(--panel);animation:arrive .56s .12s ease-out both;overflow:hidden}
+    .toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+    .controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:100%}
+    .tabs{display:flex;gap:3px;padding:3px;border:1px solid var(--line);border-radius:3px;background:var(--ink)}
+    .tab{min-height:30px;padding:0 10px;border:0;border-radius:2px;background:transparent;color:var(--muted);cursor:pointer;font-size:11px;font-weight:700;white-space:nowrap}
+    .tab[aria-pressed=true]{background:var(--soft);color:var(--lime)}
+    .sheet-select{height:38px;max-width:190px;padding:0 28px 0 10px;border:1px solid var(--line);border-radius:3px;background:var(--ink);color:var(--paper);font-size:12px;font-weight:600}
+    .sheet-select:disabled{color:var(--muted)}
+    .pirate-toolbar-btn{height:38px;padding:0 12px;border:1px solid #f3c75e88;border-radius:3px;background:#f3c75e22;color:#f3c75e;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:6px;text-decoration:none;white-space:nowrap}
+    .pirate-toolbar-btn:hover{background:#f3c75e38;border-color:#f3c75e}
+
+    .search-wrap{position:relative;flex:1;min-width:150px;max-width:240px}
+    .search-icon{position:absolute;top:50%;left:10px;width:14px;height:14px;transform:translateY(-50%);fill:none;stroke:#a6b4cb;stroke-width:1.8;pointer-events:none;z-index:1}
+    .search{width:100%;height:38px;padding:0 10px 0 32px;border:1px solid var(--line);border-radius:3px;background:var(--ink);color:var(--paper);font-size:12px}
+    .search::placeholder{color:#858d81}
+
+    .columns,.entry{display:grid;grid-template-columns:56px minmax(0,1.6fr) minmax(0,1fr) 105px;align-items:center;column-gap:12px}
+    .columns{min-height:36px;padding:0 16px;color:var(--muted);font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase}
+    .columns span:last-child{text-align:right}
+    .entry{min-height:74px;padding:10px 16px;border-top:1px solid var(--line);transition:background .13s}
+    .entry:hover{background:var(--soft)}
+    .entry[data-place="1"]{--medal:#e8bb49;--medal-wash:#e8bb4933}
+    .entry[data-place="2"]{--medal:#c4d0df;--medal-wash:#c4d0df2b}
+    .entry[data-place="3"]{--medal:#d58d5d;--medal-wash:#d58d5d30}
+    .entry[data-place]{background:linear-gradient(90deg,var(--medal-wash),transparent 78%);box-shadow:inset 3px 0 var(--medal)}
+    .entry[data-place]:hover{background:linear-gradient(90deg,var(--medal-wash),var(--medal-wash) 78%)}
+    .entry[data-place] .rank,.entry[data-place] .elims{color:var(--medal)}
+    .rank{color:var(--muted);font:800 24px var(--display)}
+    .entry:first-child .rank{color:var(--lime)}
+
+    .player{display:flex;min-width:0;align-items:center;gap:12px;width:100%}
+    .avatar{position:relative;display:grid;width:44px;height:44px;flex:0 0 44px;place-items:center;overflow:hidden;border:1px solid #4b5547;border-radius:3px;background:#343b31;color:var(--lime);font:800 18px var(--display);text-transform:uppercase}
+    .avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+    .copy{min-width:0;flex:1}
+    .name{overflow:hidden;font-size:14px;font-weight:700;text-overflow:ellipsis;white-space:nowrap}
+    .name-line{display:flex;min-width:0;align-items:center;gap:7px}
+    .participation-dot{width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#5bf28c;box-shadow:0 0 7px #5bf28c,0 0 14px #28d96c99}
+    .participation-dot.inactive{background:#758198;box-shadow:none}
+    .character-col{overflow:hidden;color:#d7dbd1;font-size:12px;text-overflow:ellipsis;white-space:nowrap}
+    .character-sub{display:none;color:var(--muted);font-size:11px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .elims{color:var(--lime);font:800 25px var(--display);text-align:right;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;column-gap:6px}
+    .elims small{display:none;color:var(--muted);font:600 10px var(--body)}
+
+    .empty{display:none;padding:48px 20px;color:var(--muted);text-align:center}
+    .empty strong{display:block;margin-bottom:5px;color:var(--paper);font:800 24px var(--display);text-transform:uppercase}
+    .error{display:none;margin:0 0 18px;padding:12px 14px;border:1px solid #ff795b70;border-radius:3px;background:#ff795b14;color:#ffb09d;line-height:1.5}
     .footer{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:14px 2px 28px;color:var(--muted);font-size:11px}
     .footer a{color:var(--muted);text-underline-offset:3px}.footer a:hover{color:var(--paper)}
-    .access-panel{margin-bottom:28px;padding:22px;border:1px solid var(--line);background:var(--panel)}.access-panel h2{margin-bottom:7px}.access-message{margin:0 0 16px;color:var(--muted);line-height:1.55}.access-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px}.access-button{display:inline-flex;min-height:40px;align-items:center;justify-content:center;gap:9px;padding:0 14px;border:1px solid var(--line);border-radius:3px;background:var(--soft);color:var(--paper);cursor:pointer;font-size:12px;font-weight:700}.access-button:hover{border-color:var(--lime)}.access-button.primary{border-color:var(--lime);background:var(--lime);color:var(--ink)}.access-panel [hidden]{display:none!important}
-    @keyframes arrive{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-    h1{color:#45a8ff;background:linear-gradient(110deg,#65d2ff 0%,#168cff 52%,#3648ed 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-    .player-trigger{width:100%;padding:0;border:0;background:transparent;color:inherit;text-align:left;cursor:pointer}.player-trigger:hover .name{text-decoration:underline;text-decoration-color:var(--lime);text-underline-offset:3px}
-    .hero-actions{display:flex;align-items:center;gap:9px}
-    .profile-identity{display:flex;align-items:center;gap:13px;margin:0 0 16px}.profile-avatar{width:58px;height:58px;flex:0 0 58px;border:1px solid var(--line);border-radius:3px;object-fit:cover;background:var(--ink)}.profile-loading{min-height:128px;justify-content:center}#profile-loading[hidden],.profile-actions[hidden],.profile-summary[hidden]{display:none}
-    dialog{width:min(520px,calc(100% - 28px));max-height:min(84vh,720px);overflow:auto;padding:22px;border:1px solid var(--line);border-radius:4px;background:var(--panel);color:var(--paper);box-shadow:0 22px 70px #000b}dialog::backdrop{background:#070b13c9;backdrop-filter:blur(4px)}.dialog-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}.dialog-heading h2{font:800 27px/1 var(--display);text-transform:uppercase}.dialog-close{width:34px;height:34px;flex:0 0 34px;border:1px solid var(--line);border-radius:3px;background:var(--ink);color:var(--paper);cursor:pointer;font-size:18px}.dialog-copy{margin:0 0 16px;color:var(--muted);line-height:1.55}
-    .challenge-form{display:grid;gap:13px}.challenge-form label{display:grid;gap:6px;color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.7px;text-transform:uppercase}.challenge-form input{width:100%;height:40px;padding:0 10px;border:1px solid var(--line);border-radius:3px;background:var(--ink);color:var(--paper);font-size:13px}
-    .challenge-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:4px}.challenge-button{min-height:40px;padding:0 14px;border:1px solid var(--line);border-radius:3px;background:var(--soft);color:var(--paper);cursor:pointer;font-size:12px;font-weight:700}.challenge-button.primary{border-color:var(--lime);background:var(--lime);color:var(--ink)}.challenge-button.danger{border-color:#ff795b80;background:#ff795b20;color:#ff9c87}
+
+    .access-panel{margin-bottom:28px;padding:22px;border:1px solid var(--line);background:var(--panel)}
+    .access-panel h2{margin:0 0 10px;font:800 24px var(--display);text-transform:uppercase}
+    .access-message{margin:0 0 16px;color:var(--muted);line-height:1.55}
+    .access-button{display:inline-flex;min-height:40px;align-items:center;justify-content:center;gap:9px;padding:0 14px;border:1px solid var(--line);border-radius:3px;background:var(--soft);color:var(--paper);cursor:pointer;font-size:12px;font-weight:700}
+    .access-button:hover{border-color:var(--lime)}
+    .access-button.primary{border-color:var(--lime);background:var(--lime);color:var(--ink)}
+
+    .player-trigger{width:100%;padding:0;border:0;background:transparent;color:inherit;text-align:left;cursor:pointer}
+    .player-trigger:hover .name{text-decoration:underline;text-decoration-color:var(--lime);text-underline-offset:3px}
+
+    .profile-identity{display:flex;align-items:center;gap:13px;margin:0 0 16px}
+    .profile-avatar{width:58px;height:58px;flex:0 0 58px;border:1px solid var(--line);border-radius:3px;object-fit:cover;background:var(--ink)}
+    .profile-loading{min-height:128px;display:flex;align-items:center;justify-content:center}
+
+    dialog{position:fixed;z-index:40;width:min(520px,calc(100% - 28px));max-height:min(86vh,740px);overflow:auto;padding:22px;border:1px solid var(--line);border-radius:4px;background:var(--panel);color:var(--paper);box-shadow:0 22px 70px #000c}
+    dialog::backdrop{background:#070b13c9;backdrop-filter:blur(4px)}
+    .dialog-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px}
+    .dialog-heading h2{margin:0;font:800 27px/1 var(--display);text-transform:uppercase}
+    .dialog-close{width:34px;height:34px;flex:0 0 34px;border:1px solid var(--line);border-radius:3px;background:var(--ink);color:var(--paper);cursor:pointer;font-size:18px}
+    .dialog-copy{margin:0 0 14px;color:var(--muted);line-height:1.55}
+
+    .challenge-form{display:grid;gap:14px}
+    .form-section{padding:12px 14px;border:1px solid var(--line);border-radius:3px;background:var(--ink);display:grid;gap:11px}
+    .form-section-title{font-size:10px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;color:var(--lime);margin:0}
+    .challenge-form label{display:grid;gap:6px;color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.7px;text-transform:uppercase}
+    .challenge-form input[type="text"],.challenge-form input[type="number"]{width:100%;height:38px;padding:0 10px;border:1px solid var(--line);border-radius:3px;background:var(--panel);color:var(--paper);font-size:13px}
+    .challenge-form input:disabled{opacity:.45;cursor:not-allowed}
+    .checkbox-row{display:flex!important;align-items:center;gap:9px;cursor:pointer;text-transform:none!important;letter-spacing:0!important;font-size:13px!important;color:var(--paper)!important}
+    .checkbox-row input[type="checkbox"]{width:17px;height:17px;accent-color:var(--lime);margin:0}
+    .points-preview{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border:1px solid var(--lime);border-radius:3px;background:#0095ff18;font-weight:700}
+
+    .challenge-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:6px}
+    .challenge-button{min-height:40px;padding:0 14px;border:1px solid var(--line);border-radius:3px;background:var(--soft);color:var(--paper);cursor:pointer;font-size:12px;font-weight:700}
+    .challenge-button.primary{border-color:var(--lime);background:var(--lime);color:var(--ink)}
+    .challenge-button.danger{border-color:#ff795b80;background:#ff795b20;color:#ff9c87}
     .challenge-card{padding:14px;border:1px solid var(--line);border-radius:3px;background:var(--ink);margin-bottom:12px}
-    .challenge-toast{position:fixed;z-index:50;right:20px;bottom:20px;width:min(370px,calc(100vw - 32px));padding:14px 16px;border:1px solid var(--line);border-left:3px solid var(--lime);background:var(--panel);box-shadow:0 12px 35px #0008;color:var(--paper);line-height:1.5}.challenge-toast[hidden]{display:none}
+
+    /* Toast sits at z-index 2147483647 so it always renders ABOVE open <dialog> modals */
+    .challenge-toast{position:fixed;z-index:2147483647;right:18px;bottom:18px;width:min(360px,calc(100vw - 32px));padding:14px 16px;border:1px solid var(--line);border-left:4px solid var(--lime);border-radius:3px;background:var(--panel);box-shadow:0 14px 38px #000d;color:var(--paper);line-height:1.45;pointer-events:auto}
     .badge-count{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--lime);color:var(--ink);font-size:10px;font-weight:800}
+
+    @keyframes arrive{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+    @media (max-width: 680px) {
+      .hero{grid-template-columns:1fr;padding:32px 0 24px}
+      .columns,.entry{grid-template-columns:40px minmax(0,1fr) 76px;column-gap:8px;padding-left:12px;padding-right:12px}
+      .columns #col-char-mvp,.character-col{display:none}
+      .character-sub{display:block}
+      .avatar{width:38px;height:38px;flex-basis:38px}
+      .rank{font-size:20px}
+      .elims{font-size:21px}
+      .session-stat{padding:10px 10px}
+      .session-stat-label{font-size:9px}
+      .session-stat-value{font-size:22px}
+      .reset-session-btn{width:44px;padding:0;justify-content:center}
+      .reset-session-btn .btn-label{display:none}
+      .reset-session-btn svg{display:block}
+      .search-wrap{max-width:100%;flex-basis:100%}
+    }
   </style>
 </head>
 <body>
@@ -52,8 +170,10 @@
       <div class="brand"><img src="icon.png" alt=""></div>
       <div class="account-profile" id="account-profile" hidden>
         <a class="refresh" id="admin-link" href="admin.html" style="min-height:34px;padding:0 11px;font-size:11px;text-decoration:none" hidden>Admin Panel</a>
-        <a class="refresh" id="pirate-hunt-link" href="fortnitehunt.html" style="min-height:34px;padding:0 11px;font-size:11px;text-decoration:none;background:#f3c75e22;border-color:#f3c75e88;color:#f3c75e" hidden>Pirate Hunt</a>
-        <button class="account-trigger" id="account-trigger" type="button" aria-haspopup="true" aria-expanded="false"><span id="account-greeting"></span><img id="account-photo" alt="" hidden></button>
+        <button class="account-trigger" id="account-trigger" type="button" aria-haspopup="true" aria-expanded="false">
+          <span id="account-greeting"></span>
+          <img id="account-photo" alt="" hidden>
+        </button>
         <div class="profile-menu" id="account-menu" role="menu" hidden>
           <div class="profile-menu-identity" id="profile-menu-identity">
             <img id="menu-photo" alt="" hidden>
@@ -64,17 +184,19 @@
         </div>
       </div>
     </header>
+
     <main>
       <section class="hero" aria-labelledby="page-title">
         <div>
           <h1 id="page-title">Elimination<br>Leaderboard</h1>
           <p class="hero-copy">Earn elims, complete challenges, and get to the top!</p>
         </div>
-        <div class="hero-actions">
+        <div class="hero-actions" id="hero-actions" hidden>
           <button class="refresh" id="challenge-center" type="button" hidden>Challenges <span class="badge-count" id="challenge-badge" hidden>0</span></button>
           <button class="refresh" id="group-challenge" type="button" title="Challenge everyone online" hidden>Group Challenge</button>
         </div>
       </section>
+
       <section class="access-panel" id="access-panel" aria-labelledby="access-heading">
         <div id="login-state">
           <h2 id="access-heading">Sign in</h2>
@@ -84,30 +206,47 @@
             <button class="access-button primary" id="discord-signin" type="button" style="background:#5865F2;border-color:#5865F2;color:#fff"><span>Continue with Discord</span></button>
           </div>
         </div>
-        <div class="access-denied" id="denied-state" hidden><h2>Access denied</h2><p>Please contact TGG for help.</p><button class="access-button signout-button" type="button">Sign out</button></div>
+        <div class="access-denied" id="denied-state" hidden>
+          <h2>Access denied</h2>
+          <p>Please contact TGG for help.</p>
+          <button class="access-button signout-button" type="button">Sign out</button>
+        </div>
       </section>
+
       <div class="member-content" id="member-content" hidden>
         <p class="error" id="error" role="alert"></p>
         <div class="stats-wrap">
-          <section class="session-stats" aria-label="Session statistics" aria-live="polite" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));flex:1;border:1px solid var(--line);background:var(--panel)">
-            <div class="session-stat" style="padding:14px 18px"><span class="session-stat-label" style="display:block;margin-bottom:5px;color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase">Session Eliminations</span><strong class="session-stat-value" id="session-eliminations" style="color:var(--lime);font:800 28px/1 var(--display)">--</strong></div>
-            <div class="session-stat" style="padding:14px 18px;border-left:1px solid var(--line)"><span class="session-stat-label" style="display:block;margin-bottom:5px;color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase">Session Wins</span><strong class="session-stat-value" id="session-wins" style="color:var(--lime);font:800 28px/1 var(--display)">--</strong></div>
-            <div class="session-stat" style="padding:14px 18px;border-left:1px solid var(--line)"><span class="session-stat-label" style="display:block;margin-bottom:5px;color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase">Session Losses</span><strong class="session-stat-value" id="session-losses" style="color:var(--lime);font:800 28px/1 var(--display)">--</strong></div>
+          <section class="session-stats" aria-label="Session statistics" aria-live="polite">
+            <div class="session-stat"><span class="session-stat-label">Session Eliminations</span><strong class="session-stat-value" id="session-eliminations">--</strong></div>
+            <div class="session-stat"><span class="session-stat-label">Session Wins</span><strong class="session-stat-value" id="session-wins">--</strong></div>
+            <div class="session-stat"><span class="session-stat-label">Session Losses</span><strong class="session-stat-value" id="session-losses">--</strong></div>
           </section>
-          <button class="refresh" id="admin-reset-session" type="button" title="Reset Session Counts" hidden style="height:90px;padding:0 16px;border-color:var(--line)">Reset Session</button>
+          <button class="refresh reset-session-btn" id="admin-reset-session" type="button" title="Reset Session Counts" hidden>
+            <span class="btn-label">Reset Session</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+          </button>
         </div>
+
         <section class="board" aria-label="Leaderboard standings">
           <div class="toolbar">
             <div class="controls">
               <select class="sheet-select" id="sheet-select" aria-label="Choose leaderboard sheet" disabled><option>Loading sheets...</option></select>
-              <div class="tabs" role="group" aria-label="Filter players"><button class="tab" type="button" data-filter="all" aria-pressed="true">All Players</button><button class="tab" type="button" data-filter="active" aria-pressed="false">Online Now</button></div>
-              <label class="search-wrap"><svg class="search-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.7" cy="8.7" r="5.7"/><path d="m13 13 4 4"/></svg><input class="search" id="search" type="search" placeholder="Find a player" aria-label="Find a player"></label>
+              <a class="pirate-toolbar-btn" id="pirate-hunt-link" href="fortnitehunt.html" hidden>Pirate Hunt</a>
+              <div class="tabs" role="group" aria-label="Filter players">
+                <button class="tab" type="button" data-filter="all" aria-pressed="true">All Players</button>
+                <button class="tab" type="button" data-filter="active" aria-pressed="false">Online Now</button>
+              </div>
+              <label class="search-wrap">
+                <svg class="search-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.7" cy="8.7" r="5.7"/><path d="m13 13 4 4"/></svg>
+                <input class="search" id="search" type="search" placeholder="Find a player" aria-label="Find a player">
+              </label>
             </div>
           </div>
           <div class="columns" aria-hidden="true"><span id="col-place">Place</span><span>Player</span><span id="col-char-mvp">Character</span><span>Eliminations</span></div>
           <div id="leaderboard" aria-live="polite"></div>
           <div class="empty" id="empty"><strong>No players found</strong><span>Try another name or change the filter.</span></div>
         </section>
+
         <footer class="footer">
           <a href="privacy.html">Privacy Policy</a>
           <span>Powered by Tech Guy Graphics</span>
@@ -126,25 +265,87 @@
     </div>
   </dialog>
 
+  <!-- Incoming Challenge Center-Screen Popup -->
+  <dialog id="incoming-challenge-dialog">
+    <div class="dialog-heading"><h2 id="incoming-title">Incoming Challenge!</h2><button class="dialog-close" type="button" data-close-dialog>×</button></div>
+    <p class="dialog-copy" id="incoming-desc"></p>
+    <div style="padding:12px;background:var(--ink);border:1px solid var(--line);border-radius:3px;margin-bottom:14px;font-size:13px" id="incoming-details"></div>
+    <div class="challenge-actions">
+      <button class="challenge-button primary" id="incoming-accept-btn" type="button">Accept Challenge</button>
+      <button class="challenge-button danger" id="incoming-deny-btn" type="button">Deny</button>
+    </div>
+  </dialog>
+
   <!-- Player Profile Modal -->
-  <dialog id="profile-dialog" aria-labelledby="profile-title"><div class="dialog-heading"><h2 id="profile-title">Player Profile</h2><button class="dialog-close" type="button" data-close-dialog>×</button></div><div class="profile-identity"><img class="profile-avatar" id="profile-avatar" alt=""><p class="dialog-copy" id="profile-name">Loading profile…</p></div><div class="login-loading profile-loading" id="profile-loading" role="status"><span>Loading player stats…</span></div><div class="profile-summary" id="profile-summary" hidden><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px"><div style="padding:12px;background:var(--ink);border:1px solid var(--line)"><span>Overall Eliminations</span><br><strong id="profile-eliminations" style="font:800 26px var(--display);color:var(--lime)">--</strong></div><div style="padding:12px;background:var(--ink);border:1px solid var(--line)"><span>Challenge Points</span><br><strong id="profile-points" style="font:800 26px var(--display);color:var(--lime)">--</strong></div></div></div><div class="challenge-actions profile-actions" id="profile-actions" hidden><button class="challenge-button primary" id="profile-challenge" type="button">Challenge</button><button class="challenge-button primary" id="profile-1v1" type="button">1v1</button></div><div class="challenge-actions"><button class="challenge-button" type="button" data-close-dialog>Close</button></div></dialog>
+  <dialog id="profile-dialog" aria-labelledby="profile-title">
+    <div class="dialog-heading"><h2 id="profile-title">Player Profile</h2><button class="dialog-close" type="button" data-close-dialog>×</button></div>
+    <div class="profile-identity"><img class="profile-avatar" id="profile-avatar" alt=""><p class="dialog-copy" id="profile-name">Loading profile…</p></div>
+    <div class="login-loading profile-loading" id="profile-loading" role="status"><span>Loading player stats…</span></div>
+    <div class="profile-summary" id="profile-summary" hidden>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+        <div style="padding:12px;background:var(--ink);border:1px solid var(--line)"><span>Overall Eliminations</span><br><strong id="profile-eliminations" style="font:800 26px var(--display);color:var(--lime)">--</strong></div>
+        <div style="padding:12px;background:var(--ink);border:1px solid var(--line)"><span>Challenge Points</span><br><strong id="profile-points" style="font:800 26px var(--display);color:var(--lime)">--</strong></div>
+      </div>
+    </div>
+    <div class="challenge-actions profile-actions" id="profile-actions" hidden>
+      <button class="challenge-button primary" id="profile-challenge" type="button">Challenge</button>
+      <button class="challenge-button primary" id="profile-1v1" type="button">1v1</button>
+    </div>
+    <div class="challenge-actions"><button class="challenge-button" type="button" data-close-dialog>Close</button></div>
+  </dialog>
 
   <!-- Create Challenge Modal -->
   <dialog id="challenge-dialog" class="challenge-dialog" aria-labelledby="challenge-title">
     <div class="dialog-heading"><h2 id="challenge-title">Create Challenge</h2><button class="dialog-close" type="button" data-close-dialog>×</button></div>
-    <p class="challenge-target" id="challenge-target"></p>
+    <p class="dialog-copy" id="challenge-target"></p>
     <form class="challenge-form" id="challenge-form">
-      <label>Challenge title<input id="challenge-name" name="title" maxlength="60" required placeholder="Most eliminations wins"></label>
-      <label>Eliminations required<input id="challenge-eliminations" name="eliminations" type="number" min="1" max="1000" step="1" value="10" required></label>
-      <label>Max Deaths allowed (optional)<input id="challenge-max-deaths" name="maxDeaths" type="number" min="0" step="1" placeholder="e.g. 3"></label>
-      <label style="display:flex;align-items:center;gap:8px"><input id="challenge-require-end" type="checkbox" style="width:16px;height:16px">Must complete before match ends</label>
-      <label>Required Character / Hero Name (optional)<input id="challenge-character" name="characterRequirement" type="text" placeholder="e.g. Tracer"></label>
-      <label id="time-limit-field">Time limit in minutes<input id="challenge-time" name="timeLimitMinutes" type="number" min="1" max="1440" step="1" value="30" required></label>
-      <div class="challenge-actions"><button class="challenge-button primary" type="submit" id="send-challenge">Send Challenge</button><button class="challenge-button" type="button" data-close-dialog>Cancel</button></div>
+      <label>Challenge title<input id="challenge-name" name="title" type="text" maxlength="60" required placeholder="Most eliminations wins"></label>
+
+      <div class="form-section">
+        <p class="form-section-title">1. Eliminations & Deaths</p>
+        <label>Eliminations required
+          <input id="challenge-eliminations" name="eliminations" type="number" inputmode="numeric" pattern="[0-9]*" min="1" max="1000" step="1" value="10" required>
+        </label>
+        <label>Max deaths allowed (optional)
+          <input id="challenge-max-deaths" name="maxDeaths" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="999" step="1" placeholder="Leave blank for unlimited">
+        </label>
+      </div>
+
+      <div class="form-section">
+        <p class="form-section-title">2. Character Requirement</p>
+        <label>Required character / hero name (optional)
+          <input id="challenge-character" name="characterRequirement" type="text" maxlength="40" placeholder="e.g. Tracer">
+        </label>
+      </div>
+
+      <div class="form-section">
+        <p class="form-section-title">3. Time & Match Constraints</p>
+        <label id="time-limit-field">Time limit in minutes
+          <input id="challenge-time" name="timeLimitMinutes" type="number" inputmode="numeric" pattern="[0-9]*" min="1" max="1440" step="1" value="30" required>
+        </label>
+        <label class="checkbox-row">
+          <input id="challenge-no-time" type="checkbox">
+          <span>No time limit</span>
+        </label>
+        <label class="checkbox-row">
+          <input id="challenge-require-end" type="checkbox">
+          <span>Must complete before match ends</span>
+        </label>
+      </div>
+
+      <div class="points-preview">
+        <span>Estimated Challenge Reward</span>
+        <strong id="challenge-points-preview" style="color:var(--lime);font:800 22px var(--display)">20 PTS</strong>
+      </div>
+
+      <div class="challenge-actions">
+        <button class="challenge-button primary" type="submit" id="send-challenge">Send Challenge</button>
+        <button class="challenge-button" type="button" data-close-dialog>Cancel</button>
+      </div>
     </form>
   </dialog>
 
-  <!-- Challenges Center Modal (Visible to Everyone) -->
+  <!-- Challenges Center Modal -->
   <dialog id="challenge-center-dialog" class="challenge-dialog">
     <div class="dialog-heading"><h2>All Live Challenges</h2><button class="dialog-close" type="button" data-close-dialog>×</button></div>
     <div id="challenge-center-list"></div>
@@ -154,8 +355,9 @@
 
   <script type="module">
     import {
-      auth, db, DISCORD_CLIENT_ID, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signInAnonymously, signOut,
+      auth, db, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signInAnonymously, signOut,
       onDisconnect, onValue, ref, set, get, update,
+      startDiscordOAuth, extractDiscordTokenFromUrl, calculateChallengePoints,
       getUserRecord, getUserRecordByDiscordId, getGameCatalog, normalizeRowsFromBoard, runFirebaseChallengeAction
     } from "./firebase-bridge.js";
 
@@ -163,17 +365,65 @@
       players: [], filter: "all", query: "", authorized: false, isAdmin: false,
       user: null, userRecord: null, actorId: "", gameAccounts: {}, challengePoints: 0,
       sheetNames: [], sheetIds: {}, selectedSheet: "", activeGameTitle: "", challenges: {}, profileTarget: null,
-      challengeMode: "individual", promptedChallenges: new Set()
+      challengeMode: "individual", promptedChallenges: new Set(), incomingChallengeId: null
     };
 
     const list = document.querySelector("#leaderboard"), empty = document.querySelector("#empty"), errorBox = document.querySelector("#error");
-    const groupChallengeButton = document.querySelector("#group-challenge"), adminResetSessionBtn = document.querySelector("#admin-reset-session");
-    const pirateHuntLink = document.querySelector("#pirate-hunt-link"), adminLink = document.querySelector("#admin-link");
+    const heroActions = document.querySelector("#hero-actions");
+    const groupChallengeButton = document.querySelector("#group-challenge");
+    const challengeCenterButton = document.querySelector("#challenge-center");
+    const adminResetSessionBtn = document.querySelector("#admin-reset-session");
+    const pirateHuntLink = document.querySelector("#pirate-hunt-link");
+    const adminLink = document.querySelector("#admin-link");
     const accountProfile = document.querySelector("#account-profile"), accountTrigger = document.querySelector("#account-trigger"), accountMenu = document.querySelector("#account-menu");
 
     let unsubscribeLeaderboard = null, unsubscribeSession = null, unsubscribePresence = null, unsubscribeChallenges = null, presenceHeartbeat = null;
 
     function number(value) { const parsed = Number.parseInt(String(value ?? "").replace(/,/g, ""), 10); return Number.isFinite(parsed) ? parsed : 0; }
+
+    function enforceDigitsOnly(inputEl) {
+      inputEl.addEventListener("input", () => {
+        inputEl.value = inputEl.value.replace(/[^0-9]/g, "");
+        updatePointsPreview();
+      });
+    }
+    enforceDigitsOnly(document.querySelector("#challenge-eliminations"));
+    enforceDigitsOnly(document.querySelector("#challenge-max-deaths"));
+    enforceDigitsOnly(document.querySelector("#challenge-time"));
+
+    const timeInput = document.querySelector("#challenge-time");
+    const noTimeCheckbox = document.querySelector("#challenge-no-time");
+    const matchEndCheckbox = document.querySelector("#challenge-require-end");
+
+    function syncTimeConstraintControls() {
+      if (matchEndCheckbox.checked) {
+        noTimeCheckbox.checked = false;
+        noTimeCheckbox.disabled = true;
+        timeInput.disabled = true;
+        timeInput.required = false;
+      } else {
+        noTimeCheckbox.disabled = false;
+        timeInput.disabled = noTimeCheckbox.checked;
+        timeInput.required = !noTimeCheckbox.checked;
+      }
+      updatePointsPreview();
+    }
+
+    noTimeCheckbox.addEventListener("change", syncTimeConstraintControls);
+    matchEndCheckbox.addEventListener("change", syncTimeConstraintControls);
+    document.querySelector("#challenge-character").addEventListener("input", updatePointsPreview);
+
+    function updatePointsPreview() {
+      const pts = calculateChallengePoints({
+        eliminations: document.querySelector("#challenge-eliminations").value,
+        timeLimitMinutes: timeInput.value,
+        noTimeLimit: noTimeCheckbox.checked,
+        requireMatchEnd: matchEndCheckbox.checked,
+        maxDeaths: document.querySelector("#challenge-max-deaths").value,
+        characterRequirement: document.querySelector("#challenge-character").value
+      });
+      document.querySelector("#challenge-points-preview").textContent = `${pts.toLocaleString()} PTS`;
+    }
 
     function updateSessionStats(data) {
       const stats = [document.querySelector("#session-eliminations"), document.querySelector("#session-wins"), document.querySelector("#session-losses")];
@@ -237,14 +487,11 @@
       if (state.actorId) set(ref(db, `presence/${state.actorId}`), null).catch(() => {});
     }
 
-    // Discord OAuth Handler
     async function handleDiscordAuth() {
-      const fragment = new URLSearchParams(window.location.hash.slice(1));
-      const accessToken = fragment.get("access_token");
+      const accessToken = extractDiscordTokenFromUrl();
       if (!accessToken) return false;
 
       try {
-        // Ensure active Firebase Auth session for DB rules
         if (!auth.currentUser) {
           await signInAnonymously(auth);
         }
@@ -256,11 +503,25 @@
           const userRecord = await getUserRecordByDiscordId(data.id);
           if (userRecord) {
             const avatarUrl = data.avatar ? `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png` : "";
+            const bannerUrl = data.banner ? `https://cdn.discordapp.com/banners/${data.id}/${data.banner}.png?size=512` : "";
+            const accentHex = typeof data.accent_color === "number"
+              ? `#${data.accent_color.toString(16).padStart(6, "0")}`
+              : "";
+
             const updates = {};
             if (avatarUrl) {
               updates.profileImage = avatarUrl;
               updates.profileImageUrl = avatarUrl;
             }
+            if (bannerUrl) {
+              updates.discordBannerUrl = bannerUrl;
+            } else {
+              updates.discordBannerUrl = "";
+            }
+            if (accentHex) {
+              updates.discordAccentColor = accentHex;
+            }
+
             const globalName = data.global_name || data.username;
             if (globalName && userRecord.leaderboardName && globalName !== userRecord.leaderboardName) {
               if (confirm(`Update leaderboard name from "${userRecord.leaderboardName}" to your Discord name "${globalName}"?`)) {
@@ -275,9 +536,11 @@
             await initializeUserSession(auth.currentUser);
             return true;
           } else {
+            history.replaceState(null, "", window.location.pathname + window.location.search);
             document.querySelector("#access-panel").hidden = false;
             document.querySelector("#denied-state").hidden = false;
             document.querySelector("#login-state").hidden = true;
+            return true;
           }
         }
       } catch (e) {
@@ -287,8 +550,7 @@
     }
 
     document.querySelector("#discord-signin").addEventListener("click", () => {
-      const redirectUri = encodeURIComponent(window.location.origin + window.location.pathname);
-      window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=token&scope=identify`;
+      startDiscordOAuth();
     });
 
     document.querySelector("#google-signin").addEventListener("click", async () => {
@@ -299,8 +561,20 @@
       localStorage.removeItem("discordId");
       stopPresence();
       await signOut(auth);
-      window.location.reload();
+      window.location.href = "index.html";
     }));
+
+    function setSignedOutUI() {
+      state.authorized = false;
+      state.userRecord = null;
+      state.actorId = "";
+      heroActions.hidden = true;
+      challengeCenterButton.hidden = true;
+      groupChallengeButton.hidden = true;
+      accountProfile.hidden = true;
+      document.querySelector("#member-content").hidden = true;
+      document.querySelector("#access-panel").hidden = false;
+    }
 
     async function initializeUserSession(authUser) {
       stopPresence();
@@ -317,8 +591,7 @@
       }
 
       if (!record) {
-        document.querySelector("#access-panel").hidden = false;
-        document.querySelector("#member-content").hidden = true;
+        setSignedOutUI();
         return;
       }
 
@@ -345,14 +618,27 @@
         document.querySelector("#menu-photo").src = photoUrl;
         document.querySelector("#account-photo").hidden = false;
         document.querySelector("#menu-photo").hidden = false;
-        document.querySelector("#profile-menu-identity").style.backgroundImage = `url('${photoUrl}')`;
+      }
+
+      // Use Discord banner if available, otherwise fall back to Discord accent_color (never avatar)
+      const menuHeader = document.querySelector("#profile-menu-identity");
+      if (record.discordBannerUrl) {
+        menuHeader.style.backgroundImage = `url('${record.discordBannerUrl}')`;
+        menuHeader.style.backgroundColor = "";
+      } else if (record.discordAccentColor) {
+        menuHeader.style.backgroundImage = "none";
+        menuHeader.style.backgroundColor = record.discordAccentColor;
+      } else {
+        menuHeader.style.backgroundImage = "none";
+        menuHeader.style.backgroundColor = "var(--soft)";
       }
 
       accountProfile.hidden = false;
       if (adminLink) adminLink.hidden = !state.isAdmin;
       if (adminResetSessionBtn) adminResetSessionBtn.hidden = !state.isAdmin;
+      heroActions.hidden = false;
       groupChallengeButton.hidden = false;
-      document.querySelector("#challenge-center").hidden = false;
+      challengeCenterButton.hidden = false;
 
       startPresence();
       subscribeToChallenges();
@@ -380,6 +666,48 @@
       return null;
     }
 
+    function openIncomingChallengePopup(id, challenge) {
+      state.incomingChallengeId = id;
+      document.querySelector("#incoming-title").textContent = challenge.title || "Incoming Challenge";
+      document.querySelector("#incoming-desc").textContent = `${challenge.creatorName} challenged you!`;
+
+      const constraints = [];
+      constraints.push(`Goal: ${challenge.eliminations} Eliminations`);
+      if (challenge.requireMatchEnd) constraints.push("Must complete before match ends");
+      else if (challenge.noTimeLimit) constraints.push("No time limit");
+      else if (challenge.timeLimitMinutes) constraints.push(`Time limit: ${challenge.timeLimitMinutes} min`);
+      if (challenge.maxDeaths !== null && challenge.maxDeaths !== undefined) constraints.push(`Max deaths: ${challenge.maxDeaths}`);
+      if (challenge.characterRequirement) constraints.push(`Required character: ${challenge.characterRequirement}`);
+      constraints.push(`Reward: ${challenge.rewardPoints} PTS`);
+
+      document.querySelector("#incoming-details").innerHTML = constraints.map(c => `<div style="margin:3px 0">• ${c}</div>`).join("");
+
+      const dialog = document.querySelector("#incoming-challenge-dialog");
+      if (!dialog.open) dialog.showModal();
+    }
+
+    document.querySelector("#incoming-accept-btn").addEventListener("click", async () => {
+      if (!state.incomingChallengeId) return;
+      try {
+        await bridgeAction("respond", { challengeId: state.incomingChallengeId, accept: true });
+        document.querySelector("#incoming-challenge-dialog").close();
+        toast("Challenge Accepted!", "Good luck — your eliminations are now being tracked.");
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    document.querySelector("#incoming-deny-btn").addEventListener("click", async () => {
+      if (!state.incomingChallengeId) return;
+      try {
+        await bridgeAction("respond", { challengeId: state.incomingChallengeId, accept: false });
+        document.querySelector("#incoming-challenge-dialog").close();
+        toast("Challenge Declined", "You declined the challenge invitation.");
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
     function subscribeToChallenges() {
       if (unsubscribeChallenges) unsubscribeChallenges();
       unsubscribeChallenges = onValue(ref(db, "challenges"), (snap) => {
@@ -401,7 +729,7 @@
           pendingForMeCount++;
           if (!state.promptedChallenges.has(id)) {
             state.promptedChallenges.add(id);
-            toast("New Challenge!", `${c.creatorName} challenged you: "${c.title}" (${c.eliminations} elims)`);
+            openIncomingChallengePopup(id, c);
           }
         }
       });
@@ -439,12 +767,13 @@
             </div>`;
         }
 
+        const timeLabel = c.requireMatchEnd ? "Before match ends" : (c.noTimeLimit ? "No time limit" : (c.timeLimitMinutes ? `${c.timeLimitMinutes}m` : ""));
         card.innerHTML = `
           <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
             <strong style="font-size:15px;color:var(--lime)">${c.title}</strong>
             <span style="font-size:11px;text-transform:uppercase;color:var(--muted)">${c.mode} • ${c.rewardPoints} pts</span>
           </div>
-          <p style="margin:6px 0;font-size:12px;color:var(--paper)">Goal: <strong>${c.eliminations} Eliminations</strong> ${c.timeLimitMinutes ? `in ${c.timeLimitMinutes}m` : ""} • Created by ${c.creatorName}</p>
+          <p style="margin:6px 0;font-size:12px;color:var(--paper)">Goal: <strong>${c.eliminations} Eliminations</strong> (${timeLabel}) • Created by ${c.creatorName}</p>
           <p style="margin:4px 0;font-size:11px;color:var(--muted)">Players: ${participantsList}</p>
           ${actionsHtml}
         `;
@@ -472,7 +801,7 @@
       }));
     }
 
-    document.querySelector("#challenge-center").addEventListener("click", () => {
+    challengeCenterButton.addEventListener("click", () => {
       renderChallengeCenter();
       document.querySelector("#challenge-center-dialog").showModal();
     });
@@ -536,7 +865,13 @@
         const data = snap.val();
         const rows = normalizeRowsFromBoard(data);
         state.players = rows.map(r => ({
-          image: r[0], eliminations: number(r[1]), name: r[2], gameUsername: r[3], character: r[4], active: r[5], placement: number(r[6])
+          image: String(r[0] || "").trim(),
+          eliminations: number(r[1]),
+          name: String(r[2] || "").trim(),
+          gameUsername: String(r[3] || "").trim(),
+          character: isFortnite ? "" : String(r[4] || "").trim(),
+          active: Boolean(r[5]),
+          placement: number(r[6])
         })).filter(p => p.name && p.gameUsername).sort((a, b) => a.placement - b.placement || b.eliminations - a.eliminations);
         render();
       });
@@ -550,13 +885,18 @@
         row.className = "entry";
         const place = p.placement || idx + 1;
         if (place <= 3) row.dataset.place = String(place);
+        const initial = p.name.slice(0, 1);
+
         row.innerHTML = `
           <span class="rank">${place}</span>
-          <button class="player player-trigger" type="button" style="display:flex;align-items:center;gap:12px">
-            <div class="avatar"><span class="init">${p.name.slice(0,1)}</span>${p.image ? `<img src="${p.image}" alt="" loading="lazy">` : ""}</div>
-            <div class="copy"><div class="name-line"><span class="participation-dot${p.active?"":" inactive"}"></span><div class="name">${p.name}</div></div></div>
+          <button class="player player-trigger" type="button">
+            <div class="avatar"><span class="init">${initial}</span>${p.image ? `<img src="${p.image.replace(/"/g, """)}" alt="" loading="lazy" onerror="this.remove()">` : ""}</div>
+            <div class="copy">
+              <div class="name-line"><span class="participation-dot${p.active?"":" inactive"}"></span><div class="name">${p.name}</div></div>
+              ${p.character ? `<div class="character-sub">${p.character}</div>` : ""}
+            </div>
           </button>
-          <span class="character">${p.character || "—"}</span>
+          <span class="character-col">${p.character || "—"}</span>
           <div class="elims"><span>${p.eliminations.toLocaleString()}</span><small>eliminations</small></div>
         `;
         row.querySelector("button").addEventListener("click", () => openPlayerProfile(p));
@@ -612,12 +952,14 @@
     });
 
     document.querySelectorAll("[data-close-dialog]").forEach(b => b.addEventListener("click", () => b.closest("dialog").close()));
-    document.querySelector("#group-challenge").addEventListener("click", () => openChallengeComposer("group"));
+    groupChallengeButton.addEventListener("click", () => openChallengeComposer("group"));
     document.querySelector("#profile-challenge").addEventListener("click", () => { document.querySelector("#profile-dialog").close(); openChallengeComposer("individual"); });
     document.querySelector("#profile-1v1").addEventListener("click", () => { document.querySelector("#profile-dialog").close(); openChallengeComposer("1v1"); });
 
     function openChallengeComposer(mode) {
       state.challengeMode = mode;
+      document.querySelector("#challenge-form").reset();
+      syncTimeConstraintControls();
       document.querySelector("#challenge-target").textContent = mode === "group" ? "Group challenge to all online players." : `Challenge ${state.profileTarget?.name}.`;
       document.querySelector("#challenge-dialog").showModal();
     }
@@ -630,9 +972,10 @@
           title: document.querySelector("#challenge-name").value,
           eliminations: number(document.querySelector("#challenge-eliminations").value),
           maxDeaths: document.querySelector("#challenge-max-deaths").value,
-          requireMatchEnd: document.querySelector("#challenge-require-end").checked,
+          noTimeLimit: noTimeCheckbox.checked,
+          requireMatchEnd: matchEndCheckbox.checked,
           characterRequirement: document.querySelector("#challenge-character").value,
-          timeLimitMinutes: number(document.querySelector("#challenge-time").value),
+          timeLimitMinutes: number(timeInput.value),
           gameTitle: state.profileTarget?.gameTitle || state.selectedSheet,
           gameUsername: state.profileTarget?.gameUsername
         });

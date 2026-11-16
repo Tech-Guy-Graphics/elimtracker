@@ -17,6 +17,73 @@ export const auth = getAuth(app);
 export const db = getDatabase(app, FIREBASE_CONFIG.databaseURL);
 export { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signInWithCustomToken, signInAnonymously, signOut, onDisconnect, onValue, ref, set, update, get, runTransaction, remove };
 
+export function getCanonicalRedirectUri() {
+  const url = new URL(window.location.href);
+  url.hash = "";
+  url.search = "";
+  if (url.pathname === "/" || url.pathname === "") {
+    url.pathname = "/index.html";
+  }
+  return url.toString();
+}
+
+export function startDiscordOAuth() {
+  const redirectUri = encodeURIComponent(getCanonicalRedirectUri());
+  window.location.assign(`https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=token&scope=identify`);
+}
+
+export function extractDiscordTokenFromUrl() {
+  const hashStr = window.location.hash ? window.location.hash.replace(/^#/, "") : "";
+  if (!hashStr) return null;
+  const params = new URLSearchParams(hashStr);
+  return params.get("access_token");
+}
+
+export function calculateChallengePoints({ eliminations, timeLimitMinutes, noTimeLimit, requireMatchEnd, maxDeaths, characterRequirement }) {
+  const elims = Math.max(1, Math.floor(Number(eliminations) || 1));
+  const mins = Math.max(1, Math.floor(Number(timeLimitMinutes) || 30));
+
+  // Base points: timed challenges scale with speed (15 min = 4x elims); untimed = 1x elims
+  let base = 0;
+  if (requireMatchEnd) {
+    // Must complete before match ends gives a strong bonus, capped below a <=15-minute time limit (which is ~4x elims)
+    base = Math.ceil(elims * 2.5);
+  } else if (noTimeLimit) {
+    base = elims;
+  } else {
+    base = Math.ceil((elims * 60) / mins);
+  }
+
+  let bonusMultiplier = 1.0;
+
+  // Decrease in allowed deaths increases points
+  if (maxDeaths !== null && maxDeaths !== undefined && maxDeaths !== "" && Number.isFinite(Number(maxDeaths))) {
+    const d = Math.max(0, Math.floor(Number(maxDeaths)));
+    if (d === 0) bonusMultiplier += 0.50;
+    else if (d === 1) bonusMultiplier += 0.35;
+    else if (d === 2) bonusMultiplier += 0.25;
+    else if (d <= 5) bonusMultiplier += 0.15;
+    else bonusMultiplier += 0.05;
+  }
+
+  // Required character adds a 25% bonus
+  if (String(characterRequirement || "").trim().length > 0) {
+    bonusMultiplier += 0.25;
+  }
+
+  let total = Math.max(1, Math.round(base * bonusMultiplier));
+
+  // Ensure "before match ends" stays slightly lower than an equivalent <=15 min timed challenge when compared at same modifiers
+  if (requireMatchEnd) {
+    const fifteenMinEquivalent = Math.round(Math.ceil((elims * 60) / 15) * bonusMultiplier);
+    if (total >= fifteenMinEquivalent) {
+      total = Math.max(1, fifteenMinEquivalent - 1);
+    }
+  }
+
+  return total;
+}
+
 export async function getAllUsers() {
   const snap = await get(ref(db, "users"));
   if (!snap.exists()) return {};
@@ -76,10 +143,7 @@ export function normalizeRowsFromBoard(board) {
       p.gameUsername || "",
       p.character || p.mvp || "",
       Boolean(p.active),
-      Number(p.placement) || (idx + 1),
-      "",
-      p.treasureIcon || "",
-      Number(p.treasureQuantity) || 0
+      Number(p.placement) || (idx + 1)
     ]);
   }
   return [];
@@ -182,24 +246,26 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
   if (action === "create") {
     const title = String(payload.title || "").trim().slice(0, 60);
     const eliminations = Math.floor(Number(payload.eliminations));
-    const noTimeLimit = payload.mode === "1v1" && payload.noTimeLimit === true;
-    const timeLimitMinutes = noTimeLimit ? 0 : Math.floor(Number(payload.timeLimitMinutes));
-
-    const maxDeaths = payload.maxDeaths !== undefined && payload.maxDeaths !== "" ? Math.floor(Number(payload.maxDeaths)) : null;
     const requireMatchEnd = Boolean(payload.requireMatchEnd);
+    const noTimeLimit = requireMatchEnd ? false : Boolean(payload.noTimeLimit);
+    const timeLimitMinutes = (noTimeLimit || requireMatchEnd) ? 0 : Math.floor(Number(payload.timeLimitMinutes));
+
+    const maxDeaths = payload.maxDeaths !== undefined && payload.maxDeaths !== "" && payload.maxDeaths !== null
+      ? Math.max(0, Math.floor(Number(payload.maxDeaths)))
+      : null;
     const characterRequirement = String(payload.characterRequirement || "").trim();
 
     if (!title) throw new Error("Enter a challenge title.");
     if (!Number.isInteger(eliminations) || eliminations < 1 || eliminations > 1000) {
       throw new Error("Choose between 1 and 1,000 eliminations.");
     }
-    if (!noTimeLimit && (!Number.isInteger(timeLimitMinutes) || timeLimitMinutes < 1 || timeLimitMinutes > 1440)) {
+    if (!noTimeLimit && !requireMatchEnd && (!Number.isInteger(timeLimitMinutes) || timeLimitMinutes < 1 || timeLimitMinutes > 1440)) {
       throw new Error("Choose a time limit from 1 minute to 24 hours.");
     }
 
     const isGroup = payload.mode === "group";
     const isDuel = payload.mode === "1v1";
-    const wagerPoints = isDuel ? Math.floor(Number(payload.wagerPoints)) : 0;
+    const wagerPoints = isDuel ? Math.max(0, Math.floor(Number(payload.wagerPoints) || 0)) : 0;
     const users = await getAllUsers();
     let targets = [];
 
@@ -248,7 +314,15 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
       };
     }
 
-    const rewardPoints = Math.max(1, noTimeLimit ? eliminations : Math.ceil((eliminations * 60) / timeLimitMinutes));
+    const rewardPoints = calculateChallengePoints({
+      eliminations,
+      timeLimitMinutes,
+      noTimeLimit,
+      requireMatchEnd,
+      maxDeaths,
+      characterRequirement
+    });
+
     const challengeId = crypto.randomUUID();
     const challenge = {
       title,
@@ -280,7 +354,6 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
     if (!snap.exists()) throw new Error("Challenge not found.");
     const challenge = snap.val();
 
-    // Match participant by actorKey, uid, or discordId
     const possibleKeys = [actorKey, userRecord.uid, userRecord.recordKey, userRecord.discordId ? `discord_${userRecord.discordId}` : null].filter(Boolean);
     const participantKey = possibleKeys.find(k => challenge.participants && challenge.participants[k]);
     const participant = participantKey ? challenge.participants[participantKey] : null;
@@ -325,7 +398,7 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
           lastTotal: startElims,
           progress: 0,
           deaths: 0,
-          deadline: challenge.noTimeLimit ? null : now + Number(challenge.timeLimitMinutes || 0) * 60000,
+          deadline: (challenge.noTimeLimit || challenge.requireMatchEnd) ? null : now + Number(challenge.timeLimitMinutes || 0) * 60000,
           updatedAt: now
         };
         if (Number(challenge.wagerPoints) > 0) {
@@ -341,7 +414,7 @@ export async function runFirebaseChallengeAction(currentUser, userRecord, action
       const participantUpdate = {
         status: "active",
         acceptedAt: now,
-        deadline: challenge.noTimeLimit ? null : now + Number(challenge.timeLimitMinutes || 0) * 60000,
+        deadline: (challenge.noTimeLimit || challenge.requireMatchEnd) ? null : now + Number(challenge.timeLimitMinutes || 0) * 60000,
         startingEliminations: startElims,
         lastTotal: startElims,
         progress: 0,
